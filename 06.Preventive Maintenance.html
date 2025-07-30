@@ -1,0 +1,3545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM Plan Annual Review | Maintenance Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --danger: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary), var(--primary));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: var(--sidebar-width);
+            padding: 20px 0;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-brand img {
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .sidebar-brand h4 {
+            margin: 0;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .nav-item {
+            margin: 5px 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .nav-link i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .page-header h2 {
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .page-header h2 i {
+            margin-right: 15px;
+            color: var(--primary);
+        }
+        
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h5 {
+            font-weight: 600;
+            margin: 0;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-header h5 i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Stat Cards */
+        .stat-card {
+            text-align: center;
+            padding: 25px 15px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+            z-index: -1;
+        }
+        
+        .stat-card.primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .stat-card.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* Table Styles */
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background-color: #f1f5f9;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            border-bottom-width: 1px;
+            padding: 12px 15px;
+        }
+        
+        .table tbody td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        
+        .status-badge i {
+            margin-right: 5px;
+            font-size: 0.7rem;
+        }
+        
+        .status-approved {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-pending {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+        
+        .status-draft {
+            background-color: #e0e7ff;
+            color: #3730a3;
+        }
+        
+        .status-na {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-completed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-overdue {
+            background-color: #ffedd5;
+            color: #9a3412;
+        }
+        
+        /* Button Styles */
+        .btn {
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 0.8rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a56e8;
+            border-color: #3a56e8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        
+        /* Filter Controls */
+        .filter-controls {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .form-select, .form-control {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        
+        .form-select:focus, .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #64748b;
+            font-weight: 500;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--primary);
+            background-color: #f1f5f9;
+            border-color: transparent;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            background-color: white;
+            border-bottom: 3px solid var(--primary);
+            font-weight: 600;
+        }
+        
+        /* Progress Bars */
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+        }
+        
+        .progress-bar {
+            background-color: var(--primary);
+            border-radius: 4px;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1050;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar-toggler {
+                display: block !important;
+            }
+        }
+        
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e2e8f0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            border: 2px solid white;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .timeline-date {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Task Priority */
+        .priority-high {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .priority-medium {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .priority-low {
+            border-left: 4px solid #10b981;
+        }
+        
+        /* Logo and Branding */
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            color: var(--dark);
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3);
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .fab:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+        }
+        
+        /* Custom Toggle */
+        .custom-toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .custom-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .custom-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .custom-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .custom-toggle-slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .custom-toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Custom tab styling for monthly tabs */
+        .month-tabs .nav-link {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-section, .print-section * {
+                visibility: visible;
+            }
+            .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+                /* Additional styles for the monthly view */
+        .monthly-view-container {
+            margin-top: 20px;
+        }
+        
+        .month-card {
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .month-header {
+            background-color: #4361ee;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .month-content {
+            padding: 20px;
+        }
+        
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .task-table th, .task-table td {
+            padding: 12px 15px;
+            border: 1px solid #dee2e6;
+            text-align: left;
+        }
+        
+        .task-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .task-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .task-table tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .action-buttons button {
+            margin-right: 5px;
+        }
+        
+        .add-task-btn {
+            margin-top: 15px;
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .monthly-view-container, .monthly-view-container * {
+                visibility: visible;
+            }
+            .monthly-view-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .action-buttons {
+                display: none !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSAxM2ExIDEgMCAwIDAtMSAxdjZhMSAxIDAgMCAxLTEgMUg3YTEgMSAwIDAgMS0xLTFWN2ExIDEgMCAwIDEgMS0xaDZhMSAxIDAgMCAwIDAtMkg3YTMgMyAwIDAgMC0zIDN2MTJhMyAzIDAgMCAwIDMgM2gxMGEzIDMgMCAwIDAgMy0zdi02YTEgMSAwIDAgMC0xLTF6Ii8+PHBhdGggZD0iTTIwLjcxIDkuMjlsLTYuMzYtNi4zNmExIDEgMCAwIDAtMS40MSAwbC0xLjQyIDEuNDJhMSAxIDAgMCAwIDAgMS40MUwxNy41OSA5bC01LjY2IDUuNjZhMSAxIDAgMCAwIDAgMS40MWwxLjQyIDEuNDJhMSAxIDAgMCAwIDEuNDEgMGw2LjM2LTYuMzZhMSAxIDAgMCAwIDAtMS40MnoiLz48L3N2Zz4=" alt="Maintenance Pro Logo">
+            <h4>Maintenance Pro</h4>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" data-bs-toggle="tab" data-bs-target="#overview">
+                    <i class="fas fa-tachometer-alt"></i> Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#monthly-view">
+                    <i class="fas fa-calendar-alt"></i> Monthly View
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#checklist">
+                    <i class="fas fa-clipboard-check"></i> Checklist Status
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#performance">
+                    <i class="fas fa-chart-line"></i> Performance
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#reports">
+                    <i class="fas fa-file-alt"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </li>
+        </ul>
+        <div class="mt-auto px-3 py-4">
+            <div class="d-flex align-items-center">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=4361ee&color=fff&rounded=true" width="40" height="40" class="rounded-circle me-2" alt="User">
+                <div>
+                    <div class="fw-bold">Admin User</div>
+                    <small class="text-white-50">Administrator</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="tab-content">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview">
+                <div class="page-header">
+                    <h2><i class="fas fa-tachometer-alt"></i> Preventive Maintenance Dashboard</h2>
+                    <div class="d-flex">
+                        <button class="btn btn-outline-primary me-2">
+                            <i class="fas fa-download me-1"></i> Export
+                        </button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                            <i class="fas fa-plus me-1"></i> New Task
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-controls">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="monthFilter" class="form-label">Select Month</label>
+                            <select id="monthFilter" class="form-select">
+                                <option value="all">All Months</option>
+                                <option value="M1">August 2024 (M1)</option>
+                                <option value="M2">September 2024 (M2)</option>
+                                <option value="Q1">October 2024 (Q1)</option>
+                                <option value="M4">November 2024 (M4)</option>
+                                <option value="M5">December 2024 (M5)</option>
+                                <option value="H">January 2025 (H)</option>
+                                <option value="M7">February 2025 (M7)</option>
+                                <option value="M8">March 2025 (M8)</option>
+                                <option value="Q3">April 2025 (Q3)</option>
+                                <option value="M10">May 2025 (M10)</option>
+                                <option value="M11">June 2025 (M11)</option>
+                                <option value="A">July 2025 (A)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="locationFilter" class="form-label">Filter by Location</label>
+                            <select id="locationFilter" class="form-select">
+                                <option value="all">All Locations</option>
+                                <option value="PV Field">PV Field</option>
+                                <option value="PVSS">PVSS</option>
+                                <option value="General">General</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label">Filter by Status</label>
+                            <select id="statusFilter" class="form-select">
+                                <option value="all">All Statuses</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Draft">Draft</option>
+                                <option value="NA">Not Applicable</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="priorityFilter" class="form-label">Filter by Priority</label>
+                            <select id="priorityFilter" class="form-select">
+                                <option value="all">All Priorities</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-card primary">
+                            <div class="stat-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div class="stat-value" id="totalTasks">58</div>
+                            <div class="stat-label">Total Tasks</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card success">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-value" id="completedTasks">32</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card warning">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-value" id="pendingTasks">26</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card danger">
+                            <div class="stat-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-value" id="overdueTasks">7</div>
+                            <div class="stat-label">Overdue</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-bar"></i> Monthly Completion Rate</h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="chartDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        This Year
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="chartDropdown">
+                                        <li><a class="dropdown-item" href="#">This Year</a></li>
+                                        <li><a class="dropdown-item" href="#">Last Year</a></li>
+                                        <li><a class="dropdown-item" href="#">Custom Range</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="completionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-pie"></i> Tasks by Location</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="locationChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-list-ol"></i> Upcoming Tasks</h5>
+                                <button class="btn btn-sm btn-outline-primary">View All</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="upcomingTasksTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Due Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="priority-high">
+                                                <td>S.1.1.1</td>
+                                                <td>DAILY WEATHER STATIONS CLEANING-D</td>
+                                                <td>2024-08-15</td>
+                                                <td><span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending</span></td>
+                                            </tr>
+                                            <tr class="priority-medium">
+                                                <td>S.1.2.3</td>
+                                                <td>WEEKLY INVERTER CHECKUP-W</td>
+                                                <td>2024-08-18</td>
+                                                <td><span class="status-badge status-approved"><i class="fas fa-check"></i> Approved</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>S.2.1.5</td>
+                                                <td>MONTHLY TRANSFORMER INSPECTION-M</td>
+                                                <td>2024-08-22</td>
+                                                <td><span class="status-badge status-draft"><i class="fas fa-file-alt"></i> Draft</span></td>
+                                            </tr>
+                                            <tr class="priority-high">
+                                                <td>S.3.1.2</td>
+                                                <td>QUARTERLY PV MODULE CLEANING-Q</td>
+                                                <td>2024-08-30</td>
+                                                <td><span class="status-badge status-overdue"><i class="fas fa-exclamation-circle"></i> Overdue</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>S.1.3.4</td>
+                                                <td>ANNUAL SUBSTATION INSPECTION-A</td>
+                                                <td>2024-09-05</td>
+                                                <td><span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-history"></i> Recent Activities</h5>
+                                <button class="btn btn-sm btn-outline-primary">View All</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Today, 10:45 AM</div>
+                                        <div class="timeline-content">
+                                            <strong>Task S.1.2.3</strong> was completed by <strong>John Doe</strong>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Yesterday, 3:22 PM</div>
+                                        <div class="timeline-content">
+                                            <strong>Checklist SJN-OM-CL-A-6001</strong> was approved by <strong>Jane Smith</strong>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Yesterday, 10:15 AM</div>
+                                        <div class="timeline-content">
+                                            <strong>Task S.3.1.2</strong> was marked as overdue
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Aug 12, 2:30 PM</div>
+                                        <div class="timeline-content">
+                                            <strong>New task S.1.3.4</strong> was created by <strong>Admin User</strong>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Aug 10, 9:00 AM</div>
+                                        <div class="timeline-content">
+                                            <strong>Monthly report</strong> for July 2024 was generated
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly View Tab -->
+            <div class="tab-pane fade" id="monthly-view">
+                <div class="page-header">
+                    <h2><i class="fas fa-calendar-alt"></i> Monthly PM Schedule</h2>
+                    <div class="d-flex">
+                        <button class="btn btn-outline-primary me-2" id="printMonthlyReport">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                            <i class="fas fa-plus me-1"></i> Add Task
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Month Navigation Tabs -->
+                <ul class="nav nav-tabs month-tabs mb-4" id="monthTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="m1-tab" data-bs-toggle="tab" data-bs-target="#m1" type="button" role="tab" aria-controls="m1" aria-selected="true">Aug 2024 (M1)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m2-tab" data-bs-toggle="tab" data-bs-target="#m2" type="button" role="tab" aria-controls="m2" aria-selected="false">Sep 2024 (M2)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="q1-tab" data-bs-toggle="tab" data-bs-target="#q1" type="button" role="tab" aria-controls="q1" aria-selected="false">Oct 2024 (Q1)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m4-tab" data-bs-toggle="tab" data-bs-target="#m4" type="button" role="tab" aria-controls="m4" aria-selected="false">Nov 2024 (M4)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m5-tab" data-bs-toggle="tab" data-bs-target="#m5" type="button" role="tab" aria-controls="m5" aria-selected="false">Dec 2024 (M5)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="h-tab" data-bs-toggle="tab" data-bs-target="#h" type="button" role="tab" aria-controls="h" aria-selected="false">Jan 2025 (H)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m7-tab" data-bs-toggle="tab" data-bs-target="#m7" type="button" role="tab" aria-controls="m7" aria-selected="false">Feb 2025 (M7)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m8-tab" data-bs-toggle="tab" data-bs-target="#m8" type="button" role="tab" aria-controls="m8" aria-selected="false">Mar 2025 (M8)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="q3-tab" data-bs-toggle="tab" data-bs-target="#q3" type="button" role="tab" aria-controls="q3" aria-selected="false">Apr 2025 (Q3)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m10-tab" data-bs-toggle="tab" data-bs-target="#m10" type="button" role="tab" aria-controls="m10" aria-selected="false">May 2025 (M10)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m11-tab" data-bs-toggle="tab" data-bs-target="#m11" type="button" role="tab" aria-controls="m11" aria-selected="false">Jun 2025 (M11)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="a-tab" data-bs-toggle="tab" data-bs-target="#a" type="button" role="tab" aria-controls="a" aria-selected="false">Jul 2025 (A)</button>
+                    </li>
+                </ul>
+
+                <!-- Month Content Tabs -->
+                <div class="tab-content" id="monthTabsContent">
+                    <!-- August 2024 (M1) -->
+                    <div class="tab-pane fade show active" id="m1" role="tabpanel" aria-labelledby="m1-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> August 2024 (M1) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">32 Completed</span>
+                                    <span class="badge bg-warning me-2">15 Pending</span>
+                                    <span class="badge bg-danger">7 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM1Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>S.1.1.1</td>
+                                                <td>DAILY WEATHER STATIONS CLEANING-D</td>
+                                                <td>PV Field</td>
+                                                <td>Daily</td>
+                                                <td>2024-08-01</td>
+                                                <td><i class="fas fa-check text-success"></i></td>
+                                                <td><span class="status-badge status-completed"><i class="fas fa-check"></i> Completed</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary edit-task">Edit</button>
+                                                    <button class="btn btn-sm btn-outline-danger delete-task">Delete</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>S.1.2.3</td>
+                                                <td>WEEKLY INVERTER CHECKUP-W</td>
+                                                <td>PVSS</td>
+                                                <td>Weekly</td>
+                                                <td>2024-08-05</td>
+                                                <td><i class="fas fa-check text-success"></i></td>
+                                                <td><span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Approved</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary edit-task">Edit</button>
+                                                    <button class="btn btn-sm btn-outline-danger delete-task">Delete</button>
+                                                </td>
+                                            </tr>
+                                            <tr class="table-warning">
+                                                <td>3</td>
+                                                <td>S.2.1.5</td>
+                                                <td>MONTHLY TRANSFORMER INSPECTION-M</td>
+                                                <td>General</td>
+                                                <td>Monthly</td>
+                                                <td>2024-08-15</td>
+                                                <td><i class="fas fa-check text-success"></i></td>
+                                                <td><span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary edit-task">Edit</button>
+                                                    <button class="btn btn-sm btn-outline-danger delete-task">Delete</button>
+                                                </td>
+                                            </tr>
+                                            <tr class="table-danger">
+                                                <td>4</td>
+                                                <td>S.3.1.2</td>
+                                                <td>QUARTERLY PV MODULE CLEANING-Q</td>
+                                                <td>PV Field</td>
+                                                <td>Quarterly</td>
+                                                <td>2024-08-10</td>
+                                                <td><i class="fas fa-times text-danger"></i></td>
+                                                <td><span class="status-badge status-overdue"><i class="fas fa-exclamation-triangle"></i> Overdue</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary edit-task">Edit</button>
+                                                    <button class="btn btn-sm btn-outline-danger delete-task">Delete</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>5</td>
+                                                <td>S.1.3.4</td>
+                                                <td>ANNUAL SUBSTATION INSPECTION-A</td>
+                                                <td>PVSS</td>
+                                                <td>Annual</td>
+                                                <td>2024-08-25</td>
+                                                <td><i class="fas fa-check text-success"></i></td>
+                                                <td><span class="status-badge status-draft"><i class="fas fa-file-alt"></i> Draft</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary edit-task">Edit</button>
+                                                    <button class="btn btn-sm btn-outline-danger delete-task">Delete</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-chart-pie"></i> Task Distribution</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="monthlyDistributionChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-chart-line"></i> Completion Progress</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Overall Completion</span>
+                                                <span>55%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 55%" aria-valuenow="55" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>PV Field Tasks</span>
+                                                <span>70%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>PVSS Tasks</span>
+                                                <span>45%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>General Tasks</span>
+                                                <span>30%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-danger" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- September 2024 (M2) -->
+                    <div class="tab-pane fade" id="m2" role="tabpanel" aria-labelledby="m2-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> September 2024 (M2) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM2Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other months would follow the same pattern -->
+                    <!-- October 2024 (Q1) -->
+                    <div class="tab-pane fade" id="q1" role="tabpanel" aria-labelledby="q1-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> October 2024 (Q1) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthQ1Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- November 2024 (M4) -->
+                    <div class="tab-pane fade" id="m4" role="tabpanel" aria-labelledby="m4-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> November 2024 (M4) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM4Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other months would follow the same pattern -->
+                    <!-- December 2024 (M5) -->
+                    <div class="tab-pane fade" id="m5" role="tabpanel" aria-labelledby="m5-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> December 2024 (M5) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM5Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- January 2025 (H) -->
+                    <div class="tab-pane fade" id="h" role="tabpanel" aria-labelledby="h-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> January 2025 (H) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthHTable">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other months would follow the same pattern -->
+                    <!-- February 2025 (M7) -->
+                    <div class="tab-pane fade" id="m7" role="tabpanel" aria-labelledby="m7-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> February 2025 (M7) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM7Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- March 2025 (M8) -->
+                    <div class="tab-pane fade" id="m8" role="tabpanel" aria-labelledby="m8-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> March 2025 (M8) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM8Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- April 2025 (Q3) -->
+                    <div class="tab-pane fade" id="q3" role="tabpanel" aria-labelledby="q3-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> April 2025 (Q3) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthQ3Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- May 2025 (M10) -->
+                    <div class="tab-pane fade" id="m10" role="tabpanel" aria-labelledby="m10-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> May 2025 (M10) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM10Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- June 2025 (M11) -->
+                    <div class="tab-pane fade" id="m11" role="tabpanel" aria-labelledby="m11-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> June 2025 (M11) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM11Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- July 2025 (A) -->
+                    <div class="tab-pane fade" id="a" role="tabpanel" aria-labelledby="a-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> July 2025 (A) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">0 Completed</span>
+                                    <span class="badge bg-warning me-2">0 Pending</span>
+                                    <span class="badge bg-danger">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthATable">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Empty state -->
+                                            <tr>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                                                    <h5>No tasks scheduled for this month</h5>
+                                                    <p class="text-muted">Click the "Add Task" button to create a new PM task</p>
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                                        <i class="fas fa-plus me-1"></i> Add Task
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checklist Status Tab -->
+            <div class="tab-pane fade" id="checklist">
+                <div class="page-header">
+                    <h2><i class="fas fa-clipboard-check"></i> Checklist & Procedure Status</h2>
+                    <div class="d-flex">
+                        <button class="btn btn-outline-primary me-2">
+                            <i class="fas fa-sync-alt me-1"></i> Refresh
+                        </button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newChecklistModal">
+                            <i class="fas fa-plus me-1"></i> New Checklist
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-list"></i> All Checklists</h5>
+                        <div class="d-flex align-items-center">
+                            <div class="input-group input-group-sm" style="width: 250px;">
+                                <input type="text" class="form-control" placeholder="Search checklists...">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="checklistTable">
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th>Location</th>
+                                        <th>Task Code</th>
+                                        <th>Description</th>
+                                        <th>Frequency</th>
+                                        <th>Checklist Name</th>
+                                        <th>PM Status</th>
+                                        <th>CM Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>PV Field</td>
+                                        <td>S.1.1.1</td>
+                                        <td>DAILY WEATHER STATIONS CLEANING-D</td>
+                                        <td>Daily</td>
+                                        <td>SJN-OM-CL-A-6001 -REV00</td>
+                                        <td><span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Approved</span></td>
+                                        <td><span class="status-badge status-draft"><i class="fas fa-file-alt"></i> Draft</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>PVSS</td>
+                                        <td>S.1.2.3</td>
+                                        <td>WEEKLY INVERTER CHECKUP-W</td>
+                                        <td>Weekly</td>
+                                        <td>SJN-OM-CL-A-6002 -REV00</td>
+                                        <td><span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Approved</span></td>
+                                        <td><span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Approved</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>General</td>
+                                        <td>S.2.1.5</td>
+                                        <td>MONTHLY TRANSFORMER INSPECTION-M</td>
+                                        <td>Monthly</td>
+                                        <td>SJN-OM-CL-A-6003 -REV00</td>
+                                        <td><span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending</span></td>
+                                        <td><span class="status-badge status-na"><i class="fas fa-ban"></i> NA</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>PV Field</td>
+                                        <td>S.3.1.2</td>
+                                        <td>QUARTERLY PV MODULE CLEANING-Q</td>
+                                        <td>Quarterly</td>
+                                        <td>SJN-OM-CL-A-6004 -REV00</td>
+                                        <td><span class="status-badge status-draft"><i class="fas fa-file-alt"></i> Draft</span></td>
+                                        <td><span class="status-badge status-draft"><i class="fas fa-file-alt"></i> Draft</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>PVSS</td>
+                                        <td>S.1.3.4</td>
+                                        <td>ANNUAL SUBSTATION INSPECTION-A</td>
+                                        <td>Annual</td>
+                                        <td>SJN-OM-CL-A-6005 -REV00</td>
+                                        <td><span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Approved</span></td>
+                                        <td><span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Approved</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-pie"></i> Checklist Status Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="checklistStatusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-tasks"></i> Checklist Completion</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="checklistCompletionChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Tab -->
+            <div class="tab-pane fade" id="performance">
+                <div class="page-header">
+                    <h2><i class="fas fa-chart-line"></i> PM Performance Metrics</h2>
+                    <div class="d-flex">
+                        <div class="dropdown me-2">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="timeRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-calendar me-1"></i> Last 12 Months
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="timeRangeDropdown">
+                                <li><a class="dropdown-item" href="#">Last 3 Months</a></li>
+                                <li><a class="dropdown-item" href="#">Last 6 Months</a></li>
+                                <li><a class="dropdown-item" href="#">Last 12 Months</a></li>
+                                <li><a class="dropdown-item" href="#">Custom Range</a></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-download me-1"></i> Export Report
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-bar"></i> Completion Rate by Month</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="performanceCompletionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-pie"></i> Delay Analysis</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="performanceDelayChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-table"></i> Detailed Performance Data</h5>
+                                <button class="btn btn-sm btn-outline-primary">View Full Report</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="performanceTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Month</th>
+                                                <th>Total Tasks</th>
+                                                <th>Completed</th>
+                                                <th>Pending</th>
+                                                <th>On Time</th>
+                                                <th>Delayed</th>
+                                                <th>Completion %</th>
+                                                <th>Trend</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>August 2024 (M1)</td>
+                                                <td>58</td>
+                                                <td>32</td>
+                                                <td>26</td>
+                                                <td>28</td>
+                                                <td>4</td>
+                                                <td>55%</td>
+                                                <td><i class="fas fa-arrow-up text-success"></i></td>
+                                            </tr>
+                                            <tr>
+                                                <td>July 2024</td>
+                                                <td>52</td>
+                                                <td>40</td>
+                                                <td>12</td>
+                                                <td>35</td>
+                                                <td>5</td>
+                                                <td>77%</td>
+                                                <td><i class="fas fa-arrow-down text-danger"></i></td>
+                                            </tr>
+                                            <tr>
+                                                <td>June 2024</td>
+                                                <td>50</td>
+                                                <td>42</td>
+                                                <td>8</td>
+                                                <td>38</td>
+                                                <td>4</td>
+                                                <td>84%</td>
+                                                <td><i class="fas fa-arrow-up text-success"></i></td>
+                                            </tr>
+                                            <tr>
+                                                <td>May 2024</td>
+                                                <td>48</td>
+                                                <td>36</td>
+                                                <td>12</td>
+                                                <td>30</td>
+                                                <td>6</td>
+                                                <td>75%</td>
+                                                <td><i class="fas fa-arrow-down text-danger"></i></td>
+                                            </tr>
+                                            <tr>
+                                                <td>April 2024</td>
+                                                <td>45</td>
+                                                <td>38</td>
+                                                <td>7</td>
+                                                <td>32</td>
+                                                <td>6</td>
+                                                <td>84%</td>
+                                                <td><i class="fas fa-arrow-up text-success"></i></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div class="tab-pane fade" id="reports">
+                <div class="page-header">
+                    <h2><i class="fas fa-file-alt"></i> Reports</h2>
+                    <div class="d-flex">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newReportModal">
+                            <i class="fas fa-plus me-1"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                </div>
+                                <h5>Monthly PM Report</h5>
+                                <p class="text-muted">August 2024</p>
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-sm btn-outline-danger me-2">
+                                        <i class="fas fa-download"></i> PDF
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-file-excel fa-3x text-success"></i>
+                                </div>
+                                <h5>Checklist Status</h5>
+                                <p class="text-muted">As of August 2024</p>
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-sm btn-outline-success me-2">
+                                        <i class="fas fa-download"></i> Excel
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-file-word fa-3x text-info"></i>
+                                </div>
+                                <h5>Annual PM Summary</h5>
+                                <p class="text-muted">2023-2024</p>
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-sm btn-outline-info me-2">
+                                        <i class="fas fa-download"></i> Word
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-history"></i> Report History</h5>
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <input type="text" class="form-control" placeholder="Search reports...">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Report Name</th>
+                                        <th>Type</th>
+                                        <th>Date Generated</th>
+                                        <th>Generated By</th>
+                                        <th>Size</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Monthly_PM_Report_August_2024</td>
+                                        <td><span class="badge bg-danger">PDF</span></td>
+                                        <td>2024-08-15</td>
+                                        <td>Admin User</td>
+                                        <td>2.4 MB</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1"><i class="fas fa-download"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Checklist_Status_August_2024</td>
+                                        <td><span class="badge bg-success">Excel</span></td>
+                                        <td>2024-08-10</td>
+                                        <td>John Doe</td>
+                                        <td>1.8 MB</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1"><i class="fas fa-download"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Annual_PM_Summary_2023-2024</td>
+                                        <td><span class="badge bg-info">Word</span></td>
+                                        <td>2024-07-30</td>
+                                        <td>Jane Smith</td>
+                                        <td>3.2 MB</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1"><i class="fas fa-download"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Quarterly_Performance_Q2_2024</td>
+                                        <td><span class="badge bg-danger">PDF</span></td>
+                                        <td>2024-06-30</td>
+                                        <td>Admin User</td>
+                                        <td>2.1 MB</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1"><i class="fas fa-download"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Equipment_Maintenance_History</td>
+                                        <td><span class="badge bg-success">Excel</span></td>
+                                        <td>2024-05-15</td>
+                                        <td>John Doe</td>
+                                        <td>4.5 MB</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1"><i class="fas fa-download"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-pane fade" id="settings">
+                <div class="page-header">
+                    <h2><i class="fas fa-cog"></i> Settings</h2>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-user-cog"></i> User Preferences</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="settingsForm">
+                                    <div class="mb-3">
+                                        <label for="theme" class="form-label">Theme</label>
+                                        <select class="form-select" id="theme">
+                                            <option value="light">Light</option>
+                                            <option value="dark">Dark</option>
+                                            <option value="system">System Default</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="notifications" class="form-label">Email Notifications</label>
+                                        <select class="form-select" id="notifications">
+                                            <option value="daily">Daily</option>
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly">Monthly</option>
+                                            <option value="none">None</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Dashboard Preferences</label>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="showCharts" checked>
+                                            <label class="form-check-label" for="showCharts">Show Charts by Default</label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="showRecentActivities" checked>
+                                            <label class="form-check-label" for="showRecentActivities">Show Recent Activities</label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="showTaskSummary" checked>
+                                            <label class="form-check-label" for="showTaskSummary">Show Task Summary</label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i> Save Settings
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-bell"></i> Notification Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Task Notifications</label>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="taskDue" checked>
+                                        <label class="form-check-label" for="taskDue">Task Due Alerts</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="taskOverdue" checked>
+                                        <label class="form-check-label" for="taskOverdue">Task Overdue Alerts</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="taskCompleted" checked>
+                                        <label class="form-check-label" for="taskCompleted">Task Completed Notifications</label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Checklist Notifications</label>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="checklistPending" checked>
+                                        <label class="form-check-label" for="checklistPending">Pending Checklist Alerts</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="checklistApproved" checked>
+                                        <label class="form-check-label" for="checklistApproved">Checklist Approved Notifications</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="checklistRejected" checked>
+                                        <label class="form-check-label" for="checklistRejected">Checklist Rejected Alerts</label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Report Notifications</label>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="reportGenerated" checked>
+                                        <label class="form-check-label" for="reportGenerated">Report Generated Notifications</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="reportScheduled" checked>
+                                        <label class="form-check-label" for="reportScheduled">Scheduled Report Alerts</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-shield-alt"></i> Security Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="securityForm">
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="currentPassword" placeholder="Enter current password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enable2FA">
+                                    <label class="form-check-label" for="enable2FA">Enable Two-Factor Authentication</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-key me-1"></i> Update Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="fab" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <!-- Quick Add Modal -->
+    <div class="modal fade" id="quickAddModal" tabindex="-1" aria-labelledby="quickAddModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quickAddModalLabel">Quick Add</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#newTaskModal">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-tasks text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">New PM Task</h6>
+                                    <small class="text-muted">Add a new preventive maintenance task</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#newChecklistModal">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-clipboard-check text-success"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">New Checklist</h6>
+                                    <small class="text-muted">Create a new maintenance checklist</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#newIssueModal">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">New Issue</h6>
+                                    <small class="text-muted">Report a maintenance issue</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#newReportModal">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-file-alt text-info"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">New Report</h6>
+                                    <small class="text-muted">Generate a custom report</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New PM Task Modal -->
+    <div class="modal fade" id="newTaskModal" tabindex="-1" aria-labelledby="newTaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newTaskModalLabel">New Preventive Maintenance Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newTaskForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="taskCode" class="form-label">Task Code</label>
+                                <input type="text" class="form-control" id="taskCode" placeholder="Enter task code (e.g., S.1.1.1)">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="taskDescription" class="form-label">Description</label>
+                                <input type="text" class="form-control" id="taskDescription" placeholder="Enter task description">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="taskLocation" class="form-label">Location</label>
+                                <select class="form-select" id="taskLocation">
+                                    <option value="">Select Location</option>
+                                    <option>PV Field</option>
+                                    <option>PVSS</option>
+                                    <option>General</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="taskFrequency" class="form-label">Frequency</label>
+                                <select class="form-select" id="taskFrequency">
+                                    <option value="">Select Frequency</option>
+                                    <option>Daily</option>
+                                    <option>Weekly</option>
+                                    <option>Monthly</option>
+                                    <option>Quarterly</option>
+                                    <option>Half Yearly</option>
+                                    <option>Annual</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="taskDueDate" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="taskDueDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="taskMonth" class="form-label">Month</label>
+                                <select class="form-select" id="taskMonth">
+                                    <option value="M1">August 2024 (M1)</option>
+                                    <option value="M2">September 2024 (M2)</option>
+                                    <option value="Q1">October 2024 (Q1)</option>
+                                    <option value="M4">November 2024 (M4)</option>
+                                    <option value="M5">December 2024 (M5)</option>
+                                    <option value="H">January 2025 (H)</option>
+                                    <option value="M7">February 2025 (M7)</option>
+                                    <option value="M8">March 2025 (M8)</option>
+                                    <option value="Q3">April 2025 (Q3)</option>
+                                    <option value="M10">May 2025 (M10)</option>
+                                    <option value="M11">June 2025 (M11)</option>
+                                    <option value="A">July 2025 (A)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="taskPriority" class="form-label">Priority</label>
+                                <select class="form-select" id="taskPriority">
+                                    <option value="High">High</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="taskAssignedTo" class="form-label">Assigned To</label>
+                                <select class="form-select" id="taskAssignedTo">
+                                    <option>John Doe</option>
+                                    <option>Jane Smith</option>
+                                    <option>Mike Johnson</option>
+                                    <option>Sarah Williams</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="taskNotes" rows="3" placeholder="Add any additional notes..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taskChecklist" class="form-label">Checklist</label>
+                            <select class="form-select" id="taskChecklist">
+                                <option value="">Select Checklist</option>
+                                <option>SJN-OM-CL-A-6001 -REV00</option>
+                                <option>SJN-OM-CL-A-6002 -REV00</option>
+                                <option>SJN-OM-CL-A-6003 -REV00</option>
+                                <option>None</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveTask">Save Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Checklist Modal -->
+    <div class="modal fade" id="newChecklistModal" tabindex="-1" aria-labelledby="newChecklistModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newChecklistModalLabel">New Maintenance Checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newChecklistForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="checklistName" class="form-label">Checklist Name</label>
+                                <input type="text" class="form-control" id="checklistName" placeholder="Enter checklist name">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="checklistCode" class="form-label">Checklist Code</label>
+                                <input type="text" class="form-control" id="checklistCode" placeholder="Enter checklist code">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="checklistLocation" class="form-label">Location</label>
+                                <select class="form-select" id="checklistLocation">
+                                    <option value="">Select Location</option>
+                                    <option>PV Field</option>
+                                    <option>PVSS</option>
+                                    <option>General</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="checklistFrequency" class="form-label">Frequency</label>
+                                <select class="form-select" id="checklistFrequency">
+                                    <option value="">Select Frequency</option>
+                                    <option>Daily</option>
+                                    <option>Weekly</option>
+                                    <option>Monthly</option>
+                                    <option>Quarterly</option>
+                                    <option>Half Yearly</option>
+                                    <option>Annual</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="checklistDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="checklistDescription" rows="2" placeholder="Enter checklist description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Checklist Items</label>
+                            <div id="checklistItemsContainer">
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control checklist-item" placeholder="Enter checklist item">
+                                    <button class="btn btn-outline-danger remove-item" type="button">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addChecklistItem">
+                                <i class="fas fa-plus me-1"></i> Add Item
+                            </button>
+                        </div>
+                        <div class="mb-3">
+                            <label for="checklistTemplate" class="form-label">Template</label>
+                            <select class="form-select" id="checklistTemplate">
+                                <option value="">Select Template (Optional)</option>
+                                <option>Standard Daily Inspection</option>
+                                <option>Weekly Equipment Check</option>
+                                <option>Monthly Facility Review</option>
+                                <option>Quarterly System Audit</option>
+                                <option>Annual Comprehensive Review</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveChecklist">Save Checklist</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Issue Modal -->
+    <div class="modal fade" id="newIssueModal" tabindex="-1" aria-labelledby="newIssueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newIssueModalLabel">Report Maintenance Issue</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newIssueForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="issueTitle" class="form-label">Issue Title</label>
+                                <input type="text" class="form-control" id="issueTitle" placeholder="Enter issue title">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="issueLocation" class="form-label">Location</label>
+                                <select class="form-select" id="issueLocation">
+                                    <option value="">Select Location</option>
+                                    <option>PV Field</option>
+                                    <option>PVSS</option>
+                                    <option>General</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="issuePriority" class="form-label">Priority</label>
+                                <select class="form-select" id="issuePriority">
+                                    <option value="High">High</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="issueAssignedTo" class="form-label">Assigned To</label>
+                                <select class="form-select" id="issueAssignedTo">
+                                    <option>John Doe</option>
+                                    <option>Jane Smith</option>
+                                    <option>Mike Johnson</option>
+                                    <option>Sarah Williams</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="issueDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="issueDescription" rows="3" placeholder="Describe the issue in detail..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="issueAttachments" class="form-label">Attachments</label>
+                            <input type="file" class="form-control" id="issueAttachments" multiple>
+                            <small class="text-muted">Upload photos or documents related to the issue</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveIssue">Report Issue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Report Modal -->
+    <div class="modal fade" id="newReportModal" tabindex="-1" aria-labelledby="newReportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newReportModalLabel">Generate Custom Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newReportForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="reportType" class="form-label">Report Type</label>
+                                <select class="form-select" id="reportType">
+                                    <option value="">Select Report Type</option>
+                                    <option>PM Completion Summary</option>
+                                    <option>Checklist Status</option>
+                                    <option>Issue Tracking</option>
+                                    <option>Performance Metrics</option>
+                                    <option>Custom Data Export</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="reportFormat" class="form-label">Format</label>
+                                <select class="form-select" id="reportFormat">
+                                    <option>PDF</option>
+                                    <option>Excel</option>
+                                    <option>Word</option>
+                                    <option>CSV</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="reportStartDate" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="reportStartDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="reportEndDate" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="reportEndDate">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reportLocation" class="form-label">Location Filter</label>
+                            <select class="form-select" id="reportLocation">
+                                <option value="">All Locations</option>
+                                <option>PV Field</option>
+                                <option>PVSS</option>
+                                <option>General</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reportColumns" class="form-label">Columns to Include</label>
+                            <select class="form-select" id="reportColumns" multiple>
+                                <option>Task Code</option>
+                                <option>Description</option>
+                                <option>Location</option>
+                                <option>Frequency</option>
+                                <option>Due Date</option>
+                                <option>Status</option>
+                                <option>Assigned To</option>
+                                <option>Completion Date</option>
+                                <option>Notes</option>
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd to select multiple columns</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reportNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="reportNotes" rows="2" placeholder="Add any notes about this report..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="generateReport">Generate Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTaskModalLabel">Edit Task Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editTaskForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editTaskCode" class="form-label">Task Code</label>
+                                <input type="text" class="form-control" id="editTaskCode" value="S.1.1.1" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editTaskDescription" class="form-label">Description</label>
+                                <input type="text" class="form-control" id="editTaskDescription" value="DAILY WEATHER STATIONS CLEANING-D">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editTaskLocation" class="form-label">Location</label>
+                                <select class="form-select" id="editTaskLocation">
+                                    <option>PV Field</option>
+                                    <option>PVSS</option>
+                                    <option>General</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editTaskFrequency" class="form-label">Frequency</label>
+                                <select class="form-select" id="editTaskFrequency">
+                                    <option>Daily</option>
+                                    <option>Weekly</option>
+                                    <option>Monthly</option>
+                                    <option>Quarterly</option>
+                                    <option>Half Yearly</option>
+                                    <option>Annual</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editTaskDueDate" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="editTaskDueDate" value="2024-08-15">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editTaskStatus" class="form-label">Status</label>
+                                <select class="form-select" id="editTaskStatus">
+                                    <option>Pending</option>
+                                    <option>In Progress</option>
+                                    <option>Completed</option>
+                                    <option>Approved</option>
+                                    <option>Overdue</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editTaskPriority" class="form-label">Priority</label>
+                                <select class="form-select" id="editTaskPriority">
+                                    <option>High</option>
+                                    <option>Medium</option>
+                                    <option>Low</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editTaskAssignedTo" class="form-label">Assigned To</label>
+                                <select class="form-select" id="editTaskAssignedTo">
+                                    <option>John Doe</option>
+                                    <option>Jane Smith</option>
+                                    <option>Mike Johnson</option>
+                                    <option>Sarah Williams</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTaskNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="editTaskNotes" rows="3" placeholder="Add any additional notes..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTaskChecklist" class="form-label">Checklist</label>
+                            <select class="form-select" id="editTaskChecklist">
+                                <option>SJN-OM-CL-A-6001 -REV00</option>
+                                <option>SJN-OM-CL-A-6002 -REV00</option>
+                                <option>SJN-OM-CL-A-6003 -REV00</option>
+                                <option>None</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveTaskChanges">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date pickers
+            flatpickr(".datepicker", {
+                dateFormat: "Y-m-d",
+                allowInput: true
+            });
+
+            // Render charts
+            renderCharts();
+            
+            // Initialize ApexCharts
+            renderApexCharts();
+
+            // Set up event listeners
+            document.getElementById('monthFilter').addEventListener('change', filterData);
+            document.getElementById('locationFilter').addEventListener('change', filterData);
+            document.getElementById('statusFilter').addEventListener('change', filterData);
+            document.getElementById('priorityFilter').addEventListener('change', filterData);
+            document.getElementById('settingsForm').addEventListener('submit', saveSettings);
+            document.getElementById('securityForm').addEventListener('submit', updatePassword);
+
+            // Quick Add functionality
+            document.getElementById('saveTask').addEventListener('click', saveNewTask);
+            document.getElementById('saveChecklist').addEventListener('click', saveNewChecklist);
+            document.getElementById('saveIssue').addEventListener('click', saveNewIssue);
+            document.getElementById('generateReport').addEventListener('click', generateNewReport);
+            document.getElementById('saveTaskChanges').addEventListener('click', saveTaskChanges);
+            
+            // Add checklist item
+            document.getElementById('addChecklistItem').addEventListener('click', addChecklistItem);
+            
+            // Print functionality
+            document.getElementById('printMonthlyReport').addEventListener('click', printMonthlyReport);
+            
+            // Edit/Delete task handlers
+            document.querySelectorAll('.edit-task').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+                    modal.show();
+                });
+            });
+            
+            document.querySelectorAll('.delete-task').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to delete this task?')) {
+                        const row = this.closest('tr');
+                        row.remove();
+                        updateTaskStats();
+                        showToast('Task deleted successfully', 'success');
+                    }
+                });
+            });
+        });
+
+        function renderCharts() {
+            // Completion Rate by Month Chart
+            const completionCtx = document.getElementById('completionChart').getContext('2d');
+            const completionChart = new Chart(completionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Completion Rate %',
+                        data: [85, 78, 92, 88, 90, 95, 87, 55, 0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(200, 200, 200, 0.7)',
+                            'rgba(200, 200, 200, 0.7)',
+                            'rgba(200, 200, 200, 0.7)',
+                            'rgba(200, 200, 200, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(200, 200, 200, 1)',
+                            'rgba(200, 200, 200, 1)',
+                            'rgba(200, 200, 200, 1)',
+                            'rgba(200, 200, 200, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Tasks by Location Chart
+            const locationCtx = document.getElementById('locationChart').getContext('2d');
+            const locationChart = new Chart(locationCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['PV Field', 'PVSS', 'General'],
+                    datasets: [{
+                        data: [25, 18, 15],
+                        backgroundColor: [
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(255, 159, 64, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Monthly Distribution Chart
+            const monthlyDistributionCtx = document.getElementById('monthlyDistributionChart').getContext('2d');
+            const monthlyDistributionChart = new Chart(monthlyDistributionCtx, {
+                type: 'polarArea',
+                data: {
+                    labels: ['PV Field', 'PVSS', 'General', 'Overdue', 'Pending'],
+                    datasets: [{
+                        data: [15, 10, 7, 5, 8],
+                        backgroundColor: [
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(153, 102, 255, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Checklist Status Chart
+            const checklistStatusCtx = document.getElementById('checklistStatusChart').getContext('2d');
+            const checklistStatusChart = new Chart(checklistStatusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Approved', 'Pending', 'Draft', 'Not Applicable'],
+                    datasets: [{
+                        data: [25, 15, 10, 8],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 99, 132, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Performance Completion Chart
+            const performanceCompletionCtx = document.getElementById('performanceCompletionChart').getContext('2d');
+            const performanceCompletionChart = new Chart(performanceCompletionCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                    datasets: [{
+                        label: 'Completion Rate %',
+                        data: [85, 78, 92, 88, 90, 95, 87, 55],
+                        fill: false,
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        tension: 0.4,
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Performance Delay Chart
+            const performanceDelayCtx = document.getElementById('performanceDelayChart').getContext('2d');
+            const performanceDelayChart = new Chart(performanceDelayCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                    datasets: [{
+                        label: 'On Time',
+                        data: [18, 15, 20, 17, 19, 22, 18, 12],
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                    }, {
+                        label: 'Delayed',
+                        data: [2, 5, 1, 3, 2, 1, 3, 5],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderApexCharts() {
+            // Checklist Completion Chart
+            const checklistCompletionChart = new ApexCharts(document.querySelector("#checklistCompletionChart"), {
+                series: [{
+                    name: 'Completed',
+                    data: [25, 18, 15, 10, 8]
+                }],
+                chart: {
+                    type: 'radar',
+                    height: 300,
+                    toolbar: {
+                        show: false
+                    }
+                },
+                colors: ['#4361ee'],
+                xaxis: {
+                    categories: ['PV Field', 'PVSS', 'General', 'Approved', 'Pending']
+                },
+                yaxis: {
+                    show: false
+                },
+                markers: {
+                    size: 5,
+                    hover: {
+                        size: 7
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return val + " checklists";
+                        }
+                    }
+                }
+            });
+            checklistCompletionChart.render();
+        }
+
+        function filterData() {
+            const monthFilter = document.getElementById('monthFilter').value;
+            const locationFilter = document.getElementById('locationFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            
+            // Filter logic would go here
+            console.log(`Filtering by month: ${monthFilter}, location: ${locationFilter}, status: ${statusFilter}, priority: ${priorityFilter}`);
+        }
+
+        function saveSettings(e) {
+            e.preventDefault();
+            const notifications = document.getElementById('notifications').value;
+            const theme = document.getElementById('theme').value;
+            const showCharts = document.getElementById('showCharts').checked;
+            
+            // In a real app, this would save to user preferences
+            console.log('Saving settings:', { notifications, theme, showCharts });
+            
+            showToast('Settings saved successfully', 'success');
+        }
+
+        function updatePassword(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation would go here
+            console.log('Updating password:', { currentPassword, newPassword, confirmPassword });
+            
+            showToast('Password updated successfully', 'success');
+            
+            // Clear form
+            document.getElementById('securityForm').reset();
+        }
+
+        function saveNewTask() {
+            const taskCode = document.getElementById('taskCode').value;
+            const taskDescription = document.getElementById('taskDescription').value;
+            const taskLocation = document.getElementById('taskLocation').value;
+            const taskFrequency = document.getElementById('taskFrequency').value;
+            const taskDueDate = document.getElementById('taskDueDate').value;
+            const taskMonth = document.getElementById('taskMonth').value;
+            const taskPriority = document.getElementById('taskPriority').value;
+            const taskAssignedTo = document.getElementById('taskAssignedTo').value;
+            const taskNotes = document.getElementById('taskNotes').value;
+            const taskChecklist = document.getElementById('taskChecklist').value;
+
+            // Basic validation
+            if (!taskCode || !taskDescription || !taskLocation || !taskFrequency || !taskDueDate) {
+                showToast('Please fill in all required fields', 'danger');
+                return;
+            }
+
+            // Determine status based on due date
+            const today = new Date();
+            const dueDate = new Date(taskDueDate);
+            const status = dueDate < today ? 'Overdue' : 'Pending';
+
+            // Create new row
+            const newRow = `
+                <tr>
+                    <td>6</td>
+                    <td>${taskCode}</td>
+                    <td>${taskDescription}</td>
+                    <td>${taskLocation}</td>
+                    <td>${taskFrequency}</td>
+                    <td>${taskDueDate}</td>
+                    <td>${taskChecklist ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>'}</td>
+                    <td><span class="status-badge ${status === 'Overdue' ? 'status-overdue' : 'status-pending'}">
+                        <i class="fas ${status === 'Overdue' ? 'fa-exclamation-triangle' : 'fa-clock'}"></i> ${status}
+                    </span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary edit-task">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger delete-task">Delete</button>
+                    </td>
+                </tr>
+            `;
+
+            // Add to the appropriate month's table
+            const monthTableId = `month${taskMonth}Table`;
+            const monthTable = document.getElementById(monthTableId);
+            
+            if (monthTable) {
+                const tbody = monthTable.querySelector('tbody');
+                
+                // Check if it's the empty state row
+                if (tbody.querySelector('td[colspan="9"]')) {
+                    tbody.innerHTML = newRow;
+                } else {
+                    tbody.insertAdjacentHTML('beforeend', newRow);
+                }
+                
+                // Update row numbers
+                updateRowNumbers(monthTableId);
+                
+                // Update stats
+                updateTaskStats();
+                
+                // Close modals
+                bootstrap.Modal.getInstance(document.getElementById('newTaskModal')).hide();
+                bootstrap.Modal.getInstance(document.getElementById('quickAddModal')).hide();
+                
+                showToast('Task added successfully', 'success');
+            } else {
+                showToast('Error: Could not find the target month table', 'danger');
+            }
+        }
+
+        function saveNewChecklist() {
+            const checklistName = document.getElementById('checklistName').value;
+            const checklistCode = document.getElementById('checklistCode').value;
+            const checklistLocation = document.getElementById('checklistLocation').value;
+            const checklistFrequency = document.getElementById('checklistFrequency').value;
+            const checklistDescription = document.getElementById('checklistDescription').value;
+            const checklistTemplate = document.getElementById('checklistTemplate').value;
+            
+            // Get checklist items
+            const checklistItems = [];
+            document.querySelectorAll('.checklist-item').forEach(item => {
+                if (item.value.trim()) {
+                    checklistItems.push(item.value.trim());
+                }
+            });
+
+            // Basic validation
+            if (!checklistName || !checklistCode || !checklistLocation || !checklistFrequency || checklistItems.length === 0) {
+                showToast('Please fill in all required fields and add at least one checklist item', 'danger');
+                return;
+            }
+
+            // Create new row for checklist table
+            const newRow = `
+                <tr>
+                    <td>6</td>
+                    <td>${checklistLocation}</td>
+                    <td>${checklistCode}</td>
+                    <td>${checklistDescription || 'No description'}</td>
+                    <td>${checklistFrequency}</td>
+                    <td>${checklistName}</td>
+                    <td><span class="status-badge status-draft"><i class="fas fa-file-alt"></i> Draft</span></td>
+                    <td><span class="status-badge status-draft"><i class="fas fa-file-alt"></i> Draft</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button>
+                        <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                    </td>
+                </tr>
+            `;
+
+            // Add to checklist table
+            const checklistTable = document.getElementById('checklistTable');
+            const tbody = checklistTable.querySelector('tbody');
+            tbody.insertAdjacentHTML('beforeend', newRow);
+            
+            // Update row numbers
+            updateRowNumbers('checklistTable');
+            
+            // Close modals
+            bootstrap.Modal.getInstance(document.getElementById('newChecklistModal')).hide();
+            bootstrap.Modal.getInstance(document.getElementById('quickAddModal')).hide();
+            
+            showToast('Checklist created successfully', 'success');
+        }
+
+        function saveNewIssue() {
+            const issueTitle = document.getElementById('issueTitle').value;
+            const issueLocation = document.getElementById('issueLocation').value;
+            const issuePriority = document.getElementById('issuePriority').value;
+            const issueAssignedTo = document.getElementById('issueAssignedTo').value;
+            const issueDescription = document.getElementById('issueDescription').value;
+            
+            // Basic validation
+            if (!issueTitle || !issueLocation || !issuePriority || !issueDescription) {
+                showToast('Please fill in all required fields', 'danger');
+                return;
+            }
+
+            // In a real app, this would save to the database
+            console.log('New issue created:', {
+                title: issueTitle,
+                location: issueLocation,
+                priority: issuePriority,
+                assignedTo: issueAssignedTo,
+                description: issueDescription
+            });
+            
+            // Close modals
+            bootstrap.Modal.getInstance(document.getElementById('newIssueModal')).hide();
+            bootstrap.Modal.getInstance(document.getElementById('quickAddModal')).hide();
+            
+            showToast('Issue reported successfully', 'success');
+        }
+
+        function generateNewReport() {
+            const reportType = document.getElementById('reportType').value;
+            const reportFormat = document.getElementById('reportFormat').value;
+            const reportStartDate = document.getElementById('reportStartDate').value;
+            const reportEndDate = document.getElementById('reportEndDate').value;
+            const reportLocation = document.getElementById('reportLocation').value;
+            
+            // Basic validation
+            if (!reportType || !reportFormat || !reportStartDate || !reportEndDate) {
+                showToast('Please fill in all required fields', 'danger');
+                return;
+            }
+
+            // In a real app, this would generate the report
+            console.log('Generating report:', {
+                type: reportType,
+                format: reportFormat,
+                startDate: reportStartDate,
+                endDate: reportEndDate,
+                location: reportLocation
+            });
+            
+            // Close modals
+            bootstrap.Modal.getInstance(document.getElementById('newReportModal')).hide();
+            bootstrap.Modal.getInstance(document.getElementById('quickAddModal')).hide();
+            
+            showToast('Report generation started. You will be notified when ready.', 'success');
+        }
+
+        function saveTaskChanges() {
+            // Get edited values
+            const taskCode = document.getElementById('editTaskCode').value;
+            const taskDescription = document.getElementById('editTaskDescription').value;
+            const taskLocation = document.getElementById('editTaskLocation').value;
+            const taskFrequency = document.getElementById('editTaskFrequency').value;
+            const taskDueDate = document.getElementById('editTaskDueDate').value;
+            const taskStatus = document.getElementById('editTaskStatus').value;
+            const taskPriority = document.getElementById('editTaskPriority').value;
+            const taskAssignedTo = document.getElementById('editTaskAssignedTo').value;
+            const taskNotes = document.getElementById('editTaskNotes').value;
+            const taskChecklist = document.getElementById('editTaskChecklist').value;
+
+            // Find the row in the table and update it
+            // In a real app, this would update the database
+            console.log('Task updated:', {
+                code: taskCode,
+                description: taskDescription,
+                location: taskLocation,
+                frequency: taskFrequency,
+                dueDate: taskDueDate,
+                status: taskStatus,
+                priority: taskPriority,
+                assignedTo: taskAssignedTo,
+                notes: taskNotes,
+                checklist: taskChecklist
+            });
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('editTaskModal')).hide();
+            
+            showToast('Task updated successfully', 'success');
+        }
+
+        function addChecklistItem() {
+            const newItem = `
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control checklist-item" placeholder="Enter checklist item">
+                    <button class="btn btn-outline-danger remove-item" type="button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.getElementById('checklistItemsContainer').insertAdjacentHTML('beforeend', newItem);
+            
+            // Add event listener to the new remove button
+            const itemsContainer = document.getElementById('checklistItemsContainer');
+            const lastRemoveBtn = itemsContainer.lastElementChild.querySelector('.remove-item');
+            lastRemoveBtn.addEventListener('click', function() {
+                this.closest('.input-group').remove();
+            });
+        }
+        
+            // In a real app, this would save to user preferences
+            console.log('Saving settings:', { notifications, theme, showCharts });
+            
+            // Show confirmation
+            const toast = document.createElement('div');
+            toast.className = 'position-fixed bottom-0 end-0 p-3';
+            toast.style.zIndex = '11';
+            toast.innerHTML = `
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-primary text-white">
+                        <strong class="me-auto">Settings Saved</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        Your preferences have been saved successfully.
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        function updatePassword(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation would go here
+            console.log('Updating password:', { currentPassword, newPassword, confirmPassword });
+            
+            // Show confirmation
+            const toast = document.createElement('div');
+            toast.className = 'position-fixed bottom-0 end-0 p-3';
+            toast.style.zIndex = '11';
+            toast.innerHTML = `
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-success text-white">
+                        <strong class="me-auto">Password Updated</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        Your password has been updated successfully.
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+            
+            // Clear form
+            document.getElementById('securityForm').reset();
+        }
+    </script>
+</body>
+</html>
+
+ 

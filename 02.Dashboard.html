@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>South Jeddah Noor 300MWAC Solar Project | O&M Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #0066cc;
+      --secondary: #00aaff;
+      --accent: #ffaa00;
+      --dark: #002240;
+      --light: #f0f8ff;
+      --success: #00cc66;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--dark);
+      color: var(--light);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(0, 170, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 80% 70%, rgba(255, 170, 0, 0.1) 0%, transparent 20%);
+    }
+
+    .sun {
+      position: fixed;
+      top: -100px;
+      right: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, #ffaa00 0%, #ff6600 70%, transparent 80%);
+      border-radius: 50%;
+      filter: blur(10px);
+      opacity: 0.6;
+      z-index: -1;
+      animation: pulse 8s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.6;
+      }
+
+      50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 0.6;
+      }
+    }
+
+    .solar-panel {
+      position: fixed;
+      bottom: -50px;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      background:
+        repeating-linear-gradient(0deg,
+          rgba(0, 0, 0, 0.8),
+          rgba(0, 0, 0, 0.8) 10px,
+          rgba(50, 50, 50, 0.8) 10px,
+          rgba(50, 50, 50, 0.8) 20px);
+      z-index: -1;
+      transform: perspective(500px) rotateX(45deg);
+      transform-origin: bottom;
+      box-shadow: 0 -20px 50px rgba(0, 170, 255, 0.3);
+    }
+
+    .solar-panel::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: solarGlow 3s infinite;
+    }
+
+    @keyframes solarGlow {
+      0% {
+        opacity: 0.3;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.3;
+      }
+    }
+
+    header {
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--light), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+      position: relative;
+      display: inline-block;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 3px;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--secondary);
+      margin-bottom: 2rem;
+    }
+
+    .power-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .power-value {
+      font-size: 2rem;
+      font-weight: bold;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .power-unit {
+      font-size: 1.2rem;
+      color: var(--secondary);
+    }
+
+    .power-bar {
+      width: 200px;
+      height: 10px;
+      background: rgba(0, 170, 255, 0.2);
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .power-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 75%;
+      background: linear-gradient(90deg, var(--secondary), var(--success));
+      border-radius: 5px;
+      animation: powerFluctuation 5s infinite alternate;
+    }
+
+    @keyframes powerFluctuation {
+      0% {
+        width: 72%;
+      }
+
+      50% {
+        width: 78%;
+      }
+
+      100% {
+        width: 72%;
+      }
+    }
+
+    .box-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      padding: 0 2rem 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .box {
+      background: rgba(0, 34, 64, 0.7);
+      border: 1px solid rgba(0, 170, 255, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: var(--light);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 170, 255, 0.1), rgba(255, 170, 0, 0.05));
+      z-index: -1;
+    }
+
+    .box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 170, 255, 0.4);
+      border-color: var(--secondary);
+    }
+
+    .box:active {
+      transform: translateY(0);
+    }
+
+    .box-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--secondary);
+      transition: all 0.3s ease;
+    }
+
+    .box:hover .box-icon {
+      color: var(--accent);
+      transform: scale(1.1);
+    }
+
+    .box-title {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .box-desc {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .box-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--secondary);
+    }
+
+    .box-badge {
+      background: rgba(0, 170, 255, 0.2);
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+    }
+
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      animation: float linear infinite;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .box-container {
+        grid-template-columns: 1fr;
+        padding: 0 1rem 2rem;
+      }
+
+      .sun {
+        width: 200px;
+        height: 200px;
+        top: -50px;
+        right: -50px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sun"></div>
+  <div class="solar-panel"></div>
+
+  <div class="particles" id="particles"></div>
+
+  <header>
+    <h1>South Jeddah Noor 300MW<sub>AC</sub> Solar Plant</h1>
+    <div class="subtitle">Operations & Maintenance Management System</div>
+
+    <div class="power-indicator">
+      <div class="power-value">287.4</div>
+      <div class="power-unit">MW</div>
+      <div class="power-bar">
+        <div class="power-fill"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="box-container">
+    <a class="box" href="03.Permit to Work System.html" target="_blank">
+      <i class="fas fa-file-signature box-icon"></i>
+      <div>
+        <div class="box-title">PTW Management</div>
+        <div class="box-desc">Manage work permits, safety protocols and authorization workflows</div>
+      </div>
+      <div class="box-footer">
+        <span>Safety</span>
+        <span class="box-badge">Critical</span>
+      </div>
+    </a>
+
+    <a class="box" href="04. DPR Report.html" target="_blank">
+      <i class="fas fa-solar-panel box-icon"></i>
+      <div>
+        <div class="box-title">DPR Management</div>
+        <div class="box-desc">Daily operations and maintenance performance tracking report</div>
+      </div>
+      <div class="box-footer">
+        <span>Reports</span>
+        <span class="box-badge">Standard</span>
+      </div>
+    </a>
+    <a class="box" href="05.Gate Pass.html" target="_blank">
+      <i class="fas fa-bolt box-icon"></i>
+      <div>
+        <div class="box-title">Gate Pass Management</div>
+        <div class="box-desc">Access and Egress Control of South Jeddah Noor Plant</div>
+      </div>
+      <div class="box-footer">
+        <span>Performance</span>
+        <span class="box-badge">Security</span>
+      </div>
+    </a>
+    <a class="box" href="06.Preventive Maintenance.html" target="_blank">
+      <i class="fas fa-chart-line box-icon"></i>
+      <div>
+        <div class="box-title">Preventive Maintenance Management</div>
+         <div class="box-desc">Preventive maintenance scheduling and tracking </div>
+      </div>
+      <div class="box-footer">
+        <span>Maintenance</span>
+        <span class="box-badge">Active</span>
+      </div>
+    </a>
+    <a class="box" href="07. LOTO Isolation Management.html" target="_blank">
+      <i class="fas fa-shield-alt box-icon"></i>
+      <div>
+        <div class="box-title">Isolation Management</div>
+         <div class="box-desc">Manage work permits, safety protocols and authorization workflows</div>
+      </div>
+      <div class="box-footer">
+        <span>Safety</span>
+        <span class="box-badge">Critical</span>
+      </div>
+    </a>
+    <a class="box" href="08. PM Maintaince Managment.html" target="_blank">
+      <i class="fas fa-tools box-icon"></i>
+      <div>
+        <div class="box-title">Corrective Maintenance </div>
+        <div class="box-desc">Corrective maintenance scheduling and tracking</div>
+      </div>
+      <div class="box-footer">
+        <span>Maintenance</span>
+        <span class="box-badge">Active</span>
+      </div>
+    </a>
+    <a class="box" href="09.Security Management.html" target="_blank">
+      <i class="fas fa-file-signature box-icon"></i>
+      <div>
+        <div class="box-title">Security Management</div>
+         <div class="box-desc">Real-time monitoring and performance optimization of solar PV plants</div>
+      </div>
+      <div class="box-footer">
+        <span>Security</span>
+        <span class="box-badge">Monitoring</span>
+      </div>
+    </a>
+    <a class="box" href="10.SCADA Management.html" target="_blank">
+      <i class="fas fa-file-signature box-icon"></i>
+      <div>
+        <div class="box-title">SCADA Management</div>
+        <div class="box-desc">Preventive and corrective maintenance scheduling</div>
+      </div>
+      <div class="box-footer">
+        <span>Maintenance</span>
+        <span class="box-badge">Active</span>
+      </div>
+    </a>
+    <a class="box" href="11.HSSE KPI Management.html" target="_blank">
+      <i class="fas fa-file-signature box-icon"></i>
+      <div>
+        <div class="box-title">HSSE KPI Management</div>
+        <div class="box-desc">Preventive and corrective maintenance scheduling</div>
+      </div>
+      <div class="box-footer">
+        <span>Maintenance</span>
+        <span class="box-badge">Active</span>
+      </div>
+    </a>
+    <a class="box" href="12.Assest  Management.html" target="_blank">
+      <i class="fas fa-file-signature box-icon"></i>
+      <div>
+        <div class="box-title">Assest Management System</div>
+        <div class="box-desc">Preventive and corrective maintenance scheduling</div>
+      </div>
+      <div class="box-footer">
+        <span>Maintenance</span>
+        <span class="box-badge">Active</span>
+      </div>
+    </a>
+  </div>
+
+  <script>
+    // Create floating particles
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 30;
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+
+        // Random size between 1px and 3px
+        const size = Math.random() * 2 + 1;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+
+        // Random position
+        particle.style.left = `${Math.random() * 100}vw`;
+        particle.style.bottom = `-10px`;
+
+        // Random animation duration between 10s and 20s
+        const duration = Math.random() * 10 + 10;
+        particle.style.animationDuration = `${duration}s`;
+
+        // Random delay
+        particle.style.animationDelay = `${Math.random() * 10}s`;
+
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // Simulate power fluctuation
+    function simulatePower() {
+      const powerValue = document.querySelector('.power-value');
+      const powerFill = document.querySelector('.power-fill');
+
+      setInterval(() => {
+        // Random fluctuation around 287.4 MW
+        const currentPower = 287.4 + (Math.random() * 6 - 3);
+        const percentage = (currentPower / 300) * 100;
+
+        powerValue.textContent = currentPower.toFixed(1);
+        powerFill.style.width = `${percentage}%`;
+      }, 2000);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      createParticles();
+      simulatePower();
+
+      // Add hover effect to boxes
+      const boxes = document.querySelectorAll('.box');
+      boxes.forEach(box => {
+        box.addEventListener('mouseenter', () => {
+          box.style.transform = 'translateY(-5px)';
+          box.style.boxShadow = '0 12px 40px rgba(0, 170, 255, 0.4)';
+        });
+
+        box.addEventListener('mouseleave', () => {
+          box.style.transform = '';
+          box.style.boxShadow = '';
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

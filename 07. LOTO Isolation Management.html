@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar PV Plant Isolation Certificate System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-danger {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .signature-pad {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+        }
+
+        .section-icon {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .checklist-table {
+            margin-bottom: 20px;
+        }
+
+        .checklist-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .checklist-table td,
+        .checklist-table th {
+            vertical-align: middle;
+            padding: 12px;
+        }
+
+        .checklist-table input[type="radio"] {
+            margin: 0 auto;
+            display: block;
+        }
+
+        .note-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin-top: 20px;
+        }
+
+        .progress-step.active .progress-step-number {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .progress-step.completed .progress-step-number {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .progress-step-text {
+            flex: 1;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .loading-spinner {
+            color: white;
+            font-size: 3rem;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .status-draft {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .status-completed {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .equipment-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .equipment-image-modal {
+            max-width: 100%;
+            max-height: 80vh;
+        }
+
+        .visual-isolation {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .visual-item {
+            flex: 1 1 200px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .visual-item img {
+            max-width: 100%;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .visual-item {
+                flex: 1 1 100%;
+            }
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--secondary-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            border: 3px solid white;
+        }
+
+        .timeline-date {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .timeline-content {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .risk-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .risk-low {
+            background-color: #2ecc71;
+        }
+
+        .risk-medium {
+            background-color: #f39c12;
+        }
+
+        .risk-high {
+            background-color: #e74c3c;
+        }
+
+        .attachment-thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        /* Solar-specific additions */
+        .equipment-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .equipment-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .steps-list {
+            padding-left: 20px;
+        }
+
+        .steps-list li {
+            margin-bottom: 5px;
+        }
+
+        .solar-risk-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .risk-high-voltage {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .risk-dc {
+            background-color: #feca57;
+            color: #000;
+        }
+
+        .risk-ac {
+            background-color: #48dbfb;
+            color: #000;
+        }
+
+        .risk-mechanical {
+            background-color: #1dd1a1;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div class="mt-2">Generating PDF...</div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="display-4">Solar PV Plant Isolation Certificate System</h1>
+                <p class="lead">Manage equipment isolation and de-isolation procedures for solar PV plants</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button id="newCertificateBtn" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle"></i> New Certificate
+                </button>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-step" id="step1">
+                <div class="progress-step-number">1</div>
+                <div class="progress-step-text">Create Isolation Certificate</div>
+            </div>
+            <div class="progress-step" id="step2">
+                <div class="progress-step-number">2</div>
+                <div class="progress-step-text">Approval Process</div>
+            </div>
+            <div class="progress-step" id="step3">
+                <div class="progress-step-number">3</div>
+                <div class="progress-step-text">Isolation Implementation</div>
+            </div>
+            <div class="progress-step" id="step4">
+                <div class="progress-step-number">4</div>
+                <div class="progress-step-text">Work Completion</div>
+            </div>
+            <div class="progress-step" id="step5">
+                <div class="progress-step-number">5</div>
+                <div class="progress-step-text">De-isolation Confirmation</div>
+            </div>
+        </div>
+
+        <div id="certificateList" class="mb-4">
+            <h3><i class="fas fa-list section-icon"></i>Existing Certificates</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Certificate ID</th>
+                            <th>Equipment</th>
+                            <th>Requestor</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="certificateTableBody">
+                        <!-- Certificates will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="certificateFormContainer" class="d-none">
+            <div class="d-flex justify-content-between mb-3">
+                <button id="backToListBtn" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </button>
+                <div>
+                    <button id="saveDraftBtn" class="btn btn-warning me-2">
+                        <i class="fas fa-save"></i> Save Draft
+                    </button>
+                    <button id="submitCertificateBtn" class="btn btn-success">
+                        <i class="fas fa-check-circle"></i> Submit Certificate
+                    </button>
+                </div>
+            </div>
+
+            <div id="certificateForm">
+                <!-- Form content will be generated here -->
+            </div>
+        </div>
+
+        <div id="certificateViewContainer" class="d-none">
+            <div class="d-flex justify-content-between mb-3">
+                <button id="backToListBtn2" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </button>
+                <div>
+                    <button id="editCertificateBtn" class="btn btn-primary me-2">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button id="downloadPdfBtn" class="btn btn-danger">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+
+            <div id="certificateView">
+                <!-- Certificate view will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Image Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="" class="equipment-image-modal" alt="Preview">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmationModalBody">
+                    Are you sure you want to perform this action?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmActionBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let certificates = JSON.parse(localStorage.getItem('solarIsolationCertificates')) || [];
+        let currentCertificate = null;
+        let currentMode = 'list'; // 'list', 'form', 'view'
+        let isEditMode = false;
+        let signaturePads = {};
+        let certificateCounter = certificates.length > 0 ?
+            Math.max(...certificates.map(c => parseInt(c.certificateId.split('-').pop() || 0))) : 0;
+
+        // Solar PV equipment data
+        const solarEquipmentData = {
+            hv: [
+                {
+                    name: "110KV GIS",
+                    isolationSteps: [
+                        "Open circuit breaker using SCADA command",
+                        "Verify mechanical position indicator shows 'OPEN'",
+                        "Apply safety earths to all three phases"
+                    ],
+                    deIsolationSteps: [
+                        "Remove all safety earths",
+                        "Close circuit breaker using SCADA command",
+                        "Verify mechanical position indicator shows 'CLOSED'"
+                    ],
+                    verificationMethods: [
+                        "Use voltage detector to confirm 0V on all phases",
+                        "Check SCADA status matches physical position",
+                        "Verify LOTO tags are properly placed"
+                    ]
+                },
+                {
+                    name: "RMU (Ring Main Unit)",
+                    isolationSteps: [
+                        "Open all RMU switches",
+                        "Apply safety earths to all three phases",
+                        "Lock out the operating mechanism"
+                    ],
+                    deIsolationSteps: [
+                        "Remove all safety earths",
+                        "Unlock the operating mechanism",
+                        "Close RMU switches in proper sequence"
+                    ],
+                    verificationMethods: [
+                        "Use voltage detector to confirm 0V",
+                        "Check mechanical position indicators",
+                        "Verify LOTO tags are properly placed"
+                    ]
+                }
+            ],
+            inverter: [
+                {
+                    name: "Inverter",
+                    isolationSteps: [
+                        "Open AC circuit breaker",
+                        "Open DC isolator",
+                        "Disable auto-restart function"
+                    ],
+                    deIsolationSteps: [
+                        "Enable auto-restart function",
+                        "Close DC isolator",
+                        "Close AC circuit breaker"
+                    ],
+                    verificationMethods: [
+                        "Check inverter display shows 'Standby'",
+                        "Verify 0V AC and DC with multimeter",
+                        "Confirm no error messages on display"
+                    ]
+                },
+                {
+                    name: "Inverter Duty Transformer",
+                    isolationSteps: [
+                        "Open HV circuit breaker",
+                        "Open LV circuit breaker",
+                        "Apply safety earths to HV and LV sides"
+                    ],
+                    deIsolationSteps: [
+                        "Remove safety earths from HV and LV sides",
+                        "Close LV circuit breaker",
+                        "Close HV circuit breaker"
+                    ],
+                    verificationMethods: [
+                        "Check transformer temperature is normal",
+                        "Verify cooling fans are operational",
+                        "Confirm no unusual noises or smells"
+                    ]
+                }
+            ],
+            pv: [
+                {
+                    name: "PV String Combiner Box",
+                    isolationSteps: [
+                        "Open DC string fuses",
+                        "Disconnect DC connectors",
+                        "Apply visible open gap where possible"
+                    ],
+                    deIsolationSteps: [
+                        "Reconnect DC connectors",
+                        "Close DC string fuses",
+                        "Verify proper string voltage"
+                    ],
+                    verificationMethods: [
+                        "Measure 0V DC at string terminals",
+                        "Visually confirm open gap in connectors",
+                        "Check no reverse current flow"
+                    ]
+                }
+            ]
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeUI();
+            loadCertificateList();
+            setupEventListeners();
+        });
+
+        function initializeUI() {
+            updateProgressSteps();
+        }
+
+        function setupEventListeners() {
+            // Navigation buttons
+            document.getElementById('newCertificateBtn').addEventListener('click', createNewCertificate);
+            document.getElementById('backToListBtn').addEventListener('click', showCertificateList);
+            document.getElementById('backToListBtn2').addEventListener('click', showCertificateList);
+
+            // Form actions
+            document.getElementById('saveDraftBtn').addEventListener('click', saveAsDraft);
+            document.getElementById('submitCertificateBtn').addEventListener('click', submitCertificate);
+            document.getElementById('editCertificateBtn').addEventListener('click', editCertificate);
+            document.getElementById('downloadPdfBtn').addEventListener('click', generatePDF);
+
+            // Image modal
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('equipment-image') || e.target.classList.contains('attachment-thumbnail')) {
+                    document.getElementById('modalImage').src = e.target.src;
+                    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+                    modal.show();
+                }
+            });
+
+            // Confirmation modal
+            document.getElementById('confirmActionBtn').addEventListener('click', function () {
+                const action = this.dataset.action;
+                if (action === 'submit') {
+                    actuallySubmitCertificate();
+                } else if (action === 'reset') {
+                    actuallyResetForm();
+                }
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+                modal.hide();
+            });
+        }
+
+        function updateProgressSteps() {
+            const steps = document.querySelectorAll('.progress-step');
+            steps.forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+
+            if (currentMode === 'list') {
+                document.getElementById('step1').classList.add('active');
+            } else if (currentMode === 'form') {
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('active');
+            } else if (currentMode === 'view') {
+                const status = currentCertificate?.status || 'draft';
+
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('completed');
+
+                if (status === 'completed') {
+                    document.getElementById('step3').classList.add('completed');
+                    document.getElementById('step4').classList.add('completed');
+                    document.getElementById('step5').classList.add('completed');
+                } else if (status === 'approved') {
+                    document.getElementById('step3').classList.add('active');
+                } else {
+                    document.getElementById('step2').classList.add('active');
+                }
+            }
+        }
+
+        function loadCertificateList() {
+            const tableBody = document.getElementById('certificateTableBody');
+            tableBody.innerHTML = '';
+
+            if (certificates.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No certificates found. Create a new one to get started.</td></tr>';
+                return;
+            }
+
+            certificates.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            certificates.forEach(cert => {
+                const row = document.createElement('tr');
+
+                // Format date
+                const date = new Date(cert.createdAt);
+                const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+
+                // Status badge
+                let statusBadge = '';
+                if (cert.status === 'draft') {
+                    statusBadge = '<span class="status-badge status-draft">Draft</span>';
+                } else if (cert.status === 'submitted') {
+                    statusBadge = '<span class="status-badge" style="background-color:#3498db;color:white">Submitted</span>';
+                } else if (cert.status === 'approved') {
+                    statusBadge = '<span class="status-badge" style="background-color:#2ecc71;color:white">Approved</span>';
+                } else if (cert.status === 'completed') {
+                    statusBadge = '<span class="status-badge status-completed">Completed</span>';
+                }
+
+                row.innerHTML = `
+                    <td>${cert.certificateId || 'N/A'}</td>
+                    <td>${cert.equipmentDetails?.name || 'N/A'}</td>
+                    <td>${cert.requestorDetails?.name || 'N/A'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${formattedDate}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary view-certificate-btn" data-id="${cert.id}">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        ${cert.status === 'draft' ? `
+                        <button class="btn btn-sm btn-warning edit-certificate-btn ms-1" data-id="${cert.id}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-certificate-btn ms-1" data-id="${cert.id}">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        ` : ''}
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            // Add event listeners to the dynamically created buttons
+            document.querySelectorAll('.view-certificate-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    viewCertificate(this.dataset.id);
+                });
+            });
+
+            document.querySelectorAll('.edit-certificate-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    editCertificate(this.dataset.id);
+                });
+            });
+
+            document.querySelectorAll('.delete-certificate-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    deleteCertificate(this.dataset.id);
+                });
+            });
+        }
+
+        function createNewCertificate() {
+            certificateCounter++;
+            const certId = certificateCounter.toString().padStart(4, '0');
+
+            currentCertificate = {
+                id: generateId(),
+                status: 'draft',
+                createdAt: new Date().toISOString(),
+                certificateId: `SJN-OM-ICC-${certId}`,
+                equipmentDetails: {},
+                isolationSteps: [],
+                deIsolationSteps: [],
+                verificationMethods: [],
+                emergencyProcedures: {},
+                requestorDetails: {},
+                approverDetails: {},
+                deIsolationConfirmation: {},
+                permitDetails: {
+                    plantName: "South Jeddah Noor 300 MWAC PV Solar Project",
+                    plantArea: [],
+                    department: [],
+                    contractorCompany: "",
+                    numEmployees: "",
+                    validFrom: "",
+                    validTo: "",
+                    locationOfWork: "",
+                    functionalName: "",
+                    equipmentNo: "",
+                    equipmentType: "",
+                    workDescription: ""
+                }
+            };
+
+            currentMode = 'form';
+            isEditMode = true;
+            updateUI();
+            generateCertificateForm();
+        }
+
+        function generateId() {
+            return 'cert-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        function updateUI() {
+            updateProgressSteps();
+
+            document.getElementById('certificateList').classList.toggle('d-none', currentMode !== 'list');
+            document.getElementById('certificateFormContainer').classList.toggle('d-none', currentMode !== 'form');
+            document.getElementById('certificateViewContainer').classList.toggle('d-none', currentMode !== 'view');
+
+            if (currentMode === 'form') {
+                document.getElementById('saveDraftBtn').classList.toggle('d-none', !isEditMode);
+                document.getElementById('submitCertificateBtn').classList.toggle('d-none', !isEditMode);
+            }
+        }
+
+        function generateCertificateForm() {
+            const formContainer = document.getElementById('certificateForm');
+            formContainer.innerHTML = getCertificateFormHTML();
+
+            // Initialize signature pads
+            initializeSignaturePads();
+
+            // If editing, populate the form
+            if (currentCertificate && isEditMode) {
+                populateForm(currentCertificate);
+            }
+
+            // Add event listeners for dynamic fields
+            document.getElementById('addIsolationStepBtn').addEventListener('click', addIsolationStep);
+            document.getElementById('addDeIsolationStepBtn').addEventListener('click', addDeIsolationStep);
+            document.getElementById('addVerificationMethodBtn').addEventListener('click', addVerificationMethod);
+            document.getElementById('addEquipmentBtn').addEventListener('click', addEquipment);
+
+            // Add reset button listener
+            document.getElementById('resetFormBtn').addEventListener('click', confirmResetForm);
+
+            // Add image upload listeners
+            document.getElementById('equipmentImageUpload').addEventListener('change', handleImageUpload);
+            document.getElementById('isolationSchemeImageUpload').addEventListener('change', handleImageUpload);
+
+            // Add validation
+            setupFormValidation();
+
+            // Set up plant area checkboxes
+            setupCheckboxListeners();
+        }
+
+        function setupCheckboxListeners() {
+            // Plant area checkboxes
+            document.querySelectorAll('input[name="plantArea"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    if (this.id === 'areaOthers' && this.checked) {
+                        document.getElementById('areaOthersSpecify').style.display = 'block';
+                    } else if (this.id === 'areaOthers' && !this.checked) {
+                        document.getElementById('areaOthersSpecify').style.display = 'none';
+                        document.getElementById('areaOthersSpecify').value = '';
+                    }
+                });
+            });
+
+            // Department checkboxes
+            document.querySelectorAll('input[name="department"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    if (this.id === 'deptOthers' && this.checked) {
+                        document.getElementById('deptOthersSpecify').style.display = 'block';
+                    } else if (this.id === 'deptOthers' && !this.checked) {
+                        document.getElementById('deptOthersSpecify').style.display = 'none';
+                        document.getElementById('deptOthersSpecify').value = '';
+                    }
+                });
+            });
+
+            // Equipment category selection
+            document.getElementById('equipmentCategory').addEventListener('change', function () {
+                const category = this.value;
+                const equipmentSelect = document.getElementById('equipmentSelect');
+
+                equipmentSelect.innerHTML = '<option value="">Select Equipment</option>';
+
+                if (category && solarEquipmentData[category]) {
+                    solarEquipmentData[category].forEach(equip => {
+                        const option = document.createElement('option');
+                        option.value = equip.name;
+                        option.textContent = equip.name;
+                        equipmentSelect.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        function getCertificateFormHTML() {
+            return `
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle section-icon"></i>Basic Information
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="certificateId" class="form-label required-field">Certificate ID</label>
+                                <input type="text" class="form-control" id="certificateId" value="${currentCertificate.certificateId}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="certificateDate" class="form-label required-field">Date</label>
+                                <input type="datetime-local" class="form-control" id="certificateDate" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label>Plant Name</label>
+                                    <input type="text" class="form-control" value="South Jeddah Noor 300 MWAC PV Solar Project" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="permitNumber">Permit Number</label>
+                                    <input type="text" class="form-control" id="permitNumber" placeholder="O&M-PTW-0000">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5 class="section-title"><i class="fas fa-map-marker-alt section-icon"></i> Plant Area & Department</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>SJNPV Plant Area</label>
+                                    <div class="checkbox-grid">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="PV Field" id="areaPVField" name="plantArea">
+                                            <label class="form-check-label" for="areaPVField">PV Field</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="PVSS" id="areaPVSS" name="plantArea">
+                                            <label class="form-check-label" for="areaPVSS">PVSS</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="O&M Building" id="areaOMBuilding" name="plantArea">
+                                            <label class="form-check-label" for="areaOMBuilding">O&M Building</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Others" id="areaOthers" name="plantArea">
+                                            <label class="form-check-label" for="areaOthers">Others</label>
+                                            <input type="text" class="form-control mt-1" id="areaOthersSpecify" placeholder="Please specify" style="display: none;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>O&M Department</label>
+                                    <div class="checkbox-grid">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Electrical" id="deptElectrical" name="department">
+                                            <label class="form-check-label" for="deptElectrical">Electrical</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Mechanical" id="deptMechanical" name="department">
+                                            <label class="form-check-label" for="deptMechanical">Mechanical</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="IT" id="deptIT" name="department">
+                                            <label class="form-check-label" for="deptIT">IT</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Security and Safety" id="deptSecurity" name="department">
+                                            <label class="form-check-label" for="deptSecurity">Security and Safety</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Others" id="deptOthers" name="department">
+                                            <label class="form-check-label" for="deptOthers">Others</label>
+                                            <input type="text" class="form-control mt-1" id="deptOthersSpecify" placeholder="Please specify" style="display: none;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Contractor/Company</label>
+                                    <input type="text" class="form-control" id="contractorCompany">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Number of Employees</label>
+                                    <input type="number" class="form-control" id="numEmployees" min="1">
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="section-title"><i class="fas fa-calendar-check section-icon"></i> Work Execution Plan</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="validFrom">Valid From (Date/Time)</label>
+                                    <input type="datetime-local" class="form-control" id="validFrom">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="validTo">Valid To (Date/Time)</label>
+                                    <input type="datetime-local" class="form-control" id="validTo">
+                                    <small class="form-text text-muted">Maximum for one Shift (12 hrs)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="plantUnit">Location of Work</label>
+                                    <input type="text" class="form-control" id="locationOfWork" placeholder="For Example: Column Number, LT Panel Number">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="functionalLocation">Equipment Functional Name</label>
+                                    <input type="text" class="form-control" id="functionalName" placeholder="For Example: Inverter, Transformer">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="equipmentNo">Equipment Number</label>
+                                    <input type="text" class="form-control" id="equipmentNo" placeholder="For Example: INV-01, TR-01">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="equipmentType">Equipment Type</label>
+                                    <input type="text" class="form-control" id="equipmentType" placeholder="For Example: String Inverter, Pad Mounted Transformer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="workDescription">Description of Work</label>
+                            <textarea class="form-control" id="workDescription" rows="3" placeholder="Detailed description of the work to be performed"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-bolt section-icon"></i>Equipment Details
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="equipmentCategory" class="form-label required-field">Equipment Category</label>
+                                <select class="form-select" id="equipmentCategory" required>
+                                    <option value="">Select Category</option>
+                                    <option value="hv">HV Equipment</option>
+                                    <option value="inverter">Inverter Equipment</option>
+                                    <option value="pv">PV Equipment</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="equipmentSelect" class="form-label required-field">Equipment</label>
+                                <select class="form-select" id="equipmentSelect" required>
+                                    <option value="">Select Equipment</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">&nbsp;</label>
+                                <button id="addEquipmentBtn" class="btn btn-primary w-100">
+                                    <i class="fas fa-plus"></i> Add Equipment
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="equipmentList" class="mb-3">
+                            <!-- Added equipment will appear here -->
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="equipmentImageUpload" class="form-label">Upload Equipment Image</label>
+                            <input type="file" class="form-control" id="equipmentImageUpload" accept="image/*">
+                            <small class="form-text text-muted">Upload clear images of the equipment to be isolated</small>
+                        </div>
+
+                        <div id="equipmentImages" class="d-flex flex-wrap mb-3">
+                            <!-- Uploaded images will appear here -->
+                        </div>
+
+                        <div class="form-group">
+                            <label for="isolationSchemeImageUpload" class="form-label">Upload Isolation Scheme Diagram</label>
+                            <input type="file" class="form-control" id="isolationSchemeImageUpload" accept="image/*">
+                            <small class="form-text text-muted">Upload a diagram showing the isolation points</small>
+                        </div>
+
+                        <div id="isolationSchemeImages" class="d-flex flex-wrap">
+                            <!-- Uploaded isolation scheme images will appear here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-lock section-icon"></i>Isolation Procedure
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label class="form-label required-field">Isolation Steps</label>
+                            <div id="isolationStepsContainer">
+                                <!-- Isolation steps will be added here -->
+                            </div>
+                            <button type="button" id="addIsolationStepBtn" class="btn btn-sm btn-outline-primary mt-2">
+                                <i class="fas fa-plus"></i> Add Step
+                            </button>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label required-field">De-isolation Steps</label>
+                            <div id="deIsolationStepsContainer">
+                                <!-- De-isolation steps will be added here -->
+                            </div>
+                            <button type="button" id="addDeIsolationStepBtn" class="btn btn-sm btn-outline-primary mt-2">
+                                <i class="fas fa-plus"></i> Add Step
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required-field">Verification Methods</label>
+                            <div id="verificationMethodsContainer">
+                                <!-- Verification methods will be added here -->
+                            </div>
+                            <button type="button" id="addVerificationMethodBtn" class="btn btn-sm btn-outline-primary mt-2">
+                                <i class="fas fa-plus"></i> Add Method
+                            </button>
+                        </div>
+                    </div>
+                </div>
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-clipboard-check section-icon"></i>Isolation Work Checklist
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered checklist-table">
+                <thead class="table-light">
+                    <tr>
+                        <th width="30%">Question/Check</th>
+                        <th width="50%">Description/Precautions</th>
+                        <th style="width: 100px;">YES</th>
+                        <th style="width: 100px;">NO</th>
+                        <th style="width: 100px;">NA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>HV Isolation Required?</td>
+                        <td>Verify if HV isolation is needed (≥1kV) and ensure proper switching sequence is followed</td>
+                        <td><input type="radio" name="hvIsolation" value="yes"></td>
+                        <td><input type="radio" name="hvIsolation" value="no"></td>
+                        <td><input type="radio" name="hvIsolation" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>Procedure/Risk Assessment Prepared</td>
+                        <td>Documented isolation procedure including sequence, responsibilities, and emergency response</td>
+                        <td><input type="radio" name="procedureAssessment" value="yes"></td>
+                        <td><input type="radio" name="procedureAssessment" value="no"></td>
+                        <td><input type="radio" name="procedureAssessment" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>Control System Logic Reviewed</td>
+                        <td>Confirm inverter/SCADA control logic won't auto-reclose or restart during maintenance</td>
+                        <td><input type="radio" name="controlLoop" value="yes"></td>
+                        <td><input type="radio" name="controlLoop" value="no"></td>
+                        <td><input type="radio" name="controlLoop" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>Bus Coupler/Tie Breaker Work?</td>
+                        <td>If working on bus coupler, coordinate parallel source isolation to prevent backfeed</td>
+                        <td><input type="radio" name="busCoupler" value="yes"></td>
+                        <td><input type="radio" name="busCoupler" value="no"></td>
+                        <td><input type="radio" name="busCoupler" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>Hazardous Energy Isolation Required?</td>
+                        <td>Identify all energy sources (electrical, hydraulic, pneumatic) requiring isolation</td>
+                        <td><input type="radio" name="hazardousMaterial" value="yes"></td>
+                        <td><input type="radio" name="hazardousMaterial" value="no"></td>
+                        <td><input type="radio" name="hazardousMaterial" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>Residual Energy Check</td>
+                        <td>Verify discharge of DC strings, capacitors, and battery systems before work</td>
+                        <td><input type="radio" name="residualEnergy" value="yes"></td>
+                        <td><input type="radio" name="residualEnergy" value="no"></td>
+                        <td><input type="radio" name="residualEnergy" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>PPE and Work Boundaries Established</td>
+                        <td>Ensure appropriate arc-flash PPE rated for system voltage and safe distance from live parts</td>
+                        <td><input type="radio" name="livePermit" value="yes"></td>
+                        <td><input type="radio" name="livePermit" value="no"></td>
+                        <td><input type="radio" name="livePermit" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>Nearby Energized Equipment</td>
+                        <td>Identify all live equipment within 10ft (PV arrays, combiner boxes, AC collection)</td>
+                        <td><input type="radio" name="energized" value="yes"></td>
+                        <td><input type="radio" name="energized" value="no"></td>
+                        <td><input type="radio" name="energized" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>De-energization Verified</td>
+                        <td>Test before touch: confirm 0V AC/DC using rated meter at work location</td>
+                        <td><input type="radio" name="deenergized" value="yes"></td>
+                        <td><input type="radio" name="deenergized" value="no"></td>
+                        <td><input type="radio" name="deenergized" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>LOTO Implemented</td>
+                        <td>Apply locks and danger tags at all disconnects, breakers, and combiner boxes</td>
+                        <td><input type="radio" name="loto" value="yes"></td>
+                        <td><input type="radio" name="loto" value="no"></td>
+                        <td><input type="radio" name="loto" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>Mechanical Energy Secured</td>
+                        <td>Lock tracking systems, cooling fans, and inverter moving parts</td>
+                        <td><input type="radio" name="mechLock" value="yes"></td>
+                        <td><input type="radio" name="mechLock" value="no"></td>
+                        <td><input type="radio" name="mechLock" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>Proper Earthing</td>
+                        <td>Install temporary grounding clusters on DC strings and AC buses per safety protocol</td>
+                        <td><input type="radio" name="earthing" value="yes"></td>
+                        <td><input type="radio" name="earthing" value="no"></td>
+                        <td><input type="radio" name="earthing" value="na"></td>
+                    </tr>
+                    <tr>
+                        <td>Capacitor Discharge Verified</td>
+                        <td>Confirm discharge of all inverter DC capacitors and AC filter capacitors</td>
+                        <td><input type="radio" name="capacitor" value="yes"></td>
+                        <td><input type="radio" name="capacitor" value="no"></td>
+                        <td><input type="radio" name="capacitor" value="na"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="note-box mt-3 p-3 bg-light rounded">
+            <strong>Note:</strong> Before executing isolation in area by Operator, it shall be communicated to control room operator from field with equipment Tag.
+        </div>
+    </div>
+</div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-exclamation-triangle section-icon"></i>Emergency Procedures
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label for="emergencyShutdown" class="form-label required-field">Emergency Shutdown Procedure</label>
+                            <textarea class="form-control" id="emergencyShutdown" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="rescuePlan" class="form-label required-field">Rescue Plan</label>
+                            <textarea class="form-control" id="rescuePlan" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="firstAidMeasures" class="form-label required-field">First Aid Measures</label>
+                            <textarea class="form-control" id="firstAidMeasures" rows="3" required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-user-tie section-icon"></i>Personnel Details
+                    </div>
+                    <div class="card-body">
+                        <h5 class="section-title"><i class="fas fa-user-edit section-icon"></i> Requestor Details</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="requestorName" class="form-label required-field">Name</label>
+                                <input type="text" class="form-control" id="requestorName" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="requestorPosition" class="form-label required-field">Position</label>
+                                <input type="text" class="form-control" id="requestorPosition" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="requestorContact" class="form-label required-field">Contact Number</label>
+                                <input type="tel" class="form-control" id="requestorContact" required>
+                            </div>
+                        </div>
+
+                        <h5 class="section-title"><i class="fas fa-user-check section-icon"></i> Approver Details</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="approverName" class="form-label required-field">Name</label>
+                                <input type="text" class="form-control" id="approverName" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="approverPosition" class="form-label required-field">Position</label>
+                                <input type="text" class="form-control" id="approverPosition" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="approverContact" class="form-label required-field">Contact Number</label>
+                                <input type="tel" class="form-control" id="approverContact" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="requestorSignature" class="form-label required-field">Requestor Signature</label>
+                                    <div class="signature-pad-container">
+                                        <canvas id="requestorSignaturePad" class="signature-pad" width="400" height="200"></canvas>
+                                        <div class="d-flex justify-content-between mt-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger clear-signature-btn" data-target="requestorSignaturePad">
+                                                <i class="fas fa-eraser"></i> Clear
+                                            </button>
+                                            <small class="text-muted">Sign above</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="approverSignature" class="form-label required-field">Approver Signature</label>
+                                    <div class="signature-pad-container">
+                                        <canvas id="approverSignaturePad" class="signature-pad" width="400" height="200"></canvas>
+                                        <div class="d-flex justify-content-between mt-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger clear-signature-btn" data-target="approverSignaturePad">
+                                                <i class="fas fa-eraser"></i> Clear
+                                            </button>
+                                            <small class="text-muted">Sign above</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-check-double section-icon"></i>De-isolation Confirmation
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="deIsolationDate" class="form-label">De-isolation Date/Time</label>
+                                <input type="datetime-local" class="form-control" id="deIsolationDate">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="deIsolationVerifiedBy" class="form-label">Verified By</label>
+                                <input type="text" class="form-control" id="deIsolationVerifiedBy">
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="deIsolationComments" class="form-label">Comments</label>
+                            <textarea class="form-control" id="deIsolationComments" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deIsolationSignature" class="form-label">Signature</label>
+                            <div class="signature-pad-container">
+                                <canvas id="deIsolationSignaturePad" class="signature-pad" width="400" height="200"></canvas>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-danger clear-signature-btn" data-target="deIsolationSignaturePad">
+                                        <i class="fas fa-eraser"></i> Clear
+                                    </button>
+                                    <small class="text-muted">Sign above</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-4">
+                    <button type="button" id="resetFormBtn" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Reset Form
+                    </button>
+                    <div>
+                        <button type="button" id="saveDraftBtn" class="btn btn-warning me-2">
+                            <i class="fas fa-save"></i> Save Draft
+                        </button>
+                        <button type="button" id="submitCertificateBtn" class="btn btn-success">
+                            <i class="fas fa-check-circle"></i> Submit Certificate
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initializeSignaturePads() {
+            // Initialize signature pads
+            signaturePads.requestor = new SignaturePad(document.getElementById('requestorSignaturePad'), {
+                backgroundColor: 'rgb(255, 255, 255)',
+                penColor: 'rgb(0, 0, 0)'
+            });
+
+            signaturePads.approver = new SignaturePad(document.getElementById('approverSignaturePad'), {
+                backgroundColor: 'rgb(255, 255, 255)',
+                penColor: 'rgb(0, 0, 0)'
+            });
+
+            signaturePads.deIsolation = new SignaturePad(document.getElementById('deIsolationSignaturePad'), {
+                backgroundColor: 'rgb(255, 255, 255)',
+                penColor: 'rgb(0, 0, 0)'
+            });
+
+            // Add clear button event listeners
+            document.querySelectorAll('.clear-signature-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const target = this.dataset.target;
+                    signaturePads[target.replace('SignaturePad', '')].clear();
+                });
+            });
+        }
+
+        function populateForm(certificate) {
+            // Basic information
+            document.getElementById('certificateDate').value = certificate.createdAt ? formatDateTimeForInput(new Date(certificate.createdAt)) : '';
+            document.getElementById('permitNumber').value = certificate.permitDetails?.permitNumber || '';
+
+            // Plant area and department
+            if (certificate.permitDetails?.plantArea) {
+                certificate.permitDetails.plantArea.forEach(area => {
+                    if (area === 'Others' && certificate.permitDetails.plantAreaOthers) {
+                        document.getElementById('areaOthers').checked = true;
+                        document.getElementById('areaOthersSpecify').style.display = 'block';
+                        document.getElementById('areaOthersSpecify').value = certificate.permitDetails.plantAreaOthers;
+                    } else {
+                        const checkbox = document.querySelector(`input[name="plantArea"][value="${area}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    }
+                });
+            }
+
+            if (certificate.permitDetails?.department) {
+                certificate.permitDetails.department.forEach(dept => {
+                    if (dept === 'Others' && certificate.permitDetails.departmentOthers) {
+                        document.getElementById('deptOthers').checked = true;
+                        document.getElementById('deptOthersSpecify').style.display = 'block';
+                        document.getElementById('deptOthersSpecify').value = certificate.permitDetails.departmentOthers;
+                    } else {
+                        const checkbox = document.querySelector(`input[name="department"][value="${dept}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    }
+                });
+            }
+
+            // Work execution plan
+            document.getElementById('contractorCompany').value = certificate.permitDetails?.contractorCompany || '';
+            document.getElementById('numEmployees').value = certificate.permitDetails?.numEmployees || '';
+            document.getElementById('validFrom').value = certificate.permitDetails?.validFrom ? formatDateTimeForInput(new Date(certificate.permitDetails.validFrom)) : '';
+            document.getElementById('validTo').value = certificate.permitDetails?.validTo ? formatDateTimeForInput(new Date(certificate.permitDetails.validTo)) : '';
+            document.getElementById('locationOfWork').value = certificate.permitDetails?.locationOfWork || '';
+            document.getElementById('functionalName').value = certificate.permitDetails?.functionalName || '';
+            document.getElementById('equipmentNo').value = certificate.permitDetails?.equipmentNo || '';
+            document.getElementById('equipmentType').value = certificate.permitDetails?.equipmentType || '';
+            document.getElementById('workDescription').value = certificate.permitDetails?.workDescription || '';
+
+            // Equipment details
+            if (certificate.equipmentDetails?.category) {
+                document.getElementById('equipmentCategory').value = certificate.equipmentDetails.category;
+                document.getElementById('equipmentCategory').dispatchEvent(new Event('change'));
+
+                // Wait a moment for the equipment select to populate
+                setTimeout(() => {
+                    if (certificate.equipmentDetails?.name) {
+                        document.getElementById('equipmentSelect').value = certificate.equipmentDetails.name;
+                    }
+                }, 100);
+            }
+
+            // Equipment images
+            if (certificate.equipmentDetails?.images) {
+                const container = document.getElementById('equipmentImages');
+                container.innerHTML = '';
+                certificate.equipmentDetails.images.forEach(img => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = img;
+                    imgElement.className = 'equipment-image me-2 mb-2';
+                    imgElement.style.maxHeight = '150px';
+                    container.appendChild(imgElement);
+                });
+            }
+
+            // Isolation scheme images
+            if (certificate.isolationSchemeImages) {
+                const container = document.getElementById('isolationSchemeImages');
+                container.innerHTML = '';
+                certificate.isolationSchemeImages.forEach(img => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = img;
+                    imgElement.className = 'equipment-image me-2 mb-2';
+                    imgElement.style.maxHeight = '150px';
+                    container.appendChild(imgElement);
+                });
+            }
+
+            // Isolation steps
+            if (certificate.isolationSteps) {
+                const container = document.getElementById('isolationStepsContainer');
+                container.innerHTML = '';
+                certificate.isolationSteps.forEach((step, index) => {
+                    addIsolationStep(step, index);
+                });
+            }
+
+            // De-isolation steps
+            if (certificate.deIsolationSteps) {
+                const container = document.getElementById('deIsolationStepsContainer');
+                container.innerHTML = '';
+                certificate.deIsolationSteps.forEach((step, index) => {
+                    addDeIsolationStep(step, index);
+                });
+            }
+
+            // Verification methods
+            if (certificate.verificationMethods) {
+                const container = document.getElementById('verificationMethodsContainer');
+                container.innerHTML = '';
+                certificate.verificationMethods.forEach((method, index) => {
+                    addVerificationMethod(method, index);
+                });
+            }
+            // Add to populateForm() function
+            if (certificate.checklist) {
+                for (const [name, value] of Object.entries(certificate.checklist)) {
+                    if (value) {
+                        const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
+                        if (radio) radio.checked = true;
+                    }
+                }
+            }
+            // Emergency procedures
+            document.getElementById('emergencyShutdown').value = certificate.emergencyProcedures?.shutdown || '';
+            document.getElementById('rescuePlan').value = certificate.emergencyProcedures?.rescue || '';
+            document.getElementById('firstAidMeasures').value = certificate.emergencyProcedures?.firstAid || '';
+
+            // Personnel details
+            document.getElementById('requestorName').value = certificate.requestorDetails?.name || '';
+            document.getElementById('requestorPosition').value = certificate.requestorDetails?.position || '';
+            document.getElementById('requestorContact').value = certificate.requestorDetails?.contact || '';
+            document.getElementById('approverName').value = certificate.approverDetails?.name || '';
+            document.getElementById('approverPosition').value = certificate.approverDetails?.position || '';
+            document.getElementById('approverContact').value = certificate.approverDetails?.contact || '';
+
+            // Signatures
+            if (certificate.requestorDetails?.signature) {
+                signaturePads.requestor.fromDataURL(certificate.requestorDetails.signature);
+            }
+            if (certificate.approverDetails?.signature) {
+                signaturePads.approver.fromDataURL(certificate.approverDetails.signature);
+            }
+
+            // De-isolation confirmation
+            document.getElementById('deIsolationDate').value = certificate.deIsolationConfirmation?.date ? formatDateTimeForInput(new Date(certificate.deIsolationConfirmation.date)) : '';
+            document.getElementById('deIsolationVerifiedBy').value = certificate.deIsolationConfirmation?.verifiedBy || '';
+            document.getElementById('deIsolationComments').value = certificate.deIsolationConfirmation?.comments || '';
+            if (certificate.deIsolationConfirmation?.signature) {
+                signaturePads.deIsolation.fromDataURL(certificate.deIsolationConfirmation.signature);
+            }
+        }
+
+        function formatDateTimeForInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function addIsolationStep(step = '', index = null) {
+            const container = document.getElementById('isolationStepsContainer');
+            const stepId = index !== null ? index : Date.now();
+
+            const stepElement = document.createElement('div');
+            stepElement.className = 'input-group mb-2';
+            stepElement.innerHTML = `
+                <input type="text" class="form-control isolation-step" value="${step}" placeholder="Describe the isolation step" required>
+                <button class="btn btn-outline-danger remove-step-btn" type="button" data-type="isolation" data-id="${stepId}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+
+            container.appendChild(stepElement);
+
+            // Add event listener to the remove button
+            stepElement.querySelector('.remove-step-btn').addEventListener('click', function () {
+                this.closest('.input-group').remove();
+            });
+        }
+
+        function addDeIsolationStep(step = '', index = null) {
+            const container = document.getElementById('deIsolationStepsContainer');
+            const stepId = index !== null ? index : Date.now();
+
+            const stepElement = document.createElement('div');
+            stepElement.className = 'input-group mb-2';
+            stepElement.innerHTML = `
+                <input type="text" class="form-control deisolation-step" value="${step}" placeholder="Describe the de-isolation step" required>
+                <button class="btn btn-outline-danger remove-step-btn" type="button" data-type="deisolation" data-id="${stepId}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+
+            container.appendChild(stepElement);
+
+            // Add event listener to the remove button
+            stepElement.querySelector('.remove-step-btn').addEventListener('click', function () {
+                this.closest('.input-group').remove();
+            });
+        }
+
+        function addVerificationMethod(method = '', index = null) {
+            const container = document.getElementById('verificationMethodsContainer');
+            const methodId = index !== null ? index : Date.now();
+
+            const methodElement = document.createElement('div');
+            methodElement.className = 'input-group mb-2';
+            methodElement.innerHTML = `
+                <input type="text" class="form-control verification-method" value="${method}" placeholder="Describe the verification method" required>
+                <button class="btn btn-outline-danger remove-step-btn" type="button" data-type="verification" data-id="${methodId}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+
+            container.appendChild(methodElement);
+
+            // Add event listener to the remove button
+            methodElement.querySelector('.remove-step-btn').addEventListener('click', function () {
+                this.closest('.input-group').remove();
+            });
+        }
+
+        function addEquipment() {
+            const category = document.getElementById('equipmentCategory').value;
+            const equipment = document.getElementById('equipmentSelect').value;
+
+            if (!category || !equipment) {
+                alert('Please select both equipment category and specific equipment');
+                return;
+            }
+
+            const equipmentData = solarEquipmentData[category].find(e => e.name === equipment);
+
+            if (!equipmentData) {
+                alert('Selected equipment not found in database');
+                return;
+            }
+
+            // Update current certificate with equipment details
+            currentCertificate.equipmentDetails = {
+                category: category,
+                name: equipment,
+                isolationSteps: equipmentData.isolationSteps,
+                deIsolationSteps: equipmentData.deIsolationSteps,
+                verificationMethods: equipmentData.verificationMethods
+            };
+
+            // Display equipment details
+            const container = document.getElementById('equipmentList');
+            container.innerHTML = `
+                <div class="equipment-card">
+                    <div class="equipment-card-header">
+                        <h5>${equipment}</h5>
+                        <span class="solar-risk-badge risk-${category === 'hv' ? 'high-voltage' : (category === 'inverter' ? 'dc' : 'ac')}">
+                            ${category === 'hv' ? 'High Voltage' : (category === 'inverter' ? 'DC Risk' : 'AC Risk')}
+                        </span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>Isolation Steps</h6>
+                            <ol class="steps-list">
+                                ${equipmentData.isolationSteps.map(step => `<li>${step}</li>`).join('')}
+                            </ol>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>De-isolation Steps</h6>
+                            <ol class="steps-list">
+                                ${equipmentData.deIsolationSteps.map(step => `<li>${step}</li>`).join('')}
+                            </ol>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Verification Methods</h6>
+                            <ul class="steps-list">
+                                ${equipmentData.verificationMethods.map(method => `<li>${method}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Populate isolation steps
+            const isolationContainer = document.getElementById('isolationStepsContainer');
+            isolationContainer.innerHTML = '';
+            equipmentData.isolationSteps.forEach(step => {
+                addIsolationStep(step);
+            });
+
+            // Populate de-isolation steps
+            const deIsolationContainer = document.getElementById('deIsolationStepsContainer');
+            deIsolationContainer.innerHTML = '';
+            equipmentData.deIsolationSteps.forEach(step => {
+                addDeIsolationStep(step);
+            });
+
+            // Populate verification methods
+            const verificationContainer = document.getElementById('verificationMethodsContainer');
+            verificationContainer.innerHTML = '';
+            equipmentData.verificationMethods.forEach(method => {
+                addVerificationMethod(method);
+            });
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const imgUrl = event.target.result;
+
+                // Determine which container to add the image to
+                let container;
+                if (e.target.id === 'equipmentImageUpload') {
+                    container = document.getElementById('equipmentImages');
+
+                    // Add to current certificate
+                    if (!currentCertificate.equipmentDetails.images) {
+                        currentCertificate.equipmentDetails.images = [];
+                    }
+                    currentCertificate.equipmentDetails.images.push(imgUrl);
+                } else if (e.target.id === 'isolationSchemeImageUpload') {
+                    container = document.getElementById('isolationSchemeImages');
+
+                    // Add to current certificate
+                    if (!currentCertificate.isolationSchemeImages) {
+                        currentCertificate.isolationSchemeImages = [];
+                    }
+                    currentCertificate.isolationSchemeImages.push(imgUrl);
+                }
+
+                // Create and append image element
+                const imgElement = document.createElement('img');
+                imgElement.src = imgUrl;
+                imgElement.className = 'equipment-image me-2 mb-2';
+                imgElement.style.maxHeight = '150px';
+                container.appendChild(imgElement);
+
+                // Reset file input
+                e.target.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setupFormValidation() {
+            // Add required field validation
+            document.querySelectorAll('[required]').forEach(field => {
+                field.addEventListener('blur', function () {
+                    if (!this.value) {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            });
+        }
+
+        function confirmResetForm() {
+            document.getElementById('confirmationModalTitle').textContent = 'Confirm Reset';
+            document.getElementById('confirmationModalBody').textContent = 'Are you sure you want to reset the form? All unsaved changes will be lost.';
+            document.getElementById('confirmActionBtn').dataset.action = 'reset';
+
+            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            modal.show();
+        }
+
+        function actuallyResetForm() {
+            if (currentCertificate && currentCertificate.id) {
+                // If editing an existing certificate, reload it
+                populateForm(currentCertificate);
+            } else {
+                // If creating a new certificate, clear the form
+                document.getElementById('certificateForm').reset();
+
+                // Clear signature pads
+                Object.values(signaturePads).forEach(pad => pad.clear());
+
+                // Clear dynamic content
+                document.getElementById('equipmentList').innerHTML = '';
+                document.getElementById('equipmentImages').innerHTML = '';
+                document.getElementById('isolationSchemeImages').innerHTML = '';
+                document.getElementById('isolationStepsContainer').innerHTML = '';
+                document.getElementById('deIsolationStepsContainer').innerHTML = '';
+                document.getElementById('verificationMethodsContainer').innerHTML = '';
+
+                // Reset current certificate (keep ID and basic info)
+                if (currentCertificate) {
+                    currentCertificate = {
+                        ...currentCertificate,
+                        equipmentDetails: {},
+                        isolationSteps: [],
+                        deIsolationSteps: [],
+                        verificationMethods: [],
+                        emergencyProcedures: {},
+                        requestorDetails: {},
+                        approverDetails: {},
+                        deIsolationConfirmation: {},
+                        permitDetails: {
+                            plantName: "South Jeddah Noor 300 MWAC PV Solar Project",
+                            plantArea: [],
+                            department: [],
+                            contractorCompany: "",
+                            numEmployees: "",
+                            validFrom: "",
+                            validTo: "",
+                            locationOfWork: "",
+                            functionalName: "",
+                            equipmentNo: "",
+                            equipmentType: "",
+                            workDescription: ""
+                        }
+                    };
+                }
+            }
+        }
+
+        function saveAsDraft() {
+            if (!validateForm()) return;
+
+            collectFormData();
+            currentCertificate.status = 'draft';
+            saveCertificate();
+
+            showCertificateList();
+        }
+
+        function submitCertificate() {
+            if (!validateForm()) return;
+
+            document.getElementById('confirmationModalTitle').textContent = 'Submit Certificate';
+            document.getElementById('confirmationModalBody').textContent = 'Are you sure you want to submit this isolation certificate?';
+            document.getElementById('confirmActionBtn').dataset.action = 'submit';
+
+            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            modal.show();
+        }
+
+        function actuallySubmitCertificate() {
+            collectFormData();
+            currentCertificate.status = 'submitted';
+            currentCertificate.submittedAt = new Date().toISOString();
+            saveCertificate();
+
+            showCertificateList();
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            // Check required fields
+            document.querySelectorAll('[required]').forEach(field => {
+                if (!field.value) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            // Check signature pads
+            if (signaturePads.requestor.isEmpty()) {
+                alert('Requestor signature is required');
+                isValid = false;
+            }
+
+            if (signaturePads.approver.isEmpty()) {
+                alert('Approver signature is required');
+                isValid = false;
+            }
+
+            // Check isolation steps
+            const isolationSteps = document.querySelectorAll('.isolation-step');
+            if (isolationSteps.length === 0) {
+                alert('At least one isolation step is required');
+                isValid = false;
+            }
+
+            // Check de-isolation steps
+            const deIsolationSteps = document.querySelectorAll('.deisolation-step');
+            if (deIsolationSteps.length === 0) {
+                alert('At least one de-isolation step is required');
+                isValid = false;
+            }
+
+            // Check verification methods
+            const verificationMethods = document.querySelectorAll('.verification-method');
+            if (verificationMethods.length === 0) {
+                alert('At least one verification method is required');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                alert('Please fill in all required fields');
+            }
+
+            return isValid;
+        }
+
+        function collectFormData() {
+            // Basic information
+            currentCertificate.createdAt = document.getElementById('certificateDate').value || new Date().toISOString();
+            currentCertificate.permitDetails.permitNumber = document.getElementById('permitNumber').value;
+
+            // Plant area and department
+            currentCertificate.permitDetails.plantArea = Array.from(document.querySelectorAll('input[name="plantArea"]:checked')).map(cb => cb.value);
+            if (document.getElementById('areaOthers').checked) {
+                currentCertificate.permitDetails.plantAreaOthers = document.getElementById('areaOthersSpecify').value;
+            }
+
+            currentCertificate.permitDetails.department = Array.from(document.querySelectorAll('input[name="department"]:checked')).map(cb => cb.value);
+            if (document.getElementById('deptOthers').checked) {
+                currentCertificate.permitDetails.departmentOthers = document.getElementById('deptOthersSpecify').value;
+            }
+
+            // Work execution plan
+            currentCertificate.permitDetails.contractorCompany = document.getElementById('contractorCompany').value;
+            currentCertificate.permitDetails.numEmployees = document.getElementById('numEmployees').value;
+            currentCertificate.permitDetails.validFrom = document.getElementById('validFrom').value;
+            currentCertificate.permitDetails.validTo = document.getElementById('validTo').value;
+            currentCertificate.permitDetails.locationOfWork = document.getElementById('locationOfWork').value;
+            currentCertificate.permitDetails.functionalName = document.getElementById('functionalName').value;
+            currentCertificate.permitDetails.equipmentNo = document.getElementById('equipmentNo').value;
+            currentCertificate.permitDetails.equipmentType = document.getElementById('equipmentType').value;
+            currentCertificate.permitDetails.workDescription = document.getElementById('workDescription').value;
+
+            // Isolation steps
+            currentCertificate.isolationSteps = Array.from(document.querySelectorAll('.isolation-step')).map(input => input.value);
+
+            // De-isolation steps
+            currentCertificate.deIsolationSteps = Array.from(document.querySelectorAll('.deisolation-step')).map(input => input.value);
+
+            // Verification methods
+            currentCertificate.verificationMethods = Array.from(document.querySelectorAll('.verification-method')).map(input => input.value);
+            // Add to collectFormData() function
+            currentCertificate.checklist = {
+                hvIsolation: document.querySelector('input[name="hvIsolation"]:checked')?.value || null,
+                procedureAssessment: document.querySelector('input[name="procedureAssessment"]:checked')?.value || null,
+                controlLoop: document.querySelector('input[name="controlLoop"]:checked')?.value || null,
+                busCoupler: document.querySelector('input[name="busCoupler"]:checked')?.value || null,
+                hazardousMaterial: document.querySelector('input[name="hazardousMaterial"]:checked')?.value || null,
+                residualEnergy: document.querySelector('input[name="residualEnergy"]:checked')?.value || null,
+                livePermit: document.querySelector('input[name="livePermit"]:checked')?.value || null,
+                energized: document.querySelector('input[name="energized"]:checked')?.value || null,
+                deenergized: document.querySelector('input[name="deenergized"]:checked')?.value || null,
+                loto: document.querySelector('input[name="loto"]:checked')?.value || null,
+                mechLock: document.querySelector('input[name="mechLock"]:checked')?.value || null,
+                earthing: document.querySelector('input[name="earthing"]:checked')?.value || null,
+                capacitor: document.querySelector('input[name="capacitor"]:checked')?.value || null
+            };
+            // Emergency procedures
+            currentCertificate.emergencyProcedures = {
+                shutdown: document.getElementById('emergencyShutdown').value,
+                rescue: document.getElementById('rescuePlan').value,
+                firstAid: document.getElementById('firstAidMeasures').value
+            };
+
+            // Personnel details
+            currentCertificate.requestorDetails = {
+                name: document.getElementById('requestorName').value,
+                position: document.getElementById('requestorPosition').value,
+                contact: document.getElementById('requestorContact').value,
+                signature: signaturePads.requestor.toDataURL()
+            };
+
+            currentCertificate.approverDetails = {
+                name: document.getElementById('approverName').value,
+                position: document.getElementById('approverPosition').value,
+                contact: document.getElementById('approverContact').value,
+                signature: signaturePads.approver.toDataURL()
+            };
+
+            // De-isolation confirmation
+            currentCertificate.deIsolationConfirmation = {
+                date: document.getElementById('deIsolationDate').value,
+                verifiedBy: document.getElementById('deIsolationVerifiedBy').value,
+                comments: document.getElementById('deIsolationComments').value,
+                signature: signaturePads.deIsolation.isEmpty() ? null : signaturePads.deIsolation.toDataURL()
+            };
+        }
+
+        function saveCertificate() {
+            if (!currentCertificate) return;
+
+            // Find if certificate already exists
+            const index = certificates.findIndex(c => c.id === currentCertificate.id);
+
+            if (index >= 0) {
+                // Update existing certificate
+                certificates[index] = currentCertificate;
+            } else {
+                // Add new certificate
+                certificates.push(currentCertificate);
+            }
+
+            // Save to localStorage
+            localStorage.setItem('solarIsolationCertificates', JSON.stringify(certificates));
+
+            // Show success message
+            alert(`Certificate ${currentCertificate.certificateId} has been ${currentCertificate.status === 'draft' ? 'saved as draft' : 'submitted'}`);
+        }
+
+        function showCertificateList() {
+            currentMode = 'list';
+            currentCertificate = null;
+            isEditMode = false;
+
+            updateUI();
+            loadCertificateList();
+        }
+
+        function viewCertificate(id) {
+            currentCertificate = certificates.find(c => c.id === id);
+            if (!currentCertificate) return;
+
+            currentMode = 'view';
+            updateUI();
+            generateCertificateView();
+        }
+
+        function generateCertificateView() {
+            const viewContainer = document.getElementById('certificateView');
+            viewContainer.innerHTML = getCertificateViewHTML();
+
+            // Set up download button
+            document.getElementById('downloadPdfBtn').addEventListener('click', generatePDF);
+
+            // Set up edit button if certificate is draft
+            if (currentCertificate.status === 'draft') {
+                document.getElementById('editCertificateBtn').addEventListener('click', function () {
+                    editCertificate(currentCertificate.id);
+                });
+            } else {
+                document.getElementById('editCertificateBtn').classList.add('d-none');
+            }
+        }
+
+        function getCertificateViewHTML() {
+            const cert = currentCertificate;
+            const createdDate = new Date(cert.createdAt);
+            const formattedDate = createdDate.toLocaleDateString() + ' ' + createdDate.toLocaleTimeString();
+
+            let submittedDate = '';
+            if (cert.submittedAt) {
+                const subDate = new Date(cert.submittedAt);
+                submittedDate = subDate.toLocaleDateString() + ' ' + subDate.toLocaleTimeString();
+            }
+
+            let deIsolationDate = '';
+            if (cert.deIsolationConfirmation?.date) {
+                const deIsolDate = new Date(cert.deIsolationConfirmation.date);
+                deIsolationDate = deIsolDate.toLocaleDateString() + ' ' + deIsolDate.toLocaleTimeString();
+            }
+
+            // Plant area display
+            let plantAreaDisplay = cert.permitDetails.plantArea?.join(', ') || '';
+            if (cert.permitDetails.plantAreaOthers) {
+                plantAreaDisplay += plantAreaDisplay ? `, ${cert.permitDetails.plantAreaOthers}` : cert.permitDetails.plantAreaOthers;
+            }
+
+            // Department display
+            let departmentDisplay = cert.permitDetails.department?.join(', ') || '';
+            if (cert.permitDetails.departmentOthers) {
+                departmentDisplay += departmentDisplay ? `, ${cert.permitDetails.departmentOthers}` : cert.permitDetails.departmentOthers;
+            }
+
+            // Equipment images
+            let equipmentImagesHTML = '';
+            if (cert.equipmentDetails?.images?.length > 0) {
+                equipmentImagesHTML = `
+                    <h5 class="mt-4">Equipment Images</h5>
+                    <div class="d-flex flex-wrap">
+                        ${cert.equipmentDetails.images.map(img => `
+                            <img src="${img}" class="equipment-image me-2 mb-2" style="max-height: 150px;">
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // Isolation scheme images
+            let isolationSchemeImagesHTML = '';
+            if (cert.isolationSchemeImages?.length > 0) {
+                isolationSchemeImagesHTML = `
+                    <h5 class="mt-4">Isolation Scheme Diagrams</h5>
+                    <div class="d-flex flex-wrap">
+                        ${cert.isolationSchemeImages.map(img => `
+                            <img src="${img}" class="equipment-image me-2 mb-2" style="max-height: 150px;">
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // Status badge
+            let statusBadge = '';
+            if (cert.status === 'draft') {
+                statusBadge = '<span class="badge bg-warning text-dark">Draft</span>';
+            } else if (cert.status === 'submitted') {
+                statusBadge = '<span class="badge bg-primary">Submitted</span>';
+            } else if (cert.status === 'approved') {
+                statusBadge = '<span class="badge bg-success">Approved</span>';
+            } else if (cert.status === 'completed') {
+                statusBadge = '<span class="badge bg-secondary">Completed</span>';
+            }
+
+            return `
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-file-alt me-2"></i>Certificate Details
+                        </div>
+                        <div>
+                            ${statusBadge}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Certificate ID:</strong> ${cert.certificateId}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Created:</strong> ${formattedDate}
+                            </div>
+                        </div>
+                        ${cert.status !== 'draft' ? `
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Submitted:</strong> ${submittedDate}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Plant Name:</strong> ${cert.permitDetails?.plantName || 'South Jeddah Noor 300 MWAC PV Solar Project'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Plant Area:</strong> ${plantAreaDisplay}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <strong>Department:</strong> ${departmentDisplay}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Permit Number:</strong> ${cert.permitDetails?.permitNumber || 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-calendar-check me-2"></i>Work Execution Plan
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Contractor/Company:</strong> ${cert.permitDetails?.contractorCompany || 'N/A'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Number of Employees:</strong> ${cert.permitDetails?.numEmployees || 'N/A'}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <strong>Valid From:</strong> ${cert.permitDetails?.validFrom ? new Date(cert.permitDetails.validFrom).toLocaleString() : 'N/A'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Valid To:</strong> ${cert.permitDetails?.validTo ? new Date(cert.permitDetails.validTo).toLocaleString() : 'N/A'}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <strong>Location of Work:</strong> ${cert.permitDetails?.locationOfWork || 'N/A'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Equipment Functional Name:</strong> ${cert.permitDetails?.functionalName || 'N/A'}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <strong>Equipment Number:</strong> ${cert.permitDetails?.equipmentNo || 'N/A'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Equipment Type:</strong> ${cert.permitDetails?.equipmentType || 'N/A'}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <strong>Description of Work:</strong>
+                            <p>${cert.permitDetails?.workDescription || 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-bolt me-2"></i>Equipment Details
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Equipment Category:</strong> ${cert.equipmentDetails?.category ? cert.equipmentDetails.category.toUpperCase() : 'N/A'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Equipment:</strong> ${cert.equipmentDetails?.name || 'N/A'}
+                            </div>
+                        </div>
+                        
+                        ${equipmentImagesHTML}
+                        ${isolationSchemeImagesHTML}
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-lock me-2"></i>Isolation Procedure
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h5>Isolation Steps</h5>
+                                <ol>
+                                    ${cert.isolationSteps?.map(step => `<li>${step}</li>`).join('') || '<li>N/A</li>'}
+                                </ol>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>De-isolation Steps</h5>
+                                <ol>
+                                    ${cert.deIsolationSteps?.map(step => `<li>${step}</li>`).join('') || '<li>N/A</li>'}
+                                </ol>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>Verification Methods</h5>
+                                <ul>
+                                    ${cert.verificationMethods?.map(method => `<li>${method}</li>`).join('') || '<li>N/A</li>'}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-clipboard-check me-2"></i>Isolation Work Checklist
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="30%">Question/Check</th>
+                            <th width="50%">Description/Precautions</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+const checklistItems = [
+    { name: 'hvIsolation', question: 'HV Isolation Required?', description: 'Verify if HV isolation is needed (≥1kV) and ensure proper switching sequence is followed' },
+    { name: 'procedureAssessment', question: 'Procedure/Risk Assessment Prepared', description: 'Documented isolation procedure including sequence, responsibilities, and emergency response' },
+    { name: 'controlLoop', question: 'Control System Logic Reviewed', description: 'Confirm inverter/SCADA control logic won\'t auto-reclose or restart during maintenance' },
+    { name: 'busCoupler', question: 'Bus Coupler/Tie Breaker Work?', description: 'If working on bus coupler, coordinate parallel source isolation to prevent backfeed' },
+    { name: 'hazardousMaterial', question: 'Hazardous Energy Isolation Required?', description: 'Identify all energy sources (electrical, hydraulic, pneumatic) requiring isolation' },
+    { name: 'residualEnergy', question: 'Residual Energy Check', description: 'Verify discharge of DC strings, capacitors, and battery systems before work' },
+    { name: 'livePermit', question: 'PPE and Work Boundaries Established', description: 'Ensure appropriate arc-flash PPE rated for system voltage and safe distance from live parts' },
+    { name: 'energized', question: 'Nearby Energized Equipment', description: 'Identify all live equipment within 10ft (PV arrays, combiner boxes, AC collection)' },
+    { name: 'deenergized', question: 'De-energization Verified', description: 'Test before touch: confirm 0V AC/DC using rated meter at work location' },
+    { name: 'loto', question: 'LOTO Implemented', description: 'Apply locks and danger tags at all disconnects, breakers, and combiner boxes' },
+    { name: 'mechLock', question: 'Mechanical Energy Secured', description: 'Lock tracking systems, cooling fans, and inverter moving parts' },
+    { name: 'earthing', question: 'Proper Earthing', description: 'Install temporary grounding clusters on DC strings and AC buses per safety protocol' },
+    { name: 'capacitor', question: 'Capacitor Discharge Verified', description: 'Confirm discharge of all inverter DC capacitors and AC filter capacitors' }
+];
+
+checklistItems.forEach(item => {
+    const value = cert.checklist?.[item.name] || 'Not answered';
+    checklistHTML += `
+        <tr>
+            <td>${item.question}</td>
+            <td>${item.description}</td>
+            <td>${value.toUpperCase()}</td>
+        </tr>`;
+});
+
+checklistHTML += `
+                    </tbody>
+                </table>
+            </div>
+            <div class="note-box mt-3 p-3 bg-light rounded">
+                <strong>Note:</strong> Before executing isolation in area by Operator, it shall be communicated to control room operator from field with equipment Tag.
+            </div>
+        </div>
+    </div>
+               
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Emergency Procedures
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h5>Emergency Shutdown Procedure</h5>
+                            <p>${cert.emergencyProcedures?.shutdown || 'N/A'}</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h5>Rescue Plan</h5>
+                            <p>${cert.emergencyProcedures?.rescue || 'N/A'}</p>
+                        </div>
+                        
+                        <div>
+                            <h5>First Aid Measures</h5>
+                            <p>${cert.emergencyProcedures?.firstAid || 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-user-tie me-2"></i>Personnel Details
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Requestor</h5>
+                                <p><strong>Name:</strong> ${cert.requestorDetails?.name || 'N/A'}</p>
+                                <p><strong>Position:</strong> ${cert.requestorDetails?.position || 'N/A'}</p>
+                                <p><strong>Contact:</strong> ${cert.requestorDetails?.contact || 'N/A'}</p>
+                                ${cert.requestorDetails?.signature ? `
+                                    <div class="mt-3">
+                                        <strong>Signature:</strong>
+                                        <img src="${cert.requestorDetails.signature}" class="signature-image mt-2" style="max-width: 200px; border: 1px solid #ddd;">
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Approver</h5>
+                                <p><strong>Name:</strong> ${cert.approverDetails?.name || 'N/A'}</p>
+                                <p><strong>Position:</strong> ${cert.approverDetails?.position || 'N/A'}</p>
+                                <p><strong>Contact:</strong> ${cert.approverDetails?.contact || 'N/A'}</p>
+                                ${cert.approverDetails?.signature ? `
+                                    <div class="mt-3">
+                                        <strong>Signature:</strong>
+                                        <img src="${cert.approverDetails.signature}" class="signature-image mt-2" style="max-width: 200px; border: 1px solid #ddd;">
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${cert.deIsolationConfirmation?.date || cert.deIsolationConfirmation?.verifiedBy || cert.deIsolationConfirmation?.comments ? `
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-check-double me-2"></i>De-isolation Confirmation
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>De-isolation Date/Time:</strong> ${deIsolationDate || 'N/A'}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Verified By:</strong> ${cert.deIsolationConfirmation?.verifiedBy || 'N/A'}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <strong>Comments:</strong>
+                            <p>${cert.deIsolationConfirmation?.comments || 'N/A'}</p>
+                        </div>
+                        
+                        ${cert.deIsolationConfirmation?.signature ? `
+                            <div class="mt-3">
+                                <strong>Signature:</strong>
+                                <img src="${cert.deIsolationConfirmation.signature}" class="signature-image mt-2" style="max-width: 200px; border: 1px solid #ddd;">
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+
+        function editCertificate(id) {
+            currentCertificate = certificates.find(c => c.id === id);
+            if (!currentCertificate) return;
+
+            currentMode = 'form';
+            isEditMode = true;
+            updateUI();
+            generateCertificateForm();
+        }
+
+        function deleteCertificate(id) {
+            const confirmDelete = confirm('Are you sure you want to delete this certificate? This action cannot be undone.');
+            if (!confirmDelete) return;
+
+            certificates = certificates.filter(c => c.id !== id);
+            localStorage.setItem('solarIsolationCertificates', JSON.stringify(certificates));
+
+            loadCertificateList();
+            alert('Certificate deleted successfully');
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Show loading overlay
+            document.querySelector('.loading-overlay').style.display = 'flex';
+
+            // Use html2canvas to capture the certificate view
+            html2canvas(document.getElementById('certificateView')).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 295; // A4 height in mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                // Add first page
+                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                // Add additional pages if needed
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    doc.addPage();
+                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                // Save the PDF
+                doc.save(`Isolation_Certificate_${currentCertificate.certificateId}.pdf`);
+
+                // Hide loading overlay
+                document.querySelector('.loading-overlay').style.display = 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>

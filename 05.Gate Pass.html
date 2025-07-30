@@ -1,0 +1,3154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>South Jeddah Noor 300MWAC PV SOLAR Plant - Gate Pass Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #2980b9;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --card-hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--card-shadow);
+            border-bottom: 5px solid var(--secondary-color);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"><path d="M0 0 L100 100 M100 0 L0 100"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header-section h2 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            font-size: 2.2rem;
+        }
+
+        .header-section h4 {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            position: relative;
+            font-size: 1.2rem;
+        }
+
+        .permit-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .permit-card:hover {
+            box-shadow: var(--card-hover-shadow);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 1.25rem 1.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom: none;
+        }
+
+        .card-header.bg-light {
+            background-color: #f8f9fa !important;
+            color: var(--primary-color);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            margin: 1.75rem 0 1.25rem;
+            border-bottom: 2px solid rgba(52, 152, 219, 0.2);
+            padding-bottom: 0.75rem;
+            font-weight: 600;
+            font-size: 1.3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background-color: var(--secondary-color);
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 8px;
+            padding: 0.85rem 1.15rem;
+            border: 1px solid #e0e6ed;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            box-shadow: none;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.15);
+        }
+
+        .btn {
+            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            box-shadow: none;
+            border: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #2874a6;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #219653;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+        }
+
+        .btn-warning:hover {
+            background-color: #d68910;
+        }
+
+        .btn-outline-primary {
+            color: var(--secondary-color);
+            border: 2px solid var(--secondary-color);
+            background-color: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .status-badge {
+            background-color: #6c757d;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-left: 1rem;
+            vertical-align: middle;
+        }
+
+        .status-badge.status-draft {
+            background-color: #7f8c8d;
+        }
+
+        .status-badge.status-submitted {
+            background-color: var(--secondary-color);
+        }
+
+        .status-badge.status-approved {
+            background-color: var(--success-color);
+        }
+
+        .status-badge.status-rejected {
+            background-color: var(--danger-color);
+        }
+
+        .approval-section {
+            display: none;
+        }
+
+        .issuer-mode {
+            display: none;
+        }
+
+        .requester-mode {
+            display: none;
+        }
+
+        .no-select-mode {
+            display: block;
+        }
+
+        #pdf-loading-indicator {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            z-index: 9999;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .signature-pad canvas {
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            width: 100% !important;
+            height: 120px !important;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .password-modal .modal-dialog {
+            max-width: 400px;
+        }
+
+        .final-status {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .final-status.status-approved {
+            background-color: rgba(39, 174, 96, 0.15);
+            color: var(--success-color);
+            border: 2px solid var(--success-color);
+        }
+
+        .final-status.status-rejected {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .notification-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item .requester-name {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .notification-item .location {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .notification-item .date {
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+
+        .form-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .form-header h4 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.4rem;
+        }
+
+        .permit-list-item {
+            padding: 18px;
+            border: 1px solid #e0e6ed;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: white;
+            box-shadow: var(--card-shadow);
+        }
+
+        .permit-list-item:hover {
+            background-color: #f8f9fa;
+            box-shadow: var(--card-hover-shadow);
+            transform: translateY(-3px);
+        }
+
+        .permit-list-item .permit-number {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .permit-list-item .permit-status {
+            float: right;
+        }
+
+        .permit-details {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .permit-details .detail-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.95rem;
+        }
+
+        .tab-content {
+            padding: 25px 0;
+        }
+
+        .mode-tabs .nav-link {
+            font-weight: 600;
+            padding: 14px 24px;
+            color: var(--primary-color);
+            border-radius: 8px 8px 0 0;
+            border: none;
+            position: relative;
+            background-color: transparent;
+            transition: all 0.3s;
+            margin-right: 5px;
+        }
+
+        .mode-tabs .nav-link.active {
+            background-color: white;
+            color: var(--secondary-color);
+            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .mode-tabs .nav-link:not(.active):hover {
+            color: var(--secondary-color);
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .mode-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--secondary-color);
+        }
+
+        .permit-info-box {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--secondary-color);
+            transition: all 0.3s;
+        }
+
+        .permit-info-box:hover {
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .permit-info-box .info-title {
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 10px;
+        }
+
+        .permit-info-box .info-content {
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .info-content div {
+            margin-bottom: 10px;
+        }
+
+        .time-date-input {
+            display: flex;
+            gap: 12px;
+        }
+
+        .time-date-input .form-control {
+            flex: 1;
+        }
+
+        .signature-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .signature-label button {
+            padding: 4px 10px;
+            font-size: 0.85rem;
+        }
+
+        .card-header.bg-success {
+            background-color: var(--success-color) !important;
+        }
+
+        .card-header.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            color: var(--dark-color);
+            font-size: 0.95rem;
+        }
+
+        .form-actions {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .no-print {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Form styles */
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -12px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            min-width: 220px;
+            padding: 0 12px;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            border: 1px solid #e0e6ed;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-section {
+                padding: 1.5rem;
+            }
+
+            .header-section h2 {
+                font-size: 1.8rem;
+            }
+
+            .header-section h4 {
+                font-size: 1rem;
+            }
+
+            .form-row .form-group {
+                min-width: 100%;
+                padding: 0;
+            }
+
+            .time-date-input {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .form-buttons .btn {
+                width: 100%;
+            }
+        }
+
+        @media print {
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .permit-card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .nav-tabs,
+            .no-print {
+                display: none !important;
+            }
+
+            .tab-pane {
+                display: block !important;
+                opacity: 1 !important;
+            }
+
+            .no-break-inside {
+                page-break-inside: avoid;
+            }
+
+            .force-black {
+                color: #000 !important;
+            }
+
+            input,
+            textarea,
+            select {
+                border: 1px solid #000 !important;
+                background-color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .form-check-input {
+                -webkit-appearance: checkbox !important;
+                appearance: checkbox !important;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            .crew-member-table {
+                font-size: 10px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-4">
+        <div class="header-section text-center mb-4">
+            <h2>South Jeddah Noor 300MW<sub>AC</sub> Solar Plant</h2>
+            <h4>Gate Pass Management System</h4>
+        </div>
+
+        <!-- Password Modal -->
+        <div class="modal fade password-modal" id="passwordModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Enter Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="passwordInput" class="form-label">Password:</label>
+                            <input type="password" class="form-control" id="passwordInput">
+                        </div>
+                        <div class="alert alert-danger d-none" id="passwordError">Invalid password. Please try again.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="submitPassword">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Modal -->
+        <div class="modal fade" id="notificationsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pending Gate Pass Requests</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="notificationsList">
+                            <!-- Notifications will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="card mb-4 no-print">
+            <div class="card-body text-center">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary position-relative" id="enterIssuerMode">
+                        <i class="fas fa-user-check"></i> Issuer Mode
+                        <span class="notification-badge d-none" id="issuerNotificationBadge">0</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-success" id="enterRequesterMode">
+                        <i class="fas fa-user"></i> Requester Mode
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="enterNoSelectMode">
+                        <i class="fas fa-home"></i> Default View
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <span id="currentModeDisplay" class="badge bg-light text-dark">Current mode: Default View</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab navigation -->
+        <ul class="nav nav-tabs mode-tabs mb-3 d-none">
+            <li class="nav-item">
+                <a class="nav-link" id="no-select-tab" data-bs-toggle="tab" href="#no-select-content">Default</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="requester-tab" data-bs-toggle="tab" href="#requester-content">Requester</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="issuer-tab" data-bs-toggle="tab" href="#issuer-content">Issuer</a>
+            </li>
+        </ul>
+
+        <!-- Tab Contents -->
+        <div class="tab-content" id="modeTabContent">
+            <!-- No Select Mode Content -->
+            <div class="tab-pane fade show active" id="no-select-content" role="tabpanel">
+                <div class="card mb-4 fade-in">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filter Completed Passes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-3">
+                                <select class="form-control" id="timeFilter">
+                                    <option value="today">Today</option>
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4" id="customDateRange" style="display:none;">
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="startDate">
+                                    <span class="input-group-text">to</span>
+                                    <input type="date" class="form-control" id="endDate">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary" id="applyFilter">Apply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="nav nav-tabs mb-3" id="completedPassesTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="material-passes-tab" data-bs-toggle="tab"
+                            href="#material-passes-content">Material Passes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="visitor-passes-tab" data-bs-toggle="tab"
+                            href="#visitor-passes-content">Visitor Passes</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="completedPassesTabContent">
+                    <!-- Material Passes Tab -->
+                    <div class="tab-pane fade show active" id="material-passes-content" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-pallet"></i> Approved/Rejected Material Gate Passes
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="completedMaterialPassesList">
+                                    <!-- Completed material passes will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visitor Passes Tab -->
+                    <div class="tab-pane fade" id="visitor-passes-content" role="tabpanel">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-user-tie"></i> Approved/Rejected Visitor Gate Passes
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="completedVisitorPassesList">
+                                    <!-- Completed visitor passes will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requester Mode Content -->
+            <div class="tab-pane fade" id="requester-content" role="tabpanel">
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-list"></i> My Gate Pass Applications</h5>
+                            <div>
+                                <button type="button" class="btn btn-primary" id="createNewMaterialPass">
+                                    <i class="fas fa-pallet"></i> New Material Pass
+                                </button>
+                                <button type="button" class="btn btn-primary" id="createNewVisitorPass">
+                                    <i class="fas fa-user-tie"></i> New Visitor Pass
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="draftPassesList">
+                            <!-- Draft passes will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Material Pass Form (hidden by default) -->
+                <div class="card permit-card d-none" id="requesterMaterialPassFormCard">
+                    <div class="card-body">
+                        <form id="requesterMaterialForm">
+                            <div class="form-header">
+                                <h4><i class="fas fa-pallet"></i> Material Gate Pass Form</h4>
+                                <div class="status-badge status-draft" id="materialPassStatus">DRAFT</div>
+                            </div>
+
+                            <!-- Permit Status Display -->
+                            <div id="materialFinalStatusDisplay" class="final-status d-none"></div>
+                            <div class="section-title">Basic Information</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterProjectName">Project Name</label>
+                                    <input type="text" class="form-control" id="requesterProjectName"
+                                        value="South Jeddah Noor 300MWAC Solar Plant" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="Deliveryorpulloutdate">Delivery/Pullout Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="Deliveryorpulloutdate"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterCompanyName">Company Name</label>
+                                    <input type="text" class="form-control" id="requesterCompanyName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="requesterApplicantDate">Request Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="requesterApplicantDate"
+                                        required>
+                                </div>
+                            </div>
+
+                            <!-- Material Details Section -->
+                            <div class="section-title">Material Details</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="materialCategory">Material Category</label>
+                                    <select class="form-control" id="materialCategory" required>
+                                        <option value="">-- Select Category --</option>
+                                        <option value="PV Modules">PV Modules</option>
+                                        <option value="Inverters">Inverters</option>
+                                        <option value="Mounting Structures">Mounting Structures</option>
+                                        <option value="Cables">Cables</option>
+                                        <option value="Transformers">Transformers</option>
+                                        <option value="Tools">Tools & Equipment</option>
+                                        <option value="Consumables">Consumables</option>
+                                        <option value="ARCS Material">ARCS Material</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="movementType">Movement Type</label>
+                                    <select class="form-control" id="movementType" required>
+                                        <option value="">--Select Movement Type--</option>
+                                        <option value="Delivery">Delivery to Site</option>
+                                        <option value="Return">Return to Supplier</option>
+                                        <option value="Transfer">Inter-Site Transfer</option>
+                                        <option value="Disposal">Disposal</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="requesterReason">Material Description and Reason for Delivery/Pull
+                                    Out</label>
+                                <textarea class="form-control" id="requesterReason" rows="3" required></textarea>
+                            </div>
+                            <!-- Vehicle Information Section -->
+                            <div class="section-title">Vehicle Information</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterVehicleNumber">Number of Vehicle</label>
+                                    <input type="number" class="form-control" id="requesterVehicleNumber" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="requesterVehicleReg">Vehicle Plate Number</label>
+                                    <input type="text" class="form-control" id="requesterVehicleReg"
+                                        placeholder="e.g KAA 4647" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterVehicleType">Vehicle Type</label>
+                                    <select class="form-control" id="requesterVehicleType" required>
+                                        <option value="">--Select Vehicle Type--</option>
+                                        <option value="Crane">Crane (Mobile/Tower)</option>
+                                        <option value="Excavator">Excavator</option>
+                                        <option value="Bulldozer">Bulldozer</option>
+                                        <option value="Backhoe Loader">Backhoe Loader</option>
+                                        <option value="Skid Steer">Skid Steer Loader</option>
+                                        <option value="Flatbed Truck">Flatbed Truck</option>
+                                        <option value="Container Truck">Container Truck</option>
+                                        <option value="Forklift">Forklift (All Sizes)</option>
+                                        <option value="Telehandler">Telehandler</option>
+                                        <option value="Pallet Jack">Pallet Jack</option>
+                                        <option value="PV Module Trailer">PV Module Installation Trailer</option>
+                                        <option value="Tracker Installer">Tracker Installation Vehicle</option>
+                                        <option value="Stringer Vehicle">Stringing Vehicle</option>
+                                        <option value="Cable Puller">Cable Pulling Vehicle</option>
+                                        <option value="Transformer Truck">Transformer Transport</option>
+                                        <option value="Switchgear Truck">Switchgear Transport</option>
+                                        <option value="Crew Bus">Crew Transport Bus</option>
+                                        <option value="Pickup Truck">Pickup Truck</option>
+                                        <option value="CAR">Car</option>
+                                        <option value="SUV">SUV</option>
+                                        <option value="Minivan">Minivan</option>
+                                        <option value="Drone Van">Drone Survey Vehicle</option>
+                                        <option value="Thermal Imaging Van">Thermal Imaging Vehicle</option>
+                                        <option value="Cleaning Truck">Module Cleaning Truck</option>
+                                        <option value="Mowing Tractor">Vegetation Management Tractor</option>
+                                        <option value="Service Van">Maintenance Service Van</option>
+                                        <option value="Fuel Truck">Fuel Tanker</option>
+                                        <option value="Water Truck">Water Tanker</option>
+                                        <option value="Generator Truck">Generator Transport</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="driverLicense">Driver License (KSA)</label>
+                                    <input type="text" class="form-control" id="driverLicense" name="driverLicense"
+                                        placeholder="e.g. 1234567890" pattern="[0-9]{10}"
+                                        title="10-digit Saudi driver license number" required maxlength="10">
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> Enter 10-digit Saudi driver license number
+                                    </small>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid 10-digit Saudi driver license number
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Material Items Table -->
+                            <div class="form-group">
+                                <label>Material Items</label>
+                                <table id="requesterMaterialTable" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Item Code</th>
+                                            <th>Description</th>
+                                            <th>Quantity</th>
+                                            <th>Serial Numbers</th>
+                                            <th>Condition</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Materials will be added here -->
+                                    </tbody>
+                                </table>
+                                <button type="button" id="requesterAddMaterial" class="btn btn-sm btn-primary mt-2">
+                                    <i class="fas fa-plus"></i> Add Material Item
+                                </button>
+                            </div>
+
+                            <!-- Authorization Section -->
+                            <div class="section-title">Requestor Section</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterApplicantName">Requestor Name</label>
+                                    <select class="form-control" id="requesterApplicantName">
+                                        <option value="">-- Select Requestor --</option>
+                                        <option value="HSSE Engineer">Noman Ashraf</option>
+                                        <option value="O&M Manager">Raguramanan</option>
+                                        <option value="Site Technician">Meshal</option>
+                                        <option value="Scada Operator">Abdullah</option>
+                                        <option value="Scada Engineer">Mohammad</option>
+                                        <option value="Scada Shift Operator">Saad</option>
+                                        <option value="Operator">Rakan</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="requesterApplicantSignature">Applicant Signature</label>
+                                    <div class="signature-pad">
+                                        <canvas id="requesterApplicantSignature" width="400" height="100"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approver Selection -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Select Approver:</label>
+                                    <select class="form-control" id="approverSelect" required>
+                                        <option value="">-- Select Approver --</option>
+                                        <option value="Plant Manager">Rachid</option>
+                                        <option value="HSSE Manager">Jayiz</option>
+                                        <option value="O&M Lead Engineer">Thiro</option>
+                                        <option value="Project Manager">Andergiri</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="Deliveryorpulloutlocation">Delivery/Pullout Location</label>
+                                    <select class="form-control" id="Deliveryorpulloutlocation" required>
+                                        <option value="">-- Select Delivery/Pullout Location --</option>
+                                        <option value="PVSS">PVSS</option>
+                                        <option value="ISO">ISO Building</option>
+                                        <option value="PV Field">PV Field</option>
+                                        <option value="O&M Building">O&M Building</option>
+                                        <option value="O&M Warehouse">O&M Warehouse</option>
+                                        <option value="Security Center Building">Security Center Building</option>
+                                        <option value="Visitor Center Building">Visitor Center Building</option>
+                                        <option value="Guard House">Guard House</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Form Actions -->
+                            <div class="form-buttons">
+                                <button type="button" id="submitMaterialPass" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Submit for Approval
+                                </button>
+                                <button type="button" id="saveDraftMaterial" class="btn btn-secondary">
+                                    <i class="fas fa-save"></i> Save Draft
+                                </button>
+                                <button type="button" id="cancelMaterialPass" class="btn btn-danger">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Visitor Pass Form (hidden by default) -->
+                <div class="card permit-card d-none" id="requesterVisitorPassFormCard">
+                    <div class="card-body">
+                        <form id="requesterVisitorForm">
+                            <div class="form-header">
+                                <h4><i class="fas fa-user-tie"></i> Visitor Gate Pass Form</h4>
+                                <div class="status-badge status-draft" id="visitorPassStatus">DRAFT</div>
+                            </div>
+
+                            <!-- Permit Status Display -->
+                            <div id="visitorFinalStatusDisplay" class="final-status d-none"></div>
+                            <div class="section-title">Basic Information</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterProjectName">Project Name</label>
+                                    <input type="text" class="form-control" id="requesterProjectName"
+                                        value="South Jeddah Noor 300MWAC Solar Plant" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="visitstartdate">Visit Start Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="visitstartdate" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterVisitorCompany">Name of Company</label>
+                                    <input type="text" class="form-control" id="requesterVisitorCompany" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="requesterVisitEnd">Visit End Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="requesterVisitEnd" required>
+                                </div>
+                            </div>
+                            <div class="section-title">Visitor Details</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterVisitorCount">Number of Visitor</label>
+                                    <input type="number" class="form-control" id="requesterVisitorCount" min="1"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="Area of Plant Visit">Area of Plant Visit</label>
+                                    <select class="form-control" id="Area of Plant Visit" required>
+                                        <option value="">-- Area of Plant Visit --</option>
+                                        <option value="PVSS">PVSS</option>
+                                        <option value="ISO">ISO Building</option>
+                                        <option value="PV Field">PV Field</option>
+                                        <option value="O&M Building">O&M Building</option>
+                                        <option value="O&M Warehouse">O&M Warehouse</option>
+                                        <option value="Security Center Building">Security Center Building</option>
+                                        <option value="Visitor Center Building">Visitor Center Building</option>
+                                        <option value="Guard House">Guard House</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="Purpose of Visit">Purpose of visit</label>
+                                <textarea class="form-control" id="Purpose of Visit" rows="3" required></textarea>
+                            </div>
+
+                            <!-- Vehicle Information Section -->
+                            <div class="section-title">Vehicle Information</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterVisitorVehicleNumber">Number of Vehicle</label>
+                                    <input type="number" class="form-control" id="requesterVisitorVehicleNumber"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="requesterVisitorVehicleReg">Vehicle Plate Number</label>
+                                    <input type="text" class="form-control" id="requesterVisitorVehicleReg" required
+                                        placeholder="e.g KAA 4746">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterVisitorVehicleType">Type of Vehicle</label>
+                                    <select class="form-control" id="requesterVisitorVehicleType" required>
+                                        <option value="">--Select Vehicle Type--</option>
+                                        <option value="Crane">Crane (Mobile/Tower)</option>
+                                        <option value="Excavator">Excavator</option>
+                                        <option value="Bulldozer">Bulldozer</option>
+                                        <option value="Backhoe Loader">Backhoe Loader</option>
+                                        <option value="Skid Steer">Skid Steer Loader</option>
+                                        <option value="Flatbed Truck">Flatbed Truck</option>
+                                        <option value="Container Truck">Container Truck</option>
+                                        <option value="Forklift">Forklift (All Sizes)</option>
+                                        <option value="Telehandler">Telehandler</option>
+                                        <option value="Pallet Jack">Pallet Jack</option>
+                                        <option value="PV Module Trailer">PV Module Installation Trailer</option>
+                                        <option value="Tracker Installer">Tracker Installation Vehicle</option>
+                                        <option value="Stringer Vehicle">Stringing Vehicle</option>
+                                        <option value="Cable Puller">Cable Pulling Vehicle</option>
+                                        <option value="Transformer Truck">Transformer Transport</option>
+                                        <option value="Switchgear Truck">Switchgear Transport</option>
+                                        <option value="Crew Bus">Crew Transport Bus</option>
+                                        <option value="Pickup Truck">Pickup Truck</option>
+                                        <option value="CAR">Car</option>
+                                        <option value="SUV">SUV</option>
+                                        <option value="Minivan">Minivan</option>
+                                        <option value="Drone Van">Drone Survey Vehicle</option>
+                                        <option value="Thermal Imaging Van">Thermal Imaging Vehicle</option>
+                                        <option value="Cleaning Truck">Module Cleaning Truck</option>
+                                        <option value="Mowing Tractor">Vegetation Management Tractor</option>
+                                        <option value="Service Van">Maintenance Service Van</option>
+                                        <option value="Fuel Truck">Fuel Tanker</option>
+                                        <option value="Water Truck">Water Tanker</option>
+                                        <option value="Generator Truck">Generator Transport</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="requesterVisitorDriverLicense">Driver License Number</label>
+                                    <input type="text" class="form-control" id="requesterVisitorDriverLicense" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Visitor Details</label>
+                                <table id="requesterVisitorTable" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Sr. No.</th>
+                                            <th>Name</th>
+                                            <th>ID Number</th>
+                                            <th>Nationality</th>
+                                            <th>Contact Number</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Visitors will be added here -->
+                                    </tbody>
+                                </table>
+                                <button type="button" id="requesterAddVisitor" class="btn btn-sm btn-primary"
+                                    style="margin-top: 10px;">
+                                    <i class="fas fa-plus"></i> Add Visitor
+                                </button>
+                            </div>
+                            <div class="section-title">Requestor Section</div>
+                            <!-- Approver Selection -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requesterApproverName">Requestor Name</label>
+                                    <select class="form-control" id="requesterApproverName">
+                                        <option value="">-- Select Requestor --</option>
+                                        <option value="HSSE Engineer">Noman Ashraf</option>
+                                        <option value="O&M Manager">Raguramanan</option>
+                                        <option value="Site Technician">Meshal</option>
+                                        <option value="Scada Operator">Abdullah</option>
+                                        <option value="Scada Engineer">Mohammad</option>
+                                        <option value="Scada Shift Operator">Saad</option>
+                                        <option value="Operator">Rakan</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="requesterApproverSignature">Requestor Signature</label>
+                                    <div class="signature-pad">
+                                        <canvas id="requesterApproverSignature" width="400" height="100"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Select Approver:</label>
+                                    <select class="form-control" id="approvervisistoSelect" required>
+                                        <option value="">-- Select Approver --</option>
+                                        <option value="Plant Manager">Rachid</option>
+                                        <option value="HSSE Manager">Jayiz</option>
+                                        <option value="O&M Lead Engineer">Thiro</option>
+                                        <option value="Project Manager">Andergiri</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="visitapplicationdate">Application Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="visitapplicationdate"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="button" id="submitVisitorPass" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Submit
+                                </button>
+                                <button type="button" id="saveDraftVisitor" class="btn btn-secondary">
+                                    <i class="fas fa-save"></i> Save Draft
+                                </button>
+                                <button type="button" id="cancelVisitorPass" class="btn btn-danger">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Issuer Mode Content -->
+            <div class="tab-pane fade" id="issuer-content" role="tabpanel">
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-list"></i> Gate Pass Applications</h5>
+                            <button type="button" class="btn btn-info position-relative" id="viewNotifications">
+                                <i class="fas fa-bell"></i> Notifications
+                                <span class="notification-badge d-none" id="activeNotificationBadge">0</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="submittedPassesList">
+                            <!-- Submitted passes will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Material Pass Form (hidden by default) -->
+                <div class="card permit-card d-none" id="issuerMaterialPassFormCard">
+                    <div class="card-body">
+                        <form id="issuerMaterialForm">
+                            <div class="form-header">
+                                <h4><i class="fas fa-pallet"></i> Material Gate Pass Form</h4>
+                                <div class="status-badge status-submitted" id="issuerMaterialPassStatus">SUBMITTED</div>
+                            </div>
+
+                            <!-- Permit Status Display -->
+                            <div id="issuerMaterialFinalStatusDisplay" class="final-status d-none"></div>
+
+                            <div class="section-title">Basic Information</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerProjectName">Project Name</label>
+                                    <input type="text" class="form-control" id="issuerProjectName"
+                                        value="South Jeddah Noor 300MWAC Solar Plant" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerDeliveryDate">Delivery/Pullout Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="issuerDeliveryDate" readonly>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerCompanyName">Company Name</label>
+                                    <input type="text" class="form-control" id="issuerCompanyName" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerRequestDate">Request Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="issuerRequestDate" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Material Details Section -->
+                            <div class="section-title">Material Details</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerMaterialCategory">Material Category</label>
+                                    <input type="text" class="form-control" id="issuerMaterialCategory" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerMovementType">Movement Type</label>
+                                    <input type="text" class="form-control" id="issuerMovementType" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="issuerReason">Material Description and Reason</label>
+                                <textarea class="form-control" id="issuerReason" rows="3" readonly></textarea>
+                            </div>
+
+                            <!-- Vehicle Information Section -->
+                            <div class="section-title">Vehicle Information</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerVehicleNumber">Number of Vehicle</label>
+                                    <input type="text" class="form-control" id="issuerVehicleNumber" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerVehicleReg">Vehicle Plate Number</label>
+                                    <input type="text" class="form-control" id="issuerVehicleReg" readonly>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerVehicleType">Vehicle Type</label>
+                                    <input type="text" class="form-control" id="issuerVehicleType" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerDriverLicense">Driver License</label>
+                                    <input type="text" class="form-control" id="issuerDriverLicense" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Material Items Table -->
+                            <div class="form-group">
+                                <label>Material Items</label>
+                                <table id="issuerMaterialTable" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Item Code</th>
+                                            <th>Description</th>
+                                            <th>Quantity</th>
+                                            <th>Serial Numbers</th>
+                                            <th>Condition</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Materials will be added here -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Requestor Section -->
+                            <div class="section-title">Requestor Section</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerApplicantName">Requestor Name</label>
+                                    <input type="text" class="form-control" id="issuerApplicantName" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Requestor Signature</label>
+                                    <div class="signature-display">
+                                        <img id="issuerApplicantSignatureImg" src="" alt="Requestor Signature"
+                                            style="max-width: 400px; max-height: 100px;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approver Section -->
+                            <div class="section-title">Approver Section</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerApproverName">Approver Name</label>
+                                    <input type="text" class="form-control" id="issuerApproverName" value="HSSE Manager"
+                                        readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Approver Signature</label>
+                                    <div class="signature-pad">
+                                        <canvas id="issuerApproverSignature" width="400" height="100"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approver Comments -->
+                            <div class="form-group">
+                                <label for="issuerComments">Comments (if any)</label>
+                                <textarea class="form-control" id="issuerComments" rows="2"></textarea>
+                            </div>
+
+                            <div class="form-buttons">
+                                <button type="button" id="approveMaterialPass" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button type="button" id="rejectMaterialPass" class="btn btn-danger">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                                <button type="button" id="cancelIssuerMaterialPass" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Visitor Pass Form (hidden by default) -->
+                <div class="card permit-card d-none" id="issuerVisitorPassFormCard">
+                    <div class="card-body">
+                        <form id="issuerVisitorForm">
+                            <div class="form-header">
+                                <h4><i class="fas fa-user-tie"></i> Visitor Gate Pass Form</h4>
+                                <div class="status-badge status-submitted" id="issuerVisitorPassStatus">SUBMITTED</div>
+                            </div>
+
+                            <!-- Permit Status Display -->
+                            <div id="issuerVisitorFinalStatusDisplay" class="final-status d-none"></div>
+
+                            <div class="section-title">Basic Information</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerVisitorProjectName">Project Name</label>
+                                    <input type="text" class="form-control" id="issuerVisitorProjectName"
+                                        value="South Jeddah Noor 300MWAC Solar Plant" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerVisitStartDate">Visit Start Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="issuerVisitStartDate"
+                                        readonly>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerVisitorCompany">Name of Company</label>
+                                    <input type="text" class="form-control" id="issuerVisitorCompany" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerVisitEndDate">Visit End Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="issuerVisitEndDate" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Visitor Details Section -->
+                            <div class="section-title">Visitor Details</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerVisitorCount">Number of Visitor</label>
+                                    <input type="text" class="form-control" id="issuerVisitorCount" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerVisitorArea">Area of Plant Visit</label>
+                                    <input type="text" class="form-control" id="issuerVisitorArea" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="issuerVisitPurpose">Purpose of visit</label>
+                                <textarea class="form-control" id="issuerVisitPurpose" rows="3" readonly></textarea>
+                            </div>
+
+                            <!-- Vehicle Information Section -->
+                            <div class="section-title">Vehicle Information</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerVisitorVehicleNumber">Number of Vehicle</label>
+                                    <input type="text" class="form-control" id="issuerVisitorVehicleNumber" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerVisitorVehicleReg">Vehicle Plate Number</label>
+                                    <input type="text" class="form-control" id="issuerVisitorVehicleReg" readonly>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerVisitorVehicleType">Type of Vehicle</label>
+                                    <input type="text" class="form-control" id="issuerVisitorVehicleType" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="issuerVisitorDriverLicense">Driver License Number</label>
+                                    <input type="text" class="form-control" id="issuerVisitorDriverLicense" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Visitor Details Table -->
+                            <div class="form-group">
+                                <label>Visitor Details</label>
+                                <table id="issuerVisitorTable" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Sr. No.</th>
+                                            <th>Name</th>
+                                            <th>ID Number</th>
+                                            <th>Nationality</th>
+                                            <th>Contact Number</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Visitors will be added here -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Requestor Section -->
+                            <div class="section-title">Requestor Section</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerVisitorRequestorName">Requestor Name</label>
+                                    <input type="text" class="form-control" id="issuerVisitorRequestorName" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Requestor Signature</label>
+                                    <div class="signature-display">
+                                        <img id="issuerVisitorRequestorSignatureImg" src="" alt="Requestor Signature"
+                                            style="max-width: 400px; max-height: 100px;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approver Section -->
+                            <div class="section-title">Approver Section</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="issuerVisitorApproverName">Approver Name</label>
+                                    <input type="text" class="form-control" id="issuerVisitorApproverName"
+                                        value="HSSE Manager" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Approver Signature</label>
+                                    <div class="signature-pad">
+                                        <canvas id="issuerVisitorApproverSignature" width="400" height="100"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approver Comments -->
+                            <div class="form-group">
+                                <label for="issuerVisitorComments">Comments (if any)</label>
+                                <textarea class="form-control" id="issuerVisitorComments" rows="2"></textarea>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="form-buttons">
+                                <button type="button" id="approveVisitorPass" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button type="button" id="rejectVisitorPass" class="btn btn-danger">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                                <button type="button" id="cancelIssuerVisitorPass" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator for PDF Generation -->
+    <div id="pdf-loading-indicator">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Generating PDF...</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+    <script>
+        // Constants
+        const ISSUER_PASSWORD = "5678";
+        const REQUESTER_PASSWORD = "1234";
+
+        // Global variables
+        let currentMode = 'no-select'; // 'issuer', 'requester', or 'no-select'
+        let signaturePads = {};
+        let currentPassId = null;
+        let nextMaterialPassNumber = 1;
+        let nextVisitorPassNumber = 1;
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize signature pads
+            initializeSignaturePads();
+
+            // Initialize modals
+            const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+            const notificationsModal = new bootstrap.Modal(document.getElementById('notificationsModal'));
+
+            // Load saved data
+            loadInitialData();
+
+            // Set up event listeners
+            setupEventListeners(passwordModal, notificationsModal);
+
+            // Load passes for the current mode
+            loadPassesForCurrentMode();
+
+            // Set current date as default for date fields
+            setDefaultDates();
+        });
+
+        function initializeSignaturePads() {
+            const signatureCanvases = document.querySelectorAll('canvas');
+            signatureCanvases.forEach(canvas => {
+                const pad = new SignaturePad(canvas, {
+                    backgroundColor: 'rgb(255, 255, 255)',
+                    penColor: 'rgb(0, 0, 0)'
+                });
+                signaturePads[canvas.id] = pad;
+            });
+        }
+
+        function setupEventListeners(passwordModal, notificationsModal) {
+            // Mode selection
+            document.getElementById('enterIssuerMode').addEventListener('click', () => {
+                passwordModal.show();
+                document.getElementById('passwordInput').placeholder = "Enter issuer password (5678)";
+                document.getElementById('submitPassword').onclick = () => verifyPassword(passwordModal, ISSUER_PASSWORD, 'issuer');
+            });
+
+            document.getElementById('enterRequesterMode').addEventListener('click', () => {
+                passwordModal.show();
+                document.getElementById('passwordInput').placeholder = "Enter requester password (1234)";
+                document.getElementById('submitPassword').onclick = () => verifyPassword(passwordModal, REQUESTER_PASSWORD, 'requester');
+            });
+
+            document.getElementById('enterNoSelectMode').addEventListener('click', () => {
+                currentMode = 'no-select';
+                localStorage.setItem('currentMode', currentMode);
+                updateUIForMode();
+                document.getElementById('currentModeDisplay').textContent = 'Current mode: Default View';
+                loadPassesForCurrentMode();
+            });
+
+            // Form actions
+            document.getElementById('createNewMaterialPass').addEventListener('click', showNewMaterialPassForm);
+            document.getElementById('createNewVisitorPass').addEventListener('click', showNewVisitorPassForm);
+
+            // Material pass actions
+            document.getElementById('saveDraftMaterial').addEventListener('click', () => saveAsDraft('material'));
+            document.getElementById('submitMaterialPass').addEventListener('click', () => submitPassRequest('material'));
+            document.getElementById('cancelMaterialPass').addEventListener('click', cancelMaterialPassForm);
+            document.getElementById('requesterAddMaterial').addEventListener('click', addMaterialRow);
+
+            // Visitor pass actions
+            document.getElementById('saveDraftVisitor').addEventListener('click', () => saveAsDraft('visitor'));
+            document.getElementById('submitVisitorPass').addEventListener('click', () => submitPassRequest('visitor'));
+            document.getElementById('cancelVisitorPass').addEventListener('click', cancelVisitorPassForm);
+            document.getElementById('requesterAddVisitor').addEventListener('click', addVisitorRow);
+
+            // Issuer actions
+            document.getElementById('approveMaterialPass').addEventListener('click', () => updatePassStatus('material', 'approved'));
+            document.getElementById('rejectMaterialPass').addEventListener('click', () => updatePassStatus('material', 'rejected'));
+            document.getElementById('cancelIssuerMaterialPass').addEventListener('click', cancelIssuerMaterialPassForm);
+
+            document.getElementById('approveVisitorPass').addEventListener('click', () => updatePassStatus('visitor', 'approved'));
+            document.getElementById('rejectVisitorPass').addEventListener('click', () => updatePassStatus('visitor', 'rejected'));
+            document.getElementById('cancelIssuerVisitorPass').addEventListener('click', cancelIssuerVisitorPassForm);
+
+            // Notifications
+            document.getElementById('viewNotifications').addEventListener('click', showNotifications);
+        }
+
+        function loadInitialData() {
+            // Load next pass numbers from localStorage
+            const savedMaterialNumber = localStorage.getItem('nextMaterialPassNumber');
+            if (savedMaterialNumber) {
+                nextMaterialPassNumber = parseInt(savedMaterialNumber);
+            }
+
+            const savedVisitorNumber = localStorage.getItem('nextVisitorPassNumber');
+            if (savedVisitorNumber) {
+                nextVisitorPassNumber = parseInt(savedVisitorNumber);
+            }
+
+            // Load current mode if exists
+            if (localStorage.getItem('currentMode')) {
+                currentMode = localStorage.getItem('currentMode');
+                updateUIForMode();
+                document.getElementById('currentModeDisplay').textContent = `Current mode: ${getModeDisplayName(currentMode)}`;
+            }
+
+            // Set up tab switching
+            const tabEl = document.querySelector(`#${currentMode}-tab`);
+            if (tabEl) {
+                new bootstrap.Tab(tabEl).show();
+            }
+        }
+
+        function getModeDisplayName(mode) {
+            switch (mode) {
+                case 'issuer': return 'Issuer Mode';
+                case 'requester': return 'Requester Mode';
+                default: return 'Default View';
+            }
+        }
+
+        function verifyPassword(modal, correctPassword, mode) {
+            const passwordInput = document.getElementById('passwordInput');
+            const passwordError = document.getElementById('passwordError');
+
+            if (passwordInput.value === correctPassword) {
+                currentMode = mode;
+                localStorage.setItem('currentMode', mode);
+                updateUIForMode();
+                modal.hide();
+                passwordInput.value = '';
+                passwordError.classList.add('d-none');
+                document.getElementById('currentModeDisplay').textContent = `Current mode: ${getModeDisplayName(mode)}`;
+
+                // Show the appropriate tab
+                const tabEl = document.querySelector(`#${mode}-tab`);
+                if (tabEl) {
+                    new bootstrap.Tab(tabEl).show();
+                }
+
+                // Load passes for the new mode
+                loadPassesForCurrentMode();
+
+                // If entering issuer mode, check for pending passes
+                if (mode === 'issuer') {
+                    checkForPendingPasses();
+                }
+            } else {
+                passwordError.classList.remove('d-none');
+            }
+        }
+
+        function updateUIForMode() {
+            // Update the active tab based on current mode
+            const tabs = document.querySelectorAll('.mode-tabs .nav-link');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const activeTab = document.querySelector(`#${currentMode}-tab`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+
+            // Update tab content visibility
+            const tabContents = document.querySelectorAll('.tab-content .tab-pane');
+            tabContents.forEach(content => content.classList.remove('show', 'active'));
+
+            const activeContent = document.querySelector(`#${currentMode}-content`);
+            if (activeContent) {
+                activeContent.classList.add('show', 'active');
+            }
+
+            // Hide pass forms by default
+            document.getElementById('requesterMaterialPassFormCard').classList.add('d-none');
+            document.getElementById('requesterVisitorPassFormCard').classList.add('d-none');
+            document.getElementById('issuerMaterialPassFormCard').classList.add('d-none');
+            document.getElementById('issuerVisitorPassFormCard').classList.add('d-none');
+
+            // Show appropriate lists
+            document.getElementById('draftPassesList').classList.remove('d-none');
+            document.getElementById('submittedPassesList').classList.remove('d-none');
+        }
+
+        function loadPassesForCurrentMode() {
+            const passes = getAllPasses();
+
+            if (currentMode === 'requester') {
+                // Load draft passes for requester
+                const draftPasses = Object.values(passes).filter(p => p.status === 'draft');
+                renderDraftPasses(draftPasses);
+            } else if (currentMode === 'issuer') {
+                // Load submitted passes for issuer
+                const submittedPasses = Object.values(passes).filter(p => p.status === 'submitted');
+                renderSubmittedPasses(submittedPasses);
+            } else {
+                // Load completed passes for no-select mode, separated by type
+                const completedPasses = Object.values(passes).filter(p => p.status === 'approved' || p.status === 'rejected');
+
+                // Separate material and visitor passes
+                const materialPasses = completedPasses.filter(p => p.type === 'material');
+                const visitorPasses = completedPasses.filter(p => p.type === 'visitor');
+
+                // Sort material passes by pass number (newest first)
+                const sortedMaterialPasses = materialPasses.sort((a, b) => {
+                    if (a.passNumber && b.passNumber) {
+                        return b.passNumber.localeCompare(a.passNumber);
+                    }
+                    return 0;
+                });
+
+                // Sort visitor passes by pass number (newest first)
+                const sortedVisitorPasses = visitorPasses.sort((a, b) => {
+                    if (a.passNumber && b.passNumber) {
+                        return b.passNumber.localeCompare(a.passNumber);
+                    }
+                    return 0;
+                });
+
+                renderCompletedPasses(sortedMaterialPasses, 'material');
+                renderCompletedPasses(sortedVisitorPasses, 'visitor');
+            }
+        }
+
+        function renderDraftPasses(passes) {
+            const container = document.getElementById('draftPassesList');
+            container.innerHTML = '';
+
+            if (passes.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No draft passes found</div>';
+                return;
+            }
+
+            passes.forEach(pass => {
+                const passElement = document.createElement('div');
+                passElement.className = 'permit-list-item';
+                passElement.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <div class="permit-number">${pass.type === 'material' ? 'Material Pass Draft' : 'Visitor Pass Draft'}</div>
+                        <div class="permit-status">
+                            <span class="badge bg-secondary">DRAFT</span>
+                        </div>
+                    </div>
+                    <div class="permit-details">
+                        <div><span class="detail-label">Company:</span> ${pass.companyName || 'Not specified'}</div>
+                        <div><span class="detail-label">Applicant:</span> ${pass.applicantName || 'Not specified'}</div>
+                        <div><span class="detail-label">Date:</span> ${pass.applicantDate || 'Not specified'}</div>
+                    </div>
+                `;
+
+                passElement.addEventListener('click', () => {
+                    if (pass.type === 'material') {
+                        loadPassForRequester(pass.id, 'material');
+                    } else {
+                        loadPassForRequester(pass.id, 'visitor');
+                    }
+                });
+
+                container.appendChild(passElement);
+            });
+        }
+
+        function renderSubmittedPasses(passes) {
+            const container = document.getElementById('submittedPassesList');
+            container.innerHTML = '';
+
+            if (passes.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No submitted passes found</div>';
+                return;
+            }
+
+            passes.forEach(pass => {
+                const passElement = document.createElement('div');
+                passElement.className = 'permit-list-item';
+                passElement.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <div class="permit-number">${pass.type === 'material' ? 'Material Pass' : 'Visitor Pass'}</div>
+                        <div class="permit-status">
+                            <span class="badge bg-primary">SUBMITTED</span>
+                        </div>
+                    </div>
+                    <div class="permit-details">
+                        <div><span class="detail-label">Company:</span> ${pass.companyName || 'Not specified'}</div>
+                        <div><span class="detail-label">Applicant:</span> ${pass.applicantName || 'Not specified'}</div>
+                        <div><span class="detail-label">Date:</span> ${pass.applicantDate || 'Not specified'}</div>
+                    </div>
+                `;
+
+                passElement.addEventListener('click', () => {
+                    if (pass.type === 'material') {
+                        loadPassForIssuer(pass.id, 'material');
+                    } else {
+                        loadPassForIssuer(pass.id, 'visitor');
+                    }
+                });
+
+                container.appendChild(passElement);
+            });
+        }
+
+        function renderCompletedPasses(passes, type) {
+            const containerId = type === 'material' ? 'completedMaterialPassesList' : 'completedVisitorPassesList';
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (passes.length === 0) {
+                container.innerHTML = `<div class="alert alert-info">No ${type} passes found</div>`;
+                return;
+            }
+
+            passes.forEach(pass => {
+                const passElement = document.createElement('div');
+                passElement.className = 'permit-list-item';
+                passElement.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <div class="permit-number">${pass.passNumber || 'No Number'}</div>
+                        <div class="permit-status">
+                            <span class="badge ${pass.status === 'approved' ? 'bg-success' : 'bg-danger'}">
+                                ${pass.status.toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="permit-details">
+                        <div><span class="detail-label">Company:</span> ${pass.companyName || 'Not specified'}</div>
+                        <div><span class="detail-label">${type === 'material' ? 'Applicant' : 'Approver'}:</span> ${pass.applicantName || pass.approverName || 'Not specified'}</div>
+                        <div><span class="detail-label">Status Date:</span> ${pass.approverDate || 'Not specified'}</div>
+                    </div>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-primary view-pass-btn" data-pass-id="${pass.id}">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary download-pass-btn" data-pass-id="${pass.id}">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(passElement);
+            });
+
+            // Add event listeners to view buttons
+            document.querySelectorAll(`#${containerId} .view-pass-btn`).forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const passId = e.target.getAttribute('data-pass-id') ||
+                        e.target.closest('button').getAttribute('data-pass-id');
+                    viewPassDetails(passId);
+                });
+            });
+
+            // Add event listeners to download buttons
+            document.querySelectorAll(`#${containerId} .download-pass-btn`).forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const passId = e.target.getAttribute('data-pass-id') ||
+                        e.target.closest('button').getAttribute('data-pass-id');
+                    downloadPassAsPDF(passId);
+                });
+            });
+        }
+        function showNewMaterialPassForm() {
+            // Hide visitor form if open
+            document.getElementById('requesterVisitorPassFormCard').classList.add('d-none');
+            resetMaterialForm();
+            document.getElementById('requesterMaterialPassFormCard').classList.remove('d-none');
+            document.getElementById('draftPassesList').classList.add('d-none');
+
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const time = now.toTimeString().substring(0, 5);
+            document.getElementById('requesterApplicantDate').value = `${today}T${time}`;
+        }
+
+        function showNewVisitorPassForm() {
+            // Hide material form if open
+            document.getElementById('requesterMaterialPassFormCard').classList.add('d-none');
+            resetVisitorForm();
+            document.getElementById('requesterVisitorPassFormCard').classList.remove('d-none');
+            document.getElementById('draftPassesList').classList.add('d-none');
+
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const time = now.toTimeString().substring(0, 5);
+            document.getElementById('visitapplicationdate').value = `${today}T${time}`;
+        }
+        function cancelMaterialPassForm() {
+            document.getElementById('requesterMaterialPassFormCard').classList.add('d-none');
+            document.getElementById('draftPassesList').classList.remove('d-none');
+            loadPassesForCurrentMode();
+        }
+
+        function cancelVisitorPassForm() {
+            document.getElementById('requesterVisitorPassFormCard').classList.add('d-none');
+            document.getElementById('draftPassesList').classList.remove('d-none');
+            loadPassesForCurrentMode();
+        }
+
+        function cancelIssuerMaterialPassForm() {
+            document.getElementById('issuerMaterialPassFormCard').classList.add('d-none');
+            document.getElementById('submittedPassesList').classList.remove('d-none');
+            loadPassesForCurrentMode();
+        }
+
+        function cancelIssuerVisitorPassForm() {
+            document.getElementById('issuerVisitorPassFormCard').classList.add('d-none');
+            document.getElementById('submittedPassesList').classList.remove('d-none');
+            loadPassesForCurrentMode();
+        }
+
+        function saveAsDraft(type) {
+            const passData = collectFormData(type);
+            passData.status = 'draft';
+            passData.type = type;
+
+            // Generate a unique ID for this pass if it doesn't have one
+            if (!currentPassId) {
+                currentPassId = 'pass-' + Date.now();
+            }
+
+            passData.id = currentPassId;
+            savePass(passData);
+            updateStatusDisplay(type, 'draft');
+
+            // Set as current pass
+            localStorage.setItem('currentPassId', currentPassId);
+
+            // Show success message and reload passes
+            alert(`${type === 'material' ? 'Material' : 'Visitor'} pass saved as draft successfully!`);
+            loadPassesForCurrentMode();
+
+            if (type === 'material') {
+                cancelMaterialPassForm();
+            } else {
+                cancelVisitorPassForm();
+            }
+        }
+
+        function submitPassRequest(type) {
+            const approverSelect = document.getElementById(`${type === 'material' ? 'approver' : 'approvervisisto'}Select`);
+
+            // Check if approver is selected
+            if (!approverSelect || !approverSelect.value) {
+                alert('Please select an approver');
+                return;
+            }
+
+            const signatureId = type === 'material' ? 'requesterApplicantSignature' : 'requesterApproverSignature';
+            if (signaturePads[signatureId].isEmpty()) {
+                alert('Please provide your signature');
+                return;
+            }
+
+            // Validate required fields
+            if (type === 'material') {
+                const companyName = document.getElementById('requesterCompanyName').value;
+                const applicantName = document.getElementById('requesterApplicantName').value;
+                const purpose = document.getElementById('requesterReason').value;
+
+                if (!companyName || !applicantName || !purpose) {
+                    alert('Please fill all required fields');
+                    return;
+                }
+            } else {
+                const companyName = document.getElementById('requesterVisitorCompany').value;
+                const visitorCount = document.getElementById('requesterVisitorCount').value;
+                const approverName = document.getElementById('requesterApproverName').value;
+
+                if (!companyName || !visitorCount || !approverName) {
+                    alert('Please fill all required fields');
+                    return;
+                }
+            }
+
+            const passData = collectFormData(type);
+            passData.status = 'submitted';
+            passData.type = type;
+            passData.selectedApprover = approverSelect.value;
+
+            // Generate a unique ID for this pass if it doesn't have one
+            if (!currentPassId) {
+                currentPassId = 'pass-' + Date.now();
+            }
+
+            passData.id = currentPassId;
+            savePass(passData);
+            updateStatusDisplay(type, 'submitted');
+
+            // Save as current pass
+            localStorage.setItem('currentPassId', currentPassId);
+
+            // Create a notification for the issuer
+            createNotification(passData);
+
+            alert(`${type === 'material' ? 'Material' : 'Visitor'} pass submitted successfully to ${approverSelect.value}!`);
+            loadPassesForCurrentMode();
+
+            if (type === 'material') {
+                cancelMaterialPassForm();
+            } else {
+                cancelVisitorPassForm();
+            }
+        }
+
+        function updatePassStatus(type, status) {
+            const signatureId = type === 'material' ? 'issuerApproverSignature' : 'issuerVisitorApproverSignature';
+            if (signaturePads[signatureId].isEmpty()) {
+                alert('Please provide your signature as the approver');
+                return;
+            }
+
+            // Get current pass data
+            const passData = getPass(currentPassId);
+            if (!passData) {
+                alert('No pass found to update');
+                return;
+            }
+
+            // Set current date and time for approver
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const time = now.toTimeString().substring(0, 5);
+
+            // Update status
+            passData.status = status;
+            passData.finalStatus = status;
+
+            // Assign pass number if approving
+            if (status === 'approved') {
+                if (type === 'material') {
+                    passData.passNumber = `SJNPV-GP-${nextMaterialPassNumber.toString().padStart(4, '0')}`;
+                    nextMaterialPassNumber++;
+                    localStorage.setItem('nextMaterialPassNumber', nextMaterialPassNumber);
+                } else {
+                    passData.passNumber = `SJNPV-VP-${nextVisitorPassNumber.toString().padStart(4, '0')}`;
+                    nextVisitorPassNumber++;
+                    localStorage.setItem('nextVisitorPassNumber', nextVisitorPassNumber);
+                }
+            }
+
+            // Update approver info
+            passData.approverName = document.getElementById(`issuer${type === 'material' ? 'Approver' : 'VisitorApprover'}Name`).value;
+            passData.approverDate = today;
+            passData.approverTime = time;
+            passData.approverSignature = signaturePads[signatureId].toDataURL();
+
+            // Save updated pass
+            savePass(passData);
+
+            // Remove from pending notifications
+            removeNotification(currentPassId);
+
+            // Show success message and reload passes
+            alert(`${type === 'material' ? 'Material' : 'Visitor'} pass ${status} successfully!`);
+            loadPassesForCurrentMode();
+
+            if (type === 'material') {
+                cancelIssuerMaterialPassForm();
+            } else {
+                cancelIssuerVisitorPassForm();
+            }
+        }
+
+        function collectFormData(type) {
+            if (type === 'material') {
+                const formData = {
+                    id: currentPassId,
+                    type: 'material',
+                    projectName: document.getElementById('requesterProjectName').value,
+                    companyName: document.getElementById('requesterCompanyName').value,
+                    deliveryDate: document.getElementById('Deliveryorpulloutdate').value,
+                    applicantDate: document.getElementById('requesterApplicantDate').value,
+                    materialCategory: document.getElementById('materialCategory').value,
+                    movementType: document.getElementById('movementType').value,
+                    reason: document.getElementById('requesterReason').value,
+                    vehicleNumber: document.getElementById('requesterVehicleNumber').value,
+                    vehicleReg: document.getElementById('requesterVehicleReg').value,
+                    vehicleType: document.getElementById('requesterVehicleType').value,
+                    driverLicense: document.getElementById('driverLicense').value,
+                    applicantName: document.getElementById('requesterApplicantName').value,
+                    deliveryLocation: document.getElementById('Deliveryorpulloutlocation').value,
+                    selectedApprover: document.getElementById('approverSelect').value,
+                    applicantSignature: signaturePads['requesterApplicantSignature'].toDataURL(),
+                    status: 'draft',
+                    materials: []
+                };
+
+                // Collect materials
+                const materialRows = document.querySelectorAll('#requesterMaterialTable tbody tr');
+                materialRows.forEach(row => {
+                    const itemCode = row.querySelector('input[name="materialItemCode"]')?.value || '';
+                    const desc = row.querySelector('input[name="materialDesc"]')?.value || '';
+                    const qty = row.querySelector('input[name="materialQty"]')?.value || '';
+                    const serial = row.querySelector('input[name="materialSerial"]')?.value || '';
+                    const condition = row.querySelector('input[name="materialCondition"]')?.value || '';
+
+                    if (itemCode || desc || qty || serial || condition) {
+                        formData.materials.push({
+                            itemCode: itemCode,
+                            description: desc,
+                            quantity: qty,
+                            serialNumbers: serial,
+                            condition: condition
+                        });
+                    }
+                });
+
+                return formData;
+            } else {
+                const formData = {
+                    id: currentPassId,
+                    type: 'visitor',
+                    projectName: document.getElementById('requesterProjectName').value,
+                    companyName: document.getElementById('requesterVisitorCompany').value,
+                    visitStart: document.getElementById('visitstartdate').value,
+                    visitEnd: document.getElementById('requesterVisitEnd').value,
+                    visitorCount: document.getElementById('requesterVisitorCount').value,
+                    visitArea: document.getElementById('Area of Plant Visit').value,
+                    visitPurpose: document.getElementById('Purpose of Visit').value,
+                    vehicleNumber: document.getElementById('requesterVisitorVehicleNumber').value,
+                    vehicleReg: document.getElementById('requesterVisitorVehicleReg').value,
+                    vehicleType: document.getElementById('requesterVisitorVehicleType').value,
+                    driverLicense: document.getElementById('requesterVisitorDriverLicense').value,
+                    approverName: document.getElementById('requesterApproverName').value,
+                    applicationDate: document.getElementById('visitapplicationdate').value,
+                    selectedApprover: document.getElementById('approvervisistoSelect').value,
+                    applicantSignature: signaturePads['requesterApproverSignature'].toDataURL(),
+                    status: 'draft',
+                    visitors: []
+                };
+
+                // Collect visitors
+                const visitorRows = document.querySelectorAll('#requesterVisitorTable tbody tr');
+                visitorRows.forEach(row => {
+                    const name = row.querySelector('input[name="visitorName"]')?.value || '';
+                    const id = row.querySelector('input[name="visitorId"]')?.value || '';
+                    const nationality = row.querySelector('input[name="visitorNationality"]')?.value || '';
+                    const contact = row.querySelector('input[name="visitorContact"]')?.value || '';
+
+                    if (name || id || nationality || contact) {
+                        formData.visitors.push({
+                            name: name,
+                            id: id,
+                            nationality: nationality,
+                            contact: contact
+                        });
+                    }
+                });
+
+                return formData;
+            }
+        }
+
+        function savePass(passData) {
+            const passes = getAllPasses();
+            passes[passData.id] = passData;
+            localStorage.setItem('passes', JSON.stringify(passes));
+        }
+
+        function getPass(passId) {
+            const passes = getAllPasses();
+            return passes[passId];
+        }
+
+        function getAllPasses() {
+            const passesJson = localStorage.getItem('passes');
+            return passesJson ? JSON.parse(passesJson) : {};
+        }
+
+        function loadPassForRequester(passId, type) {
+            const pass = getPass(passId);
+            if (!pass) {
+                alert('Pass not found');
+                return;
+            }
+
+            currentPassId = passId;
+
+            if (type === 'material') {
+                // Set basic info
+                document.getElementById('requesterProjectName').value = pass.projectName || '';
+                document.getElementById('requesterCompanyName').value = pass.companyName || '';
+                document.getElementById('Deliveryorpulloutdate').value = pass.deliveryDate || '';
+                document.getElementById('requesterApplicantDate').value = pass.applicantDate || '';
+                document.getElementById('materialCategory').value = pass.materialCategory || '';
+                document.getElementById('movementType').value = pass.movementType || '';
+                document.getElementById('requesterReason').value = pass.reason || '';
+                document.getElementById('requesterVehicleNumber').value = pass.vehicleNumber || '';
+                document.getElementById('requesterVehicleReg').value = pass.vehicleReg || '';
+                document.getElementById('requesterVehicleType').value = pass.vehicleType || '';
+                document.getElementById('driverLicense').value = pass.driverLicense || '';
+                document.getElementById('requesterApplicantName').value = pass.applicantName || '';
+                document.getElementById('Deliveryorpulloutlocation').value = pass.deliveryLocation || '';
+                document.getElementById('approverSelect').value = pass.selectedApprover || '';
+
+                // Set materials
+                const materialTable = document.querySelector('#requesterMaterialTable tbody');
+                materialTable.innerHTML = '';
+
+                if (pass.materials && pass.materials.length > 0) {
+                    pass.materials.forEach(material => {
+                        addMaterialRow(material);
+                    });
+                }
+
+                // Load signature if exists
+                if (pass.applicantSignature) {
+                    signaturePads['requesterApplicantSignature'].fromDataURL(pass.applicantSignature);
+                }
+
+                // Update status display
+                updateStatusDisplay('material', pass.status || 'draft');
+
+                // Show the form
+                document.getElementById('requesterMaterialPassFormCard').classList.remove('d-none');
+                document.getElementById('draftPassesList').classList.add('d-none');
+            } else {
+                // Set basic info
+                document.getElementById('requesterProjectName').value = pass.projectName || '';
+                document.getElementById('requesterVisitorCompany').value = pass.companyName || '';
+                document.getElementById('visitstartdate').value = pass.visitStart || '';
+                document.getElementById('requesterVisitEnd').value = pass.visitEnd || '';
+                document.getElementById('requesterVisitorCount').value = pass.visitorCount || '';
+                document.getElementById('Area of Plant Visit').value = pass.visitArea || '';
+                document.getElementById('Purpose of Visit').value = pass.visitPurpose || '';
+                document.getElementById('requesterVisitorVehicleNumber').value = pass.vehicleNumber || '';
+                document.getElementById('requesterVisitorVehicleReg').value = pass.vehicleReg || '';
+                document.getElementById('requesterVisitorVehicleType').value = pass.vehicleType || '';
+                document.getElementById('requesterVisitorDriverLicense').value = pass.driverLicense || '';
+                document.getElementById('requesterApproverName').value = pass.approverName || '';
+                document.getElementById('visitapplicationdate').value = pass.applicationDate || '';
+                document.getElementById('approvervisistoSelect').value = pass.selectedApprover || '';
+
+                // Set visitors
+                const visitorTable = document.querySelector('#requesterVisitorTable tbody');
+                visitorTable.innerHTML = '';
+
+                if (pass.visitors && pass.visitors.length > 0) {
+                    pass.visitors.forEach((visitor, index) => {
+                        addVisitorRow(visitor, index + 1);
+                    });
+                }
+
+                // Load signature if exists
+                if (pass.approverSignature) {
+                    signaturePads['requesterApproverSignature'].fromDataURL(pass.approverSignature);
+                }
+
+                // Update status display
+                updateStatusDisplay('visitor', pass.status || 'draft');
+
+                // Show the form
+                document.getElementById('requesterVisitorPassFormCard').classList.remove('d-none');
+                document.getElementById('draftPassesList').classList.add('d-none');
+            }
+        }
+
+        function loadPassForIssuer(passId, type) {
+            const pass = getPass(passId);
+            if (!pass) {
+                alert('Pass not found');
+                return;
+            }
+
+            currentPassId = passId;
+
+            if (type === 'material') {
+                // Set basic info
+                document.getElementById('issuerProjectName').value = pass.projectName || '';
+                document.getElementById('issuerCompanyName').value = pass.companyName || '';
+                document.getElementById('issuerDeliveryDate').value = pass.deliveryDate || '';
+                document.getElementById('issuerRequestDate').value = pass.applicantDate || '';
+                document.getElementById('issuerMaterialCategory').value = pass.materialCategory || '';
+                document.getElementById('issuerMovementType').value = pass.movementType || '';
+                document.getElementById('issuerReason').value = pass.reason || '';
+                document.getElementById('issuerVehicleNumber').value = pass.vehicleNumber || '';
+                document.getElementById('issuerVehicleReg').value = pass.vehicleReg || '';
+                document.getElementById('issuerVehicleType').value = pass.vehicleType || '';
+                document.getElementById('issuerDriverLicense').value = pass.driverLicense || '';
+                document.getElementById('issuerApplicantName').value = pass.applicantName || '';
+                document.getElementById('issuerApproverName').value = pass.selectedApprover || '';
+
+                // Set materials
+                const materialTable = document.querySelector('#issuerMaterialTable tbody');
+                materialTable.innerHTML = '';
+
+                if (pass.materials && pass.materials.length > 0) {
+                    pass.materials.forEach(material => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${material.itemCode || ''}</td>
+                            <td>${material.description || ''}</td>
+                            <td>${material.quantity || ''}</td>
+                            <td>${material.serialNumbers || ''}</td>
+                            <td>${material.condition || ''}</td>
+                        `;
+                        materialTable.appendChild(row);
+                    });
+                }
+
+                // Load signature if exists
+                // Load signature if exists
+                if (pass.applicantSignature) {
+                    document.getElementById('issuerVisitorRequestorSignatureImg').src = pass.applicantSignature;
+                }
+
+                // Update status display
+                updateStatusDisplay('material', pass.status || 'submitted', true);
+
+                // Show the form
+                document.getElementById('issuerMaterialPassFormCard').classList.remove('d-none');
+                document.getElementById('submittedPassesList').classList.add('d-none');
+            } else {
+                // Set basic info
+                document.getElementById('issuerVisitorProjectName').value = pass.projectName || '';
+                document.getElementById('issuerVisitorCompany').value = pass.companyName || '';
+                document.getElementById('issuerVisitStartDate').value = pass.visitStart || '';
+                document.getElementById('issuerVisitEndDate').value = pass.visitEnd || '';
+                document.getElementById('issuerVisitorCount').value = pass.visitorCount || '';
+                document.getElementById('issuerVisitorArea').value = pass.visitArea || '';
+                document.getElementById('issuerVisitPurpose').value = pass.visitPurpose || '';
+                document.getElementById('issuerVisitorVehicleNumber').value = pass.vehicleNumber || '';
+                document.getElementById('issuerVisitorVehicleReg').value = pass.vehicleReg || '';
+                document.getElementById('issuerVisitorVehicleType').value = pass.vehicleType || '';
+                document.getElementById('issuerVisitorDriverLicense').value = pass.driverLicense || '';
+                document.getElementById('issuerVisitorRequestorName').value = pass.approverName || '';
+                document.getElementById('issuerVisitorApproverName').value = pass.selectedApprover || '';
+
+                // Set visitors
+                const visitorTable = document.querySelector('#issuerVisitorTable tbody');
+                visitorTable.innerHTML = '';
+
+                if (pass.visitors && pass.visitors.length > 0) {
+                    pass.visitors.forEach((visitor, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${visitor.name || ''}</td>
+                            <td>${visitor.id || ''}</td>
+                            <td>${visitor.nationality || ''}</td>
+                            <td>${visitor.contact || ''}</td>
+                        `;
+                        visitorTable.appendChild(row);
+                    });
+                }
+
+                // Load signature if exists
+                if (pass.approverSignature) {
+                    document.getElementById('issuerVisitorRequestorSignatureImg').src = pass.approverSignature;
+                }
+
+                // Update status display
+                updateStatusDisplay('visitor', pass.status || 'submitted', true);
+
+                // Show the form
+                document.getElementById('issuerVisitorPassFormCard').classList.remove('d-none');
+                document.getElementById('submittedPassesList').classList.add('d-none');
+            }
+        }
+
+        function updateStatusDisplay(type, status, isIssuer = false) {
+            const statusElement = isIssuer ?
+                document.getElementById(`issuer${type === 'material' ? 'Material' : 'Visitor'}PassStatus`) :
+                document.getElementById(`${type}PassStatus`);
+
+            const finalStatusElement = isIssuer ?
+                document.getElementById(`issuer${type === 'material' ? 'Material' : 'Visitor'}FinalStatusDisplay`) :
+                document.getElementById(`${type}FinalStatusDisplay`);
+
+            // Update status badge
+            if (statusElement) {
+                statusElement.className = 'status-badge';
+                statusElement.classList.add(`status-${status}`);
+                statusElement.textContent = status.toUpperCase();
+            }
+
+            // Update final status display if approved/rejected
+            if (finalStatusElement) {
+                if (status === 'approved' || status === 'rejected') {
+                    finalStatusElement.className = `final-status status-${status}`;
+                    finalStatusElement.textContent = status.toUpperCase();
+                    finalStatusElement.classList.remove('d-none');
+                } else {
+                    finalStatusElement.classList.add('d-none');
+                }
+            }
+        }
+
+        function addMaterialRow(materialData = {}) {
+            const tableBody = document.querySelector('#requesterMaterialTable tbody');
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td><input type="text" class="form-control form-control-sm" name="materialItemCode" value="${materialData.itemCode || ''}" required></td>
+                <td><input type="text" class="form-control form-control-sm" name="materialDesc" value="${materialData.description || ''}" required></td>
+                <td><input type="text" class="form-control form-control-sm" name="materialQty" value="${materialData.quantity || ''}" required></td>
+                <td><input type="text" class="form-control form-control-sm" name="materialSerial" value="${materialData.serialNumbers || ''}"></td>
+                <td><input type="text" class="form-control form-control-sm" name="materialCondition" value="${materialData.condition || ''}"></td>
+                <td><button type="button" class="btn btn-sm btn-danger remove-material"><i class="fas fa-trash"></i></button></td>
+            `;
+
+            tableBody.appendChild(row);
+
+            // Add event listener to remove button
+            row.querySelector('.remove-material').addEventListener('click', () => {
+                row.remove();
+            });
+        }
+
+        function addVisitorRow(visitorData = {}, index = null) {
+            const tableBody = document.querySelector('#requesterVisitorTable tbody');
+            const row = document.createElement('tr');
+            const rowIndex = index || (tableBody.children.length + 1);
+
+            row.innerHTML = `
+                <td>${rowIndex}</td>
+                <td><input type="text" class="form-control form-control-sm" name="visitorName" value="${visitorData.name || ''}" required></td>
+                <td><input type="text" class="form-control form-control-sm" name="visitorId" value="${visitorData.id || ''}" required></td>
+                <td><input type="text" class="form-control form-control-sm" name="visitorNationality" value="${visitorData.nationality || ''}" required></td>
+                <td><input type="text" class="form-control form-control-sm" name="visitorContact" value="${visitorData.contact || ''}" required></td>
+                <td><button type="button" class="btn btn-sm btn-danger remove-visitor"><i class="fas fa-trash"></i></button></td>
+            `;
+
+            tableBody.appendChild(row);
+
+            // Add event listener to remove button
+            row.querySelector('.remove-visitor').addEventListener('click', () => {
+                row.remove();
+                // Update row numbers
+                updateVisitorRowNumbers();
+            });
+        }
+
+        function updateVisitorRowNumbers() {
+            const rows = document.querySelectorAll('#requesterVisitorTable tbody tr');
+            rows.forEach((row, index) => {
+                row.cells[0].textContent = index + 1;
+            });
+        }
+
+        function resetMaterialForm() {
+            document.getElementById('requesterMaterialForm').reset();
+            signaturePads['requesterApplicantSignature'].clear();
+            document.querySelector('#requesterMaterialTable tbody').innerHTML = '';
+            currentPassId = null;
+            updateStatusDisplay('material', 'draft');
+            document.getElementById('materialFinalStatusDisplay').classList.add('d-none');
+        }
+
+        function resetVisitorForm() {
+            document.getElementById('requesterVisitorForm').reset();
+            signaturePads['requesterApproverSignature'].clear();
+            document.querySelector('#requesterVisitorTable tbody').innerHTML = '';
+            currentPassId = null;
+            updateStatusDisplay('visitor', 'draft');
+            document.getElementById('visitorFinalStatusDisplay').classList.add('d-none');
+        }
+
+        function setDefaultDates() {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const time = now.toTimeString().substring(0, 5);
+
+            // Set default dates for material form
+            const materialDateInput = document.getElementById('requesterApplicantDate');
+            if (materialDateInput) {
+                materialDateInput.value = `${today}T${time}`;
+            }
+
+            // Set default dates for visitor form
+            const visitorStartInput = document.getElementById('visitstartdate');
+            const visitorEndInput = document.getElementById('requesterVisitEnd');
+            if (visitorStartInput && visitorEndInput) {
+                visitorStartInput.value = `${today}T${time}`;
+                visitorEndInput.value = `${today}T${time}`;
+            }
+        }
+
+        function createNotification(passData) {
+            const notifications = getNotifications();
+            const notificationId = `notif-${Date.now()}`;
+
+            notifications[notificationId] = {
+                id: notificationId,
+                passId: passData.id,
+                passType: passData.type,
+                companyName: passData.companyName,
+                applicantName: passData.applicantName,
+                date: new Date().toISOString(),
+                status: 'pending'
+            };
+
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+
+            // Update notification badge
+            checkForPendingPasses();
+        }
+
+        function removeNotification(passId) {
+            const notifications = getNotifications();
+            let found = false;
+
+            for (const [id, notification] of Object.entries(notifications)) {
+                if (notification.passId === passId) {
+                    delete notifications[id];
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found) {
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+                checkForPendingPasses();
+            }
+        }
+
+        function getNotifications() {
+            const notificationsJson = localStorage.getItem('notifications');
+            return notificationsJson ? JSON.parse(notificationsJson) : {};
+        }
+
+        function checkForPendingPasses() {
+            if (currentMode !== 'issuer') return;
+
+            const notifications = getNotifications();
+            const pendingCount = Object.values(notifications).filter(n => n.status === 'pending').length;
+
+            const badge = document.getElementById('issuerNotificationBadge');
+            const activeBadge = document.getElementById('activeNotificationBadge');
+
+            if (pendingCount > 0) {
+                badge.textContent = pendingCount;
+                badge.classList.remove('d-none');
+                activeBadge.textContent = pendingCount;
+                activeBadge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+                activeBadge.classList.add('d-none');
+            }
+        }
+
+        function showNotifications() {
+            const notifications = getNotifications();
+            const pendingNotifications = Object.values(notifications).filter(n => n.status === 'pending');
+
+            const notificationsList = document.getElementById('notificationsList');
+            notificationsList.innerHTML = '';
+
+            if (pendingNotifications.length === 0) {
+                notificationsList.innerHTML = '<div class="alert alert-info">No pending notifications</div>';
+            } else {
+                pendingNotifications.forEach(notification => {
+                    const notificationElement = document.createElement('div');
+                    notificationElement.className = 'notification-item';
+                    notificationElement.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="requester-name">${notification.applicantName || 'Unknown'}</span> from 
+                                <span class="company-name">${notification.companyName || 'Unknown Company'}</span>
+                            </div>
+                            <div class="date">${new Date(notification.date).toLocaleString()}</div>
+                        </div>
+                        <div class="location">${notification.passType === 'material' ? 'Material Gate Pass' : 'Visitor Gate Pass'}</div>
+                    `;
+
+                    notificationElement.addEventListener('click', () => {
+                        loadPassForIssuer(notification.passId, notification.passType);
+                        document.getElementById('notificationsModal').querySelector('.btn-close').click();
+                    });
+
+                    notificationsList.appendChild(notificationElement);
+                });
+            }
+
+            // Show the modal
+            const notificationsModal = new bootstrap.Modal(document.getElementById('notificationsModal'));
+            notificationsModal.show();
+        }
+        document.getElementById('timeFilter').addEventListener('change', function () {
+            const customRange = document.getElementById('customDateRange');
+            customRange.style.display = this.value === 'custom' ? 'block' : 'none';
+        });
+
+        document.getElementById('applyFilter').addEventListener('click', function () {
+            const filterValue = document.getElementById('timeFilter').value;
+            const now = new Date();
+            let startDate, endDate;
+
+            switch (filterValue) {
+                case 'today':
+                    startDate = new Date(now.setHours(0, 0, 0, 0));
+                    endDate = new Date(now.setHours(23, 59, 59, 999));
+                    break;
+                case 'week':
+                    startDate = new Date(now.setDate(now.getDate() - now.getDay()));
+                    startDate.setHours(0, 0, 0, 0);
+                    endDate = new Date(now.setDate(now.getDate() + 6));
+                    endDate.setHours(23, 59, 59, 999);
+                    break;
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    endDate.setHours(23, 59, 59, 999);
+                    break;
+                case 'custom':
+                    const startInput = document.getElementById('startDate').value;
+                    const endInput = document.getElementById('endDate').value;
+                    if (!startInput || !endInput) {
+                        alert('Please select both start and end dates');
+                        return;
+                    }
+                    startDate = new Date(startInput);
+                    endDate = new Date(endInput);
+                    endDate.setHours(23, 59, 59, 999);
+                    break;
+            }
+
+            filterCompletedPasses(startDate, endDate);
+        });
+
+        function filterCompletedPasses(startDate, endDate) {
+            const passes = Object.values(getAllPasses()).filter(p =>
+                p.status === 'approved' || p.status === 'rejected'
+            );
+
+            const filteredPasses = passes.filter(pass => {
+                const passDate = new Date(pass.approverDate);
+                return passDate >= startDate && passDate <= endDate;
+            });
+
+            // Separate material and visitor passes
+            const materialPasses = filteredPasses.filter(p => p.type === 'material');
+            const visitorPasses = filteredPasses.filter(p => p.type === 'visitor');
+
+            renderCompletedPasses(materialPasses, 'material');
+            renderCompletedPasses(visitorPasses, 'visitor');
+        }
+
+        function viewPassDetails(passId) {
+            const pass = getPass(passId);
+            if (!pass) {
+                alert('Pass not found');
+                return;
+            }
+
+            // Create a modal to display pass details
+            const modalHtml = `
+                <div class="modal fade" id="viewPassModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Gate Pass Details - ${pass.passNumber}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="permit-info-box">
+                                    <div class="info-title">Basic Information</div>
+                                    <div class="info-content">
+                                        <div><strong>Type:</strong> ${pass.type === 'material' ? 'Material Gate Pass' : 'Visitor Gate Pass'}</div>
+                                        <div><strong>Status:</strong> <span class="badge ${pass.status === 'approved' ? 'bg-success' : 'bg-danger'}">${pass.status.toUpperCase()}</span></div>
+                                        <div><strong>Project:</strong> ${pass.projectName || 'Not specified'}</div>
+                                        <div><strong>Company:</strong> ${pass.companyName || 'Not specified'}</div>
+                                        ${pass.type === 'material' ? `
+                                            <div><strong>Requestor:</strong> ${pass.applicantName || 'Not specified'}</div>
+                                            <div><strong>Delivery Date:</strong> ${pass.deliveryDate || 'Not specified'}</div>
+                                        ` : `
+                                            <div><strong>Visitor Count:</strong> ${pass.visitorCount || 'Not specified'}</div>
+                                            <div><strong>Visit Period:</strong> ${pass.visitStart || 'Not specified'} to ${pass.visitEnd || 'Not specified'}</div>
+                                        `}
+                                        <div><strong>Processed by:</strong> ${pass.approverName || 'Not specified'} on ${pass.approverDate || 'Not specified'} at ${pass.approverTime || 'Not specified'}</div>
+                                    </div>
+                                </div>
+                                
+                                ${pass.type === 'material' ? `
+                                    <div class="permit-info-box">
+                                        <div class="info-title">Material Details</div>
+                                        <div class="info-content">
+                                            <div><strong>Category:</strong> ${pass.materialCategory || 'Not specified'}</div>
+                                            <div><strong>Movement Type:</strong> ${pass.movementType || 'Not specified'}</div>
+                                            <div><strong>Reason:</strong> ${pass.reason || 'Not specified'}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="permit-info-box">
+                                        <div class="info-title">Vehicle Information</div>
+                                        <div class="info-content">
+                                            <div><strong>Vehicle Number:</strong> ${pass.vehicleNumber || 'Not specified'}</div>
+                                            <div><strong>Plate Number:</strong> ${pass.vehicleReg || 'Not specified'}</div>
+                                            <div><strong>Type:</strong> ${pass.vehicleType || 'Not specified'}</div>
+                                            <div><strong>Driver License:</strong> ${pass.driverLicense || 'Not specified'}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="permit-info-box">
+                                        <div class="info-title">Material Items</div>
+                                        <div class="info-content">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Item Code</th>
+                                                        <th>Description</th>
+                                                        <th>Quantity</th>
+                                                        <th>Serial Numbers</th>
+                                                        <th>Condition</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${pass.materials && pass.materials.length > 0 ?
+                        pass.materials.map(m => `
+                                                            <tr>
+                                                                <td>${m.itemCode || ''}</td>
+                                                                <td>${m.description || ''}</td>
+                                                                <td>${m.quantity || ''}</td>
+                                                                <td>${m.serialNumbers || ''}</td>
+                                                                <td>${m.condition || ''}</td>
+                                                            </tr>
+                                                        `).join('') :
+                        '<tr><td colspan="5">No materials listed</td></tr>'}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div class="permit-info-box">
+                                        <div class="info-title">Visitor Details</div>
+                                        <div class="info-content">
+                                            <div><strong>Area:</strong> ${pass.visitArea || 'Not specified'}</div>
+                                            <div><strong>Purpose:</strong> ${pass.visitPurpose || 'Not specified'}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="permit-info-box">
+                                        <div class="info-title">Vehicle Information</div>
+                                        <div class="info-content">
+                                            <div><strong>Vehicle Number:</strong> ${pass.vehicleNumber || 'Not specified'}</div>
+                                            <div><strong>Plate Number:</strong> ${pass.vehicleReg || 'Not specified'}</div>
+                                            <div><strong>Type:</strong> ${pass.vehicleType || 'Not specified'}</div>
+                                            <div><strong>Driver License:</strong> ${pass.driverLicense || 'Not specified'}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="permit-info-box">
+                                        <div class="info-title">Visitors</div>
+                                        <div class="info-content">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Sr. No.</th>
+                                                        <th>Name</th>
+                                                        <th>ID Number</th>
+                                                        <th>Nationality</th>
+                                                        <th>Contact Number</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${pass.visitors && pass.visitors.length > 0 ?
+                    pass.visitors.map((v, i) => `
+                                                            <tr>
+                                                                <td>${i + 1}</td>
+                                                                <td>${v.name || ''}</td>
+                                                                <td>${v.id || ''}</td>
+                                                                <td>${v.nationality || ''}</td>
+                                                                <td>${v.contact || ''}</td>
+                                                            </tr>
+                                                        `).join('') :
+                    '<tr><td colspan="5">No visitors listed</td></tr>'}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                `}
+                                
+                                <div class="permit-info-box">
+                                    <div class="info-title">Signatures</div>
+                                    <div class="info-content">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                               <div><strong>${pass.type === 'material' ? 'Requestor' : 'Requestor'} Signature:</strong></div>
+                                               <img src="${pass.type === 'material' ? pass.applicantSignature : pass.applicantSignature}" style="max-width: 100%; border: 1px solid #ddd; margin-top: 10px;">
+                                            </div>
+                                               <div class="col-md-6">
+                    ${pass.status === 'approved' || pass.status === 'rejected' ? `
+                      <div><strong>Approver Signature:</strong></div>
+                      <img src="${pass.approverSignature}" style="max-width: 100%; border: 1px solid #ddd; margin-top: 10px;">
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="downloadPassFromModal" data-pass-id="${passId}">
+              <i class="fas fa-download"></i> Download
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+            // Add modal to DOM
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = modalHtml;
+            document.body.appendChild(modalContainer);
+
+            // Initialize modal
+            const viewPassModal = new bootstrap.Modal(document.getElementById('viewPassModal'));
+            viewPassModal.show();
+
+            // Add event listener for download button
+            document.getElementById('downloadPassFromModal').addEventListener('click', () => {
+                downloadPassAsPDF(passId);
+                viewPassModal.hide();
+            });
+
+            // Remove modal from DOM after it's hidden
+            document.getElementById('viewPassModal').addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(modalContainer);
+            });
+        }
+
+        function downloadPassAsPDF(passId) {
+            const pass = getPass(passId);
+            if (!pass) {
+                alert('Pass not found');
+                return;
+            }
+
+            // Show loading indicator
+            document.getElementById('pdf-loading-indicator').style.display = 'block';
+
+            // Create a temporary div to hold the content for PDF generation
+            const pdfContent = document.createElement('div');
+            pdfContent.style.padding = '20px';
+            pdfContent.style.maxWidth = '800px';
+            pdfContent.style.margin = '0 auto';
+
+            // Add pass content to the div
+            pdfContent.innerHTML = `
+    <div style="text-align: center; margin-bottom: 20px;">
+      <h2 style="color: #1a5276;">South Jeddah Noor 300MW<sub>AC</sub> Solar Plant</h2>
+      <h4 style="color: #3498db;">Gate Pass - ${pass.passNumber}</h4>
+    </div>
+    
+    <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+        <div><strong>Type:</strong> ${pass.type === 'material' ? 'Material Gate Pass' : 'Visitor Gate Pass'}</div>
+        <div><strong>Status:</strong> <span style="color: ${pass.status === 'approved' ? 'green' : 'red'}">${pass.status.toUpperCase()}</span></div>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <div><strong>Date Issued:</strong> ${pass.approverDate || 'Not specified'}</div>
+        <div><strong>Time Issued:</strong> ${pass.approverTime || 'Not specified'}</div>
+      </div>
+    </div>
+    
+    <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+      <h5 style="color: #1a5276; border-bottom: 1px solid #eee; padding-bottom: 5px;">Basic Information</h5>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div><strong>Company:</strong> ${pass.companyName || 'Not specified'}</div>
+        ${pass.type === 'material' ? `
+          <div><strong>Applicant:</strong> ${pass.applicantName || 'Not specified'}</div>
+          <div><strong>Purpose:</strong> ${pass.purpose || 'Not specified'}</div>
+        ` : `
+          <div><strong>Visitor Count:</strong> ${pass.visitorCount || 'Not specified'}</div>
+          <div><strong>Visit Period:</strong> ${pass.visitStart || 'Not specified'} to ${pass.visitEnd || 'Not specified'}</div>
+        `}
+        <div><strong>Processed by:</strong> ${pass.approverName || 'Not specified'}</div>
+      </div>
+    </div>
+    
+    ${pass.type === 'material' ? `
+      <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+        <h5 style="color: #1a5276; border-bottom: 1px solid #eee; padding-bottom: 5px;">Vehicle Information</h5>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div><strong>Vehicle Number:</strong> ${pass.vehicleNumber || 'Not specified'}</div>
+          <div><strong>Registration:</strong> ${pass.vehicleReg || 'Not specified'}</div>
+          <div><strong>Type:</strong> ${pass.vehicleType || 'Not specified'}</div>
+          <div><strong>Driver License:</strong> ${pass.driverLicense || 'Not specified'}</div>
+        </div>
+      </div>
+      
+      <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+        <h5 style="color: #1a5276; border-bottom: 1px solid #eee; padding-bottom: 5px;">Materials</h5>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="border: 1px solid #ddd; padding: 8px;">Description</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Quantity</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Unit</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Actual Account</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pass.materials && pass.materials.length > 0 ?
+                        pass.materials.map(m => `
+                <tr>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${m.description || ''}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${m.quantity || ''}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${m.unit || ''}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${m.account || ''}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${m.remarks || ''}</td>
+                </tr>
+              `).join('') :
+                        '<tr><td colspan="5" style="border: 1px solid #ddd; padding: 8px; text-align: center;">No materials listed</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    ` : `
+      <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+        <h5 style="color: #1a5276; border-bottom: 1px solid #eee; padding-bottom: 5px;">Vehicle Information</h5>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div><strong>Vehicle Number:</strong> ${pass.vehicleNumber || 'Not specified'}</div>
+          <div><strong>Registration:</strong> ${pass.vehicleReg || 'Not specified'}</div>
+          <div><strong>Type:</strong> ${pass.vehicleType || 'Not specified'}</div>
+          <div><strong>Driver License:</strong> ${pass.driverLicense || 'Not specified'}</div>
+        </div>
+      </div>
+      
+      <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+        <h5 style="color: #1a5276; border-bottom: 1px solid #eee; padding-bottom: 5px;">Visitors</h5>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="border: 1px solid #ddd; padding: 8px;">Sr. No.</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Name</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">ID Number</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Nationality</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Contact Number</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pass.visitors && pass.visitors.length > 0 ?
+                    pass.visitors.map((v, i) => `
+                <tr>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${i + 1}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${v.name || ''}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${v.id || ''}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${v.nationality || ''}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">${v.contact || ''}</td>
+                </tr>
+              `).join('') :
+                    '<tr><td colspan="5" style="border: 1px solid #ddd; padding: 8px; text-align: center;">No visitors listed</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    `}
+    
+    <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+      <h5 style="color: #1a5276; border-bottom: 1px solid #eee; padding-bottom: 5px;">Signatures</h5>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <div><strong>${pass.type === 'material' ? 'Requestor' : 'Requestor'} Signature:</strong></div>
+<img src="${pass.type === 'material' ? pass.applicantSignature : pass.applicantSignature}" style="max-width: 100%; border: 1px solid #ddd; margin-top: 10px;">
+        </div>
+        ${pass.status === 'approved' || pass.status === 'rejected' ? `
+          <div>
+            <div><strong>Approver Signature:</strong></div>
+            <img src="${pass.approverSignature}" style="max-width: 100%; border: 1px solid #ddd; margin-top: 10px;">
+          </div>
+        ` : ''}
+      </div>
+    </div>
+    
+    <div style="text-align: center; font-size: 12px; color: #777; margin-top: 30px;">
+      <p>This is an electronically generated document and does not require a physical signature</p>
+      <p>${new Date().toLocaleString()}</p>
+    </div>
+  `;
+
+            // Add the content to the body temporarily
+            document.body.appendChild(pdfContent);
+
+            // Use html2canvas to capture the content
+            html2canvas(pdfContent, {
+                scale: 2,
+                logging: false,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                // Remove the temporary content
+                document.body.removeChild(pdfContent);
+
+                // Create PDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+                const imgX = (pdfWidth - imgWidth * ratio) / 2;
+                const imgY = 10;
+
+                pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+                pdf.save(`GatePass_${pass.passNumber}.pdf`);
+
+                // Hide loading indicator
+                document.getElementById('pdf-loading-indicator').style.display = 'none';
+            }).catch(error => {
+                console.error('Error generating PDF:', error);
+                document.body.removeChild(pdfContent);
+                document.getElementById('pdf-loading-indicator').style.display = 'none';
+                alert('Error generating PDF. Please try again.');
+            });
+        }
+    </script>
+</body>
+
+</html>

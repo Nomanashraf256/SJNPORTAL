@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM Plan Annual Review | SJNPV O&M Maintenance Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --danger: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary), var(--primary));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: var(--sidebar-width);
+            padding: 20px 0;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-brand img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .sidebar-brand h4 {
+            margin: 0;
+            font-weight: 700;
+            color: white;
+        }
+
+        .nav-item {
+            margin: 5px 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .page-header h2 {
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .page-header h2 i {
+            margin-right: 15px;
+            color: var(--primary);
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h5 {
+            font-weight: 600;
+            margin: 0;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header h5 i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Stat Cards */
+        .stat-card {
+            text-align: center;
+            padding: 25px 15px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+            z-index: -1;
+        }
+
+        .stat-card.primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .stat-card.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background-color: #f1f5f9;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            border-bottom-width: 1px;
+            padding: 12px 15px;
+        }
+
+        .table tbody td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .status-badge i {
+            margin-right: 5px;
+            font-size: 0.7rem;
+        }
+
+        .status-approved {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .status-pending {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+
+        .status-draft {
+            background-color: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .status-na {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-completed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-overdue {
+            background-color: #ffedd5;
+            color: #9a3412;
+        }
+
+        /* Button Styles */
+        .btn {
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 0.8rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #3a56e8;
+            border-color: #3a56e8;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+
+        /* Filter Controls */
+        .filter-controls {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-select,
+        .form-control {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .form-select:focus,
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .nav-tabs .nav-link {
+            color: #64748b;
+            font-weight: 500;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary);
+            background-color: #f1f5f9;
+            border-color: transparent;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            background-color: white;
+            border-bottom: 3px solid var(--primary);
+            font-weight: 600;
+        }
+
+        /* Progress Bars */
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+        }
+
+        .progress-bar {
+            background-color: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1050;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-toggler {
+                display: block !important;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e2e8f0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            border: 2px solid white;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .timeline-date {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .timeline-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Task Priority */
+        .priority-high {
+            border-left: 4px solid #ef4444;
+        }
+
+        .priority-medium {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .priority-low {
+            border-left: 4px solid #10b981;
+        }
+
+        /* Logo and Branding */
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            color: var(--dark);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3);
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fab:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        /* Custom Toggle */
+        .custom-toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .custom-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .custom-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .custom-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.custom-toggle-slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.custom-toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Custom tab styling for monthly tabs */
+        .month-tabs .nav-link {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .print-section,
+            .print-section * {
+                visibility: visible;
+            }
+
+            .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* Additional styles for the monthly view */
+        .monthly-view-container {
+            margin-top: 20px;
+        }
+
+        .month-card {
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .month-header {
+            background-color: #4361ee;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .month-content {
+            padding: 20px;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .task-table th,
+        .task-table td {
+            padding: 12px 15px;
+            border: 1px solid #dee2e6;
+            text-align: left;
+        }
+
+        .task-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .task-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .task-table tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons button {
+            margin-right: 5px;
+        }
+
+        .add-task-btn {
+            margin-top: 15px;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .monthly-view-container,
+            .monthly-view-container * {
+                visibility: visible;
+            }
+
+            .monthly-view-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .action-buttons {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Your existing HTML structure here -->
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xOSAxM2ExIDEgMCAwIDAtMSAxdjZhMSAxIDAgMCAxLTEgMUg3YTEgMSAwIDAgMS0xLTFWN2ExIDEgMCAwIDEgMS0xaDZhMSAxIDAgMCAwIDAtMkg3YTMgMyAwIDAgMC0zIDN2MTJhMyAzIDAgMCAwIDMgM2gxMGEzIDMgMCAwIDAgMy0zdi02YTEgMSAwIDAgMC0xLTF6Ii8+PHBhdGggZD0iTTIwLjcxIDkuMjlsLTYuMzYtNi4zNmExIDEgMCAwIDAtMS40MSAwbC0xLjQyIDEuNDJhMSAxIDAgMCAwIDAgMS40MUwxNy41OSA5bC01LjY2IDUuNjZhMSAxIDAgMCAwIDAgMS40MWwxLjQyIDEuNDJhMSAxIDAgMCAwIDEuNDEgMGw2LjM2LTYuMzZhMSAxIDAgMCAwIDAtMS40MnoiLz48L3N2Zz4="
+                alt="Maintenance Pro Logo">
+            <h4>Maintenance Pro</h4>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" data-bs-toggle="tab" data-bs-target="#overview">
+                    <i class="fas fa-tachometer-alt"></i> Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#monthly-view">
+                    <i class="fas fa-calendar-alt"></i> Monthly View
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#checklist">
+                    <i class="fas fa-clipboard-check"></i> Checklist Status
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#performance">
+                    <i class="fas fa-chart-line"></i> Performance
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#reports">
+                    <i class="fas fa-file-alt"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </li>
+        </ul>
+        <div class="mt-auto px-3 py-4">
+            <div class="d-flex align-items-center">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=4361ee&color=fff&rounded=true"
+                    width="40" height="40" class="rounded-circle me-2" alt="User">
+                <div>
+                    <div class="fw-bold">Admin User</div>
+                    <small class="text-white-50">Administrator</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="tab-content">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview">
+                <div class="page-header">
+                    <h2><i class="fas fa-tachometer-alt"></i> Preventive Maintenance Dashboard</h2>
+                    <div class="d-flex">
+                        <button class="btn btn-outline-primary me-2">
+                            <i class="fas fa-download me-1"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-controls">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="monthFilter" class="form-label">Select Month</label>
+                            <select id="monthFilter" class="form-select">
+                                <option value="all">All Months</option>
+                                <option value="M1">August 2024 (M1)</option>
+                                <option value="M2">September 2024 (M2)</option>
+                                <option value="Q1">October 2024 (Q1)</option>
+                                <option value="M4">November 2024 (M4)</option>
+                                <option value="M5">December 2024 (M5)</option>
+                                <option value="H">January 2025 (H)</option>
+                                <option value="M7">February 2025 (M7)</option>
+                                <option value="M8">March 2025 (M8)</option>
+                                <option value="Q3">April 2025 (Q3)</option>
+                                <option value="M10">May 2025 (M10)</option>
+                                <option value="M11">June 2025 (M11)</option>
+                                <option value="A">July 2025 (A)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="locationFilter" class="form-label">Filter by Location</label>
+                            <select id="locationFilter" class="form-select">
+                                <option value="all">All Locations</option>
+                                <option value="PV Field">PV Field</option>
+                                <option value="PVSS">PVSS</option>
+                                <option value="General">General</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="Frequency" class="form-label">Filter by Frequency</label>
+                            <select id="Frequency" class="form-select">
+                                <option value="all">All Frequency</option>
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Quarterly">Quarterly</option>
+                                <option value="Half Yearly">Half Yearly</option>
+                                <option value="Annual">Annual</option>
+                            </select>
+                        </div>                  
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-card primary">
+                            <div class="stat-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div class="stat-value" id="totalTasks">58</div>
+                            <div class="stat-label">Total Tasks</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card success">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-value" id="completedTasks">32</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card warning">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-value" id="pendingTasks">26</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card danger">
+                            <div class="stat-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-value" id="overdueTasks">7</div>
+                            <div class="stat-label">Overdue</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-bar"></i> Monthly Completion Rate</h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                        id="chartDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        This Year
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="chartDropdown">
+                                        <li><a class="dropdown-item" href="#">This Year</a></li>
+                                        <li><a class="dropdown-item" href="#">Last Year</a></li>
+                                        <li><a class="dropdown-item" href="#">Custom Range</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="completionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-pie"></i> Tasks by Location</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="locationChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-list-ol"></i> Upcoming Tasks</h5>
+                                <button class="btn btn-sm btn-outline-primary">View All</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="upcomingTasksTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Due Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="priority-high">
+                                                <td>S.1.1.1</td>
+                                                <td>DAILY WEATHER STATIONS CLEANING-D</td>
+                                                <td>2024-08-15</td>
+                                                <td><span class="status-badge status-pending"><i
+                                                            class="fas fa-clock"></i> Pending</span></td>
+                                            </tr>
+                                            <tr class="priority-medium">
+                                                <td>S.1.2.3</td>
+                                                <td>WEEKLY INVERTER CHECKUP-W</td>
+                                                <td>2024-08-18</td>
+                                                <td><span class="status-badge status-approved"><i
+                                                            class="fas fa-check"></i> Approved</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>S.2.1.5</td>
+                                                <td>MONTHLY TRANSFORMER INSPECTION-M</td>
+                                                <td>2024-08-22</td>
+                                                <td><span class="status-badge status-draft"><i
+                                                            class="fas fa-file-alt"></i> Draft</span></td>
+                                            </tr>
+                                            <tr class="priority-high">
+                                                <td>S.3.1.2</td>
+                                                <td>QUARTERLY PV MODULE CLEANING-Q</td>
+                                                <td>2024-08-30</td>
+                                                <td><span class="status-badge status-overdue"><i
+                                                            class="fas fa-exclamation-circle"></i> Overdue</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>S.1.3.4</td>
+                                                <td>ANNUAL SUBSTATION INSPECTION-A</td>
+                                                <td>2024-09-05</td>
+                                                <td><span class="status-badge status-pending"><i
+                                                            class="fas fa-clock"></i> Pending</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-history"></i> Recent Activities</h5>
+                                <button class="btn btn-sm btn-outline-primary">View All</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Today, 10:45 AM</div>
+                                        <div class="timeline-content">
+                                            <strong>Task S.1.2.3</strong> was completed by <strong>John Doe</strong>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Yesterday, 3:22 PM</div>
+                                        <div class="timeline-content">
+                                            <strong>Checklist SJN-OM-CL-A-6001</strong> was approved by <strong>Jane
+                                                Smith</strong>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Yesterday, 10:15 AM</div>
+                                        <div class="timeline-content">
+                                            <strong>Task S.3.1.2</strong> was marked as overdue
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Aug 12, 2:30 PM</div>
+                                        <div class="timeline-content">
+                                            <strong>New task S.1.3.4</strong> was created by <strong>Admin User</strong>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">Aug 10, 9:00 AM</div>
+                                        <div class="timeline-content">
+                                            <strong>Monthly report</strong> for July 2024 was generated
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Monthly View Tab -->
+            <div class="tab-pane fade" id="monthly-view">
+                <div class="page-header">
+                    <h2><i class="fas fa-calendar-alt"></i> Monthly PM Schedule</h2>
+                    <div class="d-flex">
+                        <button class="btn btn-outline-primary me-2" id="printMonthlyReport">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Month Navigation Tabs -->
+                <ul class="nav nav-tabs month-tabs mb-4" id="monthTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="m1-tab" data-bs-toggle="tab" data-bs-target="#m1"
+                            type="button" role="tab" aria-controls="m1" aria-selected="true">Aug 2024 (M1)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m2-tab" data-bs-toggle="tab" data-bs-target="#m2" type="button"
+                            role="tab" aria-controls="m2" aria-selected="false">Sep 2024 (M2)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="q1-tab" data-bs-toggle="tab" data-bs-target="#q1" type="button"
+                            role="tab" aria-controls="q1" aria-selected="false">Oct 2024 (Q1)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m4-tab" data-bs-toggle="tab" data-bs-target="#m4" type="button"
+                            role="tab" aria-controls="m4" aria-selected="false">Nov 2024 (M4)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m5-tab" data-bs-toggle="tab" data-bs-target="#m5" type="button"
+                            role="tab" aria-controls="m5" aria-selected="false">Dec 2024 (M5)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="h-tab" data-bs-toggle="tab" data-bs-target="#h" type="button"
+                            role="tab" aria-controls="h" aria-selected="false">Jan 2025 (H)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m7-tab" data-bs-toggle="tab" data-bs-target="#m7" type="button"
+                            role="tab" aria-controls="m7" aria-selected="false">Feb 2025 (M7)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m8-tab" data-bs-toggle="tab" data-bs-target="#m8" type="button"
+                            role="tab" aria-controls="m8" aria-selected="false">Mar 2025 (M8)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="q3-tab" data-bs-toggle="tab" data-bs-target="#q3" type="button"
+                            role="tab" aria-controls="q3" aria-selected="false">Apr 2025 (Q3)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m10-tab" data-bs-toggle="tab" data-bs-target="#m10" type="button"
+                            role="tab" aria-controls="m10" aria-selected="false">May 2025 (M10)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="m11-tab" data-bs-toggle="tab" data-bs-target="#m11" type="button"
+                            role="tab" aria-controls="m11" aria-selected="false">Jun 2025 (M11)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="a-tab" data-bs-toggle="tab" data-bs-target="#a" type="button"
+                            role="tab" aria-controls="a" aria-selected="false">Jul 2025 (A)</button>
+                    </li>
+                </ul>
+
+                <!-- Month Tabs Content -->
+                <div class="tab-content" id="monthTabsContent">
+                    <!-- August 2024 (M1) -->
+                    <div class="tab-pane fade show active" id="m1" role="tabpanel" aria-labelledby="m1-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> August 2024 (M1) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2" id="m1-completed">0 Completed</span>
+                                    <span class="badge bg-warning me-2" id="m1-pending">0 Pending</span>
+                                    <span class="badge bg-danger" id="m1-overdue">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM1Table">
+                                        <thead>
+                                            <tr>
+                                                <th>Sr.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Tasks will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <button class="btn btn-primary mt-3" onclick="showAddTaskModal('M1')">
+                                    <i class="fas fa-plus me-1"></i> Add New Task
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Charts section remains the same -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-chart-pie"></i> Task Distribution</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="monthlyDistributionChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-chart-line"></i> Completion Progress</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Overall Completion</span>
+                                                <span>55%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" role="progressbar"
+                                                    style="width: 55%" aria-valuenow="55" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>PV Field Tasks</span>
+                                                <span>70%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: 70%"
+                                                    aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>PVSS Tasks</span>
+                                                <span>45%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-warning" role="progressbar"
+                                                    style="width: 45%" aria-valuenow="45" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>General Tasks</span>
+                                                <span>30%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-danger" role="progressbar"
+                                                    style="width: 30%" aria-valuenow="30" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- September 2024 (M2) -->
+                    <div class="tab-pane fade" id="m2" role="tabpanel" aria-labelledby="m2-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> September 2024 (M2) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2" id="m2-completed">0 Completed</span>
+                                    <span class="badge bg-warning me-2" id="m2-pending">0 Pending</span>
+                                    <span class="badge bg-danger" id="m2-overdue">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthM2Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Tasks will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <button class="btn btn-primary mt-3" onclick="showAddTaskModal('M2')">
+                                    <i class="fas fa-plus me-1"></i> Add New Task
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- October 2024 (Q1) -->
+                    <div class="tab-pane fade" id="q1" role="tabpanel" aria-labelledby="q1-tab">
+                        <div class="card print-section">
+                            <div class="card-header">
+                                <h5><i class="fas fa-calendar-check"></i> October 2024 (Q1) Schedule</h5>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2" id="q1-completed">0 Completed</span>
+                                    <span class="badge bg-warning me-2" id="q1-pending">0 Pending</span>
+                                    <span class="badge bg-danger" id="q1-overdue">0 Overdue</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="monthQ1Table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Task Code</th>
+                                                <th>Description</th>
+                                                <th>Location</th>
+                                                <th>Frequency</th>
+                                                <th>Due Date</th>
+                                                <th>Checklist</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Tasks will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <button class="btn btn-primary mt-3" onclick="showAddTaskModal('Q1')">
+                                    <i class="fas fa-plus me-1"></i> Add New Task
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other months follow the same pattern -->
+                    <!-- November 2024 (M4) -->
+                    <div class="tab-pane fade" id="m4" role="tabpanel" aria-labelledby="m4-tab">
+                        <!-- Similar structure as above -->
+                    </div>
+
+                    <!-- December 2024 (M5) -->
+                    <div class="tab-pane fade" id="m5" role="tabpanel" aria-labelledby="m5-tab">
+                        <!-- Similar structure as above -->
+                    </div>
+
+                    <!-- January 2025 (H) -->
+                    <div class="tab-pane fade" id="h" role="tabpanel" aria-labelledby="h-tab">
+                        <!-- Similar structure as above -->
+                    </div>
+
+                    <!-- February 2025 (M7) -->
+                    <div class="tab-pane fade" id="m7" role="tabpanel" aria-labelledby="m7-tab">
+                        <!-- Similar structure as above -->
+                    </div>
+
+                    <!-- March 2025 (M8) -->
+                    <div class="tab-pane fade" id="m8" role="tabpanel" aria-labelledby="m8-tab">
+                        <!-- Similar structure as above -->
+                    </div>
+
+                    <!-- April 2025 (Q3) -->
+                    <div class="tab-pane fade" id="q3" role="tabpanel" aria-labelledby="q3-tab">
+                        <!-- Similar structure as above -->
+                    </div>
+
+                    <!-- May 2025 (M10) -->
+                    <div class="tab-pane fade" id="m10" role="tabpanel" aria-labelledby="m10-tab">
+                        <!-- Similar structure as above -->
+                    </div>
+
+                    <!-- June 2025 (M11) -->
+                    <div class="tab-pane fade" id="m11" role="tabpanel" aria-labelledby="m11-tab">
+                        <!-- Similar structure as above -->
+                    </div>
+
+                    <!-- July 2025 (A) -->
+                    <div class="tab-pane fade" id="a" role="tabpanel" aria-labelledby="a-tab">
+                        <!-- Similar structure as above -->
+                    </div>
+                </div>
+
+                <!-- Add Task Modal -->
+                <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="taskModalLabel">Add New Task</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="taskForm">
+                                    <input type="hidden" id="taskId">
+                                    <input type="hidden" id="taskMonth">
+                                    <div class="mb-3">
+                                        <label for="taskCode" class="form-label">Task Code</label>
+                                        <input type="text" class="form-control" id="taskCode" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="taskDescription" class="form-label">Description</label>
+                                        <input type="text" class="form-control" id="taskDescription" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="taskLocation" class="form-label">Location</label>
+                                        <select class="form-select" id="taskLocation" required>
+                                            <option value="PV Field">PV Field</option>
+                                            <option value="PVSS">PVSS</option>
+                                            <option value="General">General</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="taskFrequency" class="form-label">Frequency</label>
+                                        <select class="form-select" id="taskFrequency" required>
+                                            <option value="Daily">Daily</option>
+                                            <option value="Weekly">Weekly</option>
+                                            <option value="Monthly">Monthly</option>
+                                            <option value="Quarterly">Quarterly</option>
+                                            <option value="Half Yearly">Half Yearly</option>
+                                            <option value="Annual">Annual</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="taskDueDate" class="form-label">Due Date</label>
+                                        <input type="date" class="form-control" id="taskDueDate" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="taskStatus" class="form-label">Status</label>
+                                        <select class="form-select" id="taskStatus" required>
+                                            <option value="Completed">Completed</option>                                       
+                                            <option value="Pending">Pending</option>
+                                            <option value="Overdue">Overdue</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="taskChecklist">
+                                        <label class="form-check-label" for="taskChecklist">Has Checklist</label>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="saveTask">Save Task</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+                <script>
+                    // Initialize the application when DOM is loaded
+                    document.addEventListener('DOMContentLoaded', function () {
+                        // Initialize date pickers
+                        flatpickr("#taskDueDate", {
+                            dateFormat: "Y-m-d",
+                            defaultDate: new Date()
+                        });
+
+                        // Load all tasks from localStorage
+                        loadAllTasks();
+
+                        // Set up event listeners
+                        document.getElementById('saveTask').addEventListener('click', saveTask);
+
+                        // Initialize charts
+                        renderCharts();
+                    });
+
+                    // Task management functions
+                    let allTasks = {};
+
+                    function loadAllTasks() {
+                        const savedTasks = localStorage.getItem('pmAllTasks');
+                        if (savedTasks) {
+                            allTasks = JSON.parse(savedTasks);
+
+                            // Initialize any missing months
+                            const months = ['M1', 'M2', 'Q1', 'M4', 'M5', 'H', 'M7', 'M8', 'Q3', 'M10', 'M11', 'A'];
+                            months.forEach(month => {
+                                if (!allTasks[month]) {
+                                    allTasks[month] = [];
+                                }
+                            });
+
+                            renderAllTasks();
+                            updateAllTaskStats();
+                        } else {
+                            // Initialize with default tasks for M1 (August 2024)
+                            allTasks = {
+                                'M1': [
+                                    {
+                                        id: 1,
+                                        code: "S.1.1.1",
+                                        description: "DAILY WEATHER STATIONS CLEANING-D",
+                                        location: "PV Field",
+                                        frequency: "Daily",
+                                        dueDate: "2024-08-01",
+                                        checklist: true,
+                                        status: "Completed"
+                                    },
+                                    {
+                                        id: 2,
+                                        code: "S.1.2.3",
+                                        description: "WEEKLY INVERTER CHECKUP-W",
+                                        location: "PVSS",
+                                        frequency: "Weekly",
+                                        dueDate: "2024-08-05",
+                                        checklist: true,
+                                        status: "Approved"
+                                    },
+                                    {
+                                        id: 3,
+                                        code: "S.2.1.5",
+                                        description: "MONTHLY TRANSFORMER INSPECTION-M",
+                                        location: "General",
+                                        frequency: "Monthly",
+                                        dueDate: "2024-08-15",
+                                        checklist: true,
+                                        status: "Pending"
+                                    },
+                                    {
+                                        id: 4,
+                                        code: "S.3.1.2",
+                                        description: "QUARTERLY PV MODULE CLEANING-Q",
+                                        location: "PV Field",
+                                        frequency: "Quarterly",
+                                        dueDate: "2024-08-10",
+                                        checklist: false,
+                                        status: "Overdue"
+                                    },
+                                    {
+                                        id: 5,
+                                        code: "S.1.3.4",
+                                        description: "ANNUAL SUBSTATION INSPECTION-A",
+                                        location: "PVSS",
+                                        frequency: "Annual",
+                                        dueDate: "2024-08-25",
+                                        checklist: true,
+                                        status: "Draft"
+                                    }
+                                ],
+                                'M2': [],
+                                'Q1': [],
+                                'M4': [],
+                                'M5': [],
+                                'H': [],
+                                'M7': [],
+                                'M8': [],
+                                'Q3': [],
+                                'M10': [],
+                                'M11': [],
+                                'A': []
+                            };
+                            saveAllTasks();
+                            renderAllTasks();
+                            updateAllTaskStats();
+                        }
+                    }
+
+                    function saveAllTasks() {
+                        localStorage.setItem('pmAllTasks', JSON.stringify(allTasks));
+                    }
+
+                    function renderAllTasks() {
+                        // Render tasks for each month
+                        Object.keys(allTasks).forEach(month => {
+                            renderTasksForMonth(month);
+                        });
+                    }
+
+                    function renderTasksForMonth(month) {
+                        const tableId = `month${month}Table`;
+                        const tbody = document.querySelector(`#${tableId} tbody`);
+                        if (!tbody) return;
+
+                        tbody.innerHTML = '';
+
+                        allTasks[month].forEach((task, index) => {
+                            const row = document.createElement('tr');
+
+                            // Highlight overdue and pending tasks
+                            if (task.status === 'Overdue') {
+                                row.classList.add('table-danger');
+                            } else if (task.status === 'Pending') {
+                                row.classList.add('table-warning');
+                            }
+
+                            // Status badge class
+                            let statusClass = '';
+                            switch (task.status) {
+                                case 'Completed': statusClass = 'status-completed'; break;
+                                case 'Pending': statusClass = 'status-pending'; break;                       
+                                case 'Overdue': statusClass = 'status-overdue'; break;
+                            }
+
+                            // Status icon
+                            let statusIcon = '';
+                            switch (task.status) {
+                                case 'Completed': statusIcon = 'fa-check'; break;
+                                case 'Pending': statusIcon = 'fa-clock'; break;
+                                case 'Overdue': statusIcon = 'fa-exclamation-triangle'; break;
+                            }
+
+                            row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${task.code}</td>
+                    <td>${task.description}</td>
+                    <td>${task.location}</td>
+                    <td>${task.frequency}</td>
+                    <td>${task.dueDate}</td>
+                    <td>${task.checklist ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>'}</td>
+                    <td><span class="status-badge ${statusClass}"><i class="fas ${statusIcon}"></i> ${task.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary edit-task" data-month="${month}" data-id="${task.id}">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger delete-task" data-month="${month}" data-id="${task.id}">Delete</button>
+                    </td>
+                `;
+
+                            tbody.appendChild(row);
+                        });
+
+                        // Add event listeners to edit and delete buttons
+                        document.querySelectorAll(`#${tableId} .edit-task`).forEach(btn => {
+                            btn.addEventListener('click', function () {
+                                const taskId = parseInt(this.getAttribute('data-id'));
+                                const month = this.getAttribute('data-month');
+                                editTask(month, taskId);
+                            });
+                        });
+
+                        document.querySelectorAll(`#${tableId} .delete-task`).forEach(btn => {
+                            btn.addEventListener('click', function () {
+                                const taskId = parseInt(this.getAttribute('data-id'));
+                                const month = this.getAttribute('data-month');
+                                deleteTask(month, taskId);
+                            });
+                        });
+                    }
+
+                    function updateAllTaskStats() {
+                        Object.keys(allTasks).forEach(month => {
+                            updateTaskStatsForMonth(month);
+                        });
+
+                        // Update summary charts
+                        updateCharts();
+                    }
+
+                    function updateTaskStatsForMonth(month) {
+                        const tasks = allTasks[month] || [];
+                        const completed = tasks.filter(t => t.status === 'Completed').length;
+                        const pending = tasks.filter(t => t.status === 'Pending').length;
+                        const overdue = tasks.filter(t => t.status === 'Overdue').length;
+
+                        const completedEl = document.getElementById(`${month.toLowerCase()}-completed`);
+                        const pendingEl = document.getElementById(`${month.toLowerCase()}-pending`);
+                        const overdueEl = document.getElementById(`${month.toLowerCase()}-overdue`);
+
+                        if (completedEl) completedEl.textContent = `${completed} Completed`;
+                        if (pendingEl) pendingEl.textContent = `${pending} Pending`;
+                        if (overdueEl) overdueEl.textContent = `${overdue} Overdue`;
+                    }
+
+                    function showAddTaskModal(month) {
+                        document.getElementById('taskModalLabel').textContent = `Add New Task (${getMonthName(month)})`;
+                        document.getElementById('taskForm').reset();
+                        document.getElementById('taskId').value = '';
+                        document.getElementById('taskMonth').value = month;
+
+                        const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+                        modal.show();
+                    }
+
+                    function editTask(month, taskId) {
+                        const task = (allTasks[month] || []).find(t => t.id === taskId);
+                        if (!task) return;
+
+                        document.getElementById('taskModalLabel').textContent = `Edit Task (${getMonthName(month)})`;
+                        document.getElementById('taskId').value = task.id;
+                        document.getElementById('taskMonth').value = month;
+                        document.getElementById('taskCode').value = task.code;
+                        document.getElementById('taskDescription').value = task.description;
+                        document.getElementById('taskLocation').value = task.location;
+                        document.getElementById('taskFrequency').value = task.frequency;
+                        document.getElementById('taskDueDate').value = task.dueDate;
+                        document.getElementById('taskStatus').value = task.status;
+                        document.getElementById('taskChecklist').checked = task.checklist;
+
+                        const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+                        modal.show();
+                    }
+
+                    function saveTask() {
+                        const taskId = document.getElementById('taskId').value;
+                        const month = document.getElementById('taskMonth').value;
+                        const taskCode = document.getElementById('taskCode').value;
+                        const taskDescription = document.getElementById('taskDescription').value;
+                        const taskLocation = document.getElementById('taskLocation').value;
+                        const taskFrequency = document.getElementById('taskFrequency').value;
+                        const taskDueDate = document.getElementById('taskDueDate').value;
+                        const taskStatus = document.getElementById('taskStatus').value;
+                        const taskChecklist = document.getElementById('taskChecklist').checked;
+
+                        if (!taskCode || !taskDescription || !taskLocation || !taskFrequency || !taskDueDate || !taskStatus) {
+                            alert('Please fill in all fields');
+                            return;
+                        }
+
+                        const newTask = {
+                            id: taskId ? parseInt(taskId) : Date.now(),
+                            code: taskCode,
+                            description: taskDescription,
+                            location: taskLocation,
+                            frequency: taskFrequency,
+                            dueDate: taskDueDate,
+                            checklist: taskChecklist,
+                            status: taskStatus
+                        };
+
+                        if (!allTasks[month]) {
+                            allTasks[month] = [];
+                        }
+
+                        if (taskId) {
+                            // Update existing task
+                            const index = allTasks[month].findIndex(t => t.id === parseInt(taskId));
+                            if (index !== -1) {
+                                allTasks[month][index] = newTask;
+                            }
+                        } else {
+                            // Add new task
+                            allTasks[month].push(newTask);
+                        }
+
+                        saveAllTasks();
+                        renderTasksForMonth(month);
+                        updateTaskStatsForMonth(month);
+
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('taskModal'));
+                        modal.hide();
+
+                        showToast('Task saved successfully', 'success');
+                    }
+
+                    function deleteTask(month, taskId) {
+                        if (confirm('Are you sure you want to delete this task?')) {
+                            allTasks[month] = (allTasks[month] || []).filter(t => t.id !== taskId);
+                            saveAllTasks();
+                            renderTasksForMonth(month);
+                            updateTaskStatsForMonth(month);
+
+                            showToast('Task deleted successfully', 'success');
+                        }
+                    }
+
+                    function getMonthName(monthCode) {
+                        const monthNames = {
+                            'M1': 'August 2024',
+                            'M2': 'September 2024',
+                            'Q1': 'October 2024',
+                            'M4': 'November 2024',
+                            'M5': 'December 2024',
+                            'H': 'January 2025',
+                            'M7': 'February 2025',
+                            'M8': 'March 2025',
+                            'Q3': 'April 2025',
+                            'M10': 'May 2025',
+                            'M11': 'June 2025',
+                            'A': 'July 2025'
+                        };
+                        return monthNames[monthCode] || monthCode;
+                    }
+
+                    function renderCharts() {
+                        // Initialize your charts here
+                        // This would be similar to your existing chart initialization code
+                    }
+
+                    function updateCharts() {
+                        // Update your charts based on current task data
+                        // Calculate totals across all months
+                        let totalCompleted = 0;
+                        let totalPending = 0;
+                        let totalOverdue = 0;
+
+                        Object.values(allTasks).forEach(tasks => {
+                            totalCompleted += tasks.filter(t => t.status === 'Completed').length;
+                            totalPending += tasks.filter(t => t.status === 'Pending').length;
+                            totalOverdue += tasks.filter(t => t.status === 'Overdue').length;
+                        });
+
+                        // Update summary stats
+                        document.getElementById('totalTasks').textContent = totalCompleted + totalPending + totalOverdue;
+                        document.getElementById('completedTasks').textContent = totalCompleted;
+                        document.getElementById('pendingTasks').textContent = totalPending;
+                        document.getElementById('overdueTasks').textContent = totalOverdue;
+
+                        // Update your charts here with the new data
+                    }
+
+                    function showToast(message, type) {
+                        const toastContainer = document.createElement('div');
+                        toastContainer.className = 'position-fixed bottom-0 end-0 p-3';
+                        toastContainer.style.zIndex = '11';
+
+                        const toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
+
+                        toastContainer.innerHTML = `
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header ${toastClass} text-white">
+                        <strong class="me-auto">${type === 'success' ? 'Success' : 'Error'}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+
+                        document.body.appendChild(toastContainer);
+
+                        setTimeout(() => {
+                            toastContainer.remove();
+                        }, 3000);
+                    }
+                </script>
+</body>
+
+</html>

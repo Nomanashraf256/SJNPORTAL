@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>South Jeddah Noor Plant - O&M Management Portal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Split layout */
+        .split-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slideshow-section {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-section {
+            width: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-color: #c7bff3;
+            position: relative;
+            z-index: 1;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Vertical divider */
+        .divider {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 1px;
+            background-color: rgba(0, 0, 0, 0.1);
+            z-index: 2;
+        }
+
+        .background-slideshow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .background-slideshow img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .background-slideshow img.active {
+            opacity: 1;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .login-container, .admin-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .login-container::before, .admin-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 255, 255, 0)
+            );
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .about-info {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #2c3e50;
+            text-align: left;
+        }
+
+        .about-info h3 {
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: #3498db;
+        }
+
+        /* Admin Panel Styles */
+        .admin-container {
+            display: none;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .admin-container h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .admin-container h3 {
+            color: #3498db;
+            font-size: 18px;
+            margin: 20px 0 15px;
+            text-align: left;
+        }
+
+        .user-list {
+            margin-bottom: 20px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-actions button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .add-user-form {
+            margin-top: 20px;
+        }
+
+        .add-user-form input {
+            margin-bottom: 10px;
+        }
+
+        .close-admin {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #2c3e50;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            color: #2c3e50;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .btn-secondary {
+            background-color: #7f8c8d;
+            color: white;
+            margin-top: 15px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .split-container {
+                flex-direction: column;
+            }
+            
+            .slideshow-section {
+                height: 40%;
+            }
+            
+            .login-section {
+                width: 100%;
+                height: 60%;
+            }
+            
+            .divider {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="split-container">
+        <!-- Slideshow Section -->
+        <div class="slideshow-section">
+            <div class="background-slideshow">
+                <img src="SJNPV2.PNG" class="active">
+                <img src="SJNPV20.jpg">
+                <img src="SJNPV12.jpg">
+                <img src="SJNPV13.jpg">
+                <img src="SJNPV15.jpg">
+                <img src="SJNPV7.PNG">
+            </div>
+            <div class="overlay"></div>
+        </div>
+        
+        <!-- Vertical divider -->
+        <div class="divider"></div>
+        <!-- Login Section -->
+        <div class="login-section">
+            <!-- Login Container -->
+            <div class="login-container" id="loginContainer">
+                <img src="SJN LOGO.svg" width="400" height="300">
+                <h1>South Jeddah Noor Plant</h1>
+                <p class="subtitle">O&M Management Portal</p>
+                
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn">Login</button>
+                    <div id="loginError" class="error-message" style="display: none;"></div>
+                </form>
+                
+                <div class="about-info">
+                    <h3>About South Jeddah Noor Plant</h3>
+                    <p>South Jeddah Noor Solar PV IPP is a 300MWac solar power plant that will supply electricity to over 14,000 households. The project supports Saudi Arabia's National Renewable Energy Program and Vision 2030 goals for sustainable development.</p>
+                </div>
+                
+                <div class="footer">
+                    &copy; 2025 South Jeddah Noor Plant. All rights reserved.
+                </div>
+            </div>
+            
+            <!-- Admin Container (hidden by default) -->
+            <div class="admin-container" id="adminContainer">
+                <button class="close-admin" id="closeAdmin">×</button>
+                <img src="SJN LOGO.svg" width="400" height="300">
+                <h2>Admin Dashboard</h2>
+                
+                <div class="add-user-form">
+                    <h3>Create New Sub-User</h3>
+                    <input type="email" id="newUserEmail" placeholder="Enter sub-user email" required>
+                    <input type="password" id="newUserPassword" placeholder="Enter sub-user password" required>
+                    <button class="btn" id="createUserBtn">Create Sub-User</button>
+                    <div id="userCreationError" class="error-message" style="display: none;"></div>
+                </div>
+                
+                <h3>Existing Sub-Users</h3>
+                <div class="user-list">
+                    <table id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Users will be listed here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <button class="btn" id="accessWebsiteBtn">Access Main Website</button>
+                <button class="btn btn-secondary" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Background Slideshow
+        const backgroundImages = document.querySelectorAll('.background-slideshow img');
+        let currentImageIndex = 0;
+
+        function changeBackground() {
+            backgroundImages[currentImageIndex].classList.remove('active');
+            currentImageIndex = (currentImageIndex + 1) % backgroundImages.length;
+            backgroundImages[currentImageIndex].classList.add('active');
+        }
+
+        // Change image every 3 seconds
+        setInterval(changeBackground, 3000);
+
+        // Super admin credentials
+        const SUPER_ADMIN = {
+            email: 'nomanashraf9999@gmail.com',
+            password: 'Germany101$'
+        };
+        
+        // Initialize users array from localStorage or create empty array
+        let users = JSON.parse(localStorage.getItem('solarPlantUsers')) || [];
+        
+        // DOM elements
+        const loginContainer = document.getElementById('loginContainer');
+        const adminContainer = document.getElementById('adminContainer');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const usersTableBody = document.getElementById('usersTableBody');
+        const createUserBtn = document.getElementById('createUserBtn');
+        const userCreationError = document.getElementById('userCreationError');
+        const accessWebsiteBtn = document.getElementById('accessWebsiteBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const closeAdmin = document.getElementById('closeAdmin');
+        
+        // Login form submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Check super admin credentials
+            if (email === SUPER_ADMIN.email && password === SUPER_ADMIN.password) {
+                showAdminPanel();
+                return;
+            }
+            
+            // Check sub-user credentials
+            const user = users.find(u => u.email === email && u.password === password);
+            if (user) {
+                accessMainWebsite();
+                return;
+            }
+            
+            // Invalid credentials
+            showError(loginError, 'Invalid credentials. Please try again.');
+            document.getElementById('password').value = '';
+        });
+        
+        // Create new sub-user
+        createUserBtn.addEventListener('click', function() {
+            const email = document.getElementById('newUserEmail').value;
+            const password = document.getElementById('newUserPassword').value;
+            
+            if (!email || !password) {
+                showError(userCreationError, 'Please enter both email and password.');
+                return;
+            }
+            
+            if (users.length >= 10) {
+                showError(userCreationError, 'Maximum 10 sub-users allowed.');
+                return;
+            }
+            
+            if (users.some(u => u.email === email)) {
+                showError(userCreationError, 'User with this email already exists.');
+                return;
+            }
+            
+            users.push({ email, password });
+            localStorage.setItem('solarPlantUsers', JSON.stringify(users));
+            
+            document.getElementById('newUserEmail').value = '';
+            document.getElementById('newUserPassword').value = '';
+            userCreationError.style.display = 'none';
+            
+            renderUsersTable();
+        });
+        
+        // Delete user
+        function deleteUser(email) {
+            users = users.filter(u => u.email !== email);
+            localStorage.setItem('solarPlantUsers', JSON.stringify(users));
+            renderUsersTable();
+        }
+        
+        // Access main website
+        accessWebsiteBtn.addEventListener('click', accessMainWebsite);
+        
+        // Logout
+        logoutBtn.addEventListener('click', function() {
+            adminContainer.style.display = 'none';
+            loginContainer.style.display = 'block';
+        });
+
+        // Close admin panel
+        closeAdmin.addEventListener('click', function() {
+            adminContainer.style.display = 'none';
+            loginContainer.style.display = 'block';
+        });
+        
+        // Helper functions
+        function showAdminPanel() {
+            loginContainer.style.display = 'none';
+            adminContainer.style.display = 'block';
+            renderUsersTable();
+        }
+        
+        function accessMainWebsite() {
+            window.location.href = '02.Dashboard.html';
+        }
+        
+        function renderUsersTable() {
+            usersTableBody.innerHTML = '';
+            
+            if (users.length === 0) {
+                usersTableBody.innerHTML = '<tr><td colspan="2" style="text-align: center;">No sub-users created yet</td></tr>';
+                return;
+            }
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                const emailCell = document.createElement('td');
+                emailCell.textContent = user.email;
+                
+                const actionsCell = document.createElement('td');
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.className = 'btn btn-danger';
+                deleteBtn.addEventListener('click', () => deleteUser(user.email));
+                
+                actionsCell.appendChild(deleteBtn);
+                row.appendChild(emailCell);
+                row.appendChild(actionsCell);
+                
+                usersTableBody.appendChild(row);
+            });
+        }
+        
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.animation = 'none';
+                void element.offsetWidth; // Trigger reflow
+                element.style.animation = 'shake 0.5s';
+            }, 10);
+        }
+        
+        // Initialize
+        renderUsersTable();
+    </script>
+</body>
+</html>

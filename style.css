@@ -1,0 +1,297 @@
+/* PDF Export Specific Styles */
+@media print {
+  body {
+    background-color: rgb(11, 176, 231) !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .permit-card, .card-header, .nav-tabs, .form-control, .signature-pad {
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .header-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--solar-blue)) !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .nav-tabs .nav-link {
+    background-color: transparent !important;
+    color: #000 !important;
+  }
+
+  .nav-tabs .nav-link.active {
+    color: #000 !important;
+    border-bottom: 3px solid var(--solar-yellow) !important;
+  }
+
+  .btn, .footer {
+    display: none !important;
+  }
+}
+
+/* Base Styles */
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --accent-color: #f39c12;
+  --success-color: #27ae60;
+  --danger-color: #e74c3c;
+  --light-color: #ecf0f1;
+  --dark-color: #34495e;
+  --solar-yellow: #f1c40f;
+  --solar-orange: #e67e22;
+  --solar-blue: #2980b9;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  color: var(--primary-color);
+}
+
+/* Header Styles */
+.header-section {
+  background: linear-gradient(135deg, var(--primary-color), var(--solar-blue));
+  color: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.site-title {
+  color: white;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.site-subtitle {
+  color: rgba(255,255,255,0.8);
+  font-size: 1.1rem;
+}
+
+.company-logo {
+  max-height: 80px;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+/* Card and Tab Styles */
+.permit-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  border: none;
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: var(--primary-color);
+  color: white;
+  border-bottom: none;
+  padding: 0;
+}
+
+.nav-tabs {
+  border-bottom: none;
+  background-color: var(--primary-color);
+}
+
+.nav-tabs .nav-link {
+  color: rgba(255,255,255,0.7);
+  font-weight: 500;
+  border: none;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+  background-color: rgba(255,255,255,0.1);
+  margin-right: 5px;
+}
+
+.nav-tabs .nav-link.active {
+  color: white;
+  background-color: transparent;
+  border-bottom: 3px solid var(--solar-yellow);
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+  color: white;
+  background-color: rgba(255,255,255,0.15);
+}
+
+/* Form Styles */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.status-badge {
+  background-color: var(--solar-yellow);
+  color: var(--primary-color);
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-title {
+  color: var(--primary-color);
+  margin-top: 25px;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--light-color);
+  font-weight: 600;
+}
+
+.section-title i {
+  color: var(--solar-orange);
+  margin-right: 10px;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.form-control, .form-select {
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  transition: all 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+}
+
+/* Signature Pad Styles */
+.signature-pad {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  background-color: white;
+}
+
+.signature-pad canvas {
+  width: 100%;
+  height: 100px;
+  background-color: white;
+}
+
+.small-signature canvas {
+  width: 100%;
+  height: 40px;
+  background-color: white;
+}
+
+/* Table Styles */
+.crew-member-table {
+  font-size: 0.9rem;
+  background-color: white;
+}
+
+.crew-member-table th {
+  white-space: nowrap;
+  background-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+.crew-member-table td {
+  vertical-align: middle;
+  background-color: white !important;
+}
+
+/* Button Styles (hidden in PDF) */
+.btn {
+  border-radius: 5px;
+  padding: 8px 20px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-success {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.btn-secondary {
+  background-color: var(--dark-color);
+  border-color: var(--dark-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .checkbox-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .nav-tabs .nav-link {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .crew-member-table {
+    font-size: 0.8rem;
+  }
+}
+
+/* Print/PDF Specific Overrides */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  #generalPermit, #hotWork, #electrical, #confined, #height, #loto, #lifting,
+  .permit-card, .permit-card * {
+    visibility: visible;
+  }
+  
+  .permit-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    border: none;
+  }
+  
+  .nav-tabs {
+    display: none;
+  }
+  
+  .form-control, .form-select, .signature-pad, .crew-member-table {
+    background-color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .header-section {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: linear-gradient(135deg, var(--primary-color), var(--solar-blue)) !important;
+  }
+}
