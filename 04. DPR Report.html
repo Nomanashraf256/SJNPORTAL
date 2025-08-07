@@ -1,0 +1,4313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SJN Solar Plant Daily Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --metric-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --edit-mode-color: #fff9e6;
+        }
+
+        .report-date-container {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .report-date-container strong {
+            font-weight: 600;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            transition: background-color 0.3s;
+        }
+
+        body.edit-mode {
+            background-color: var(--edit-mode-color);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        #report-date {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #7f8c8d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #95a5a6;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #219653;
+        }
+
+        .time-bar {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .time-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        /* PDF-specific styles */
+        @media print,
+        pdf {
+            body {
+                background-color: white !important;
+                color: black !important;
+            }
+
+            .card,
+            .metric-card,
+            .chart-card,
+            .gauge-card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                background-color: white !important;
+                break-inside: avoid;
+            }
+
+            .btn {
+                display: none !important;
+            }
+
+            canvas {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+
+            .editable-field::after {
+                display: none !important;
+            }
+        }
+
+        /* Loading overlay styles */
+        .pdf-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            font-size: 24px;
+            flex-direction: column;
+        }
+
+        .pdf-loading-spinner {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .metric-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .content-grid {
+            grid-template-columns: 2fr 1fr;
+        }
+
+        .metric-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--metric-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background-color: var(--secondary-color);
+        }
+
+        .metric-title {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        /* Add this to your existing CSS */
+        .status-select-wrapper {
+            border: none !important;
+            background: none !important;
+            box-shadow: none !important;
+        }
+
+        .status-select {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            appearance: none;
+            padding-right: 20px;
+            cursor: pointer;
+        }
+
+        .edit-mode .status-select {
+            background: white !important;
+            border: 1px solid #ddd !important;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2) !important;
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: default;
+        }
+
+        .edit-mode .status-select-wrapper::after {
+            display: none !important;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .metric-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .positive {
+            color: var(--success-color);
+        }
+
+        .negative {
+            color: var(--danger-color);
+        }
+
+        .neutral {
+            color: #7f8c8d;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 400;
+            color: var(--dark-color);
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* === Ultra-Compact Table (Smallest Readable Size) === */
+        .ghi-table-container {
+            overflow-x: auto;
+            margin-bottom: 5px;
+            max-height: 250px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            /* Clean, space-efficient font */
+        }
+
+        .ghi-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px !important;
+            /* Force smallest readable size */
+            line-height: 1.1;
+        }
+
+        .ghi-table th,
+        .ghi-table td {
+            padding: 2px 3px !important;
+            /* Minimal padding */
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .ghi-table th {
+            background-color: #f8f8f8;
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Tiny Input Fields */
+        .ghi-table input {
+            width: 50px !important;
+            padding: 1px 2px !important;
+            font-size: 10px !important;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            height: 18px;
+        }
+
+        /* Time Column Sticky (Optional) */
+        .ghi-table th:first-child,
+        .ghi-table td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #f8f8f8;
+            z-index: 1;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: none;
+            /* Hidden by default, shown in edit mode */
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .time-input {
+            width: 100px;
+        }
+
+        .deviation,
+        .soiling-deviation {
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .chart-card h4 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+
+        .mini-chart-container {
+            height: 250px;
+        }
+
+        .add-row-btn,
+        .remove-row-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .solar-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.1;
+            overflow: hidden;
+        }
+
+        .status-display {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-display.completed {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-display.pending {
+            background-color: rgba(241, 196, 15, 0.1);
+            color: #f39c12;
+        }
+
+        .status-display.in-progress {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--secondary-color);
+        }
+
+        /* Ultra-Compact Table Styles (applies to all similar tables) */
+        .compact-table-container {
+            overflow-x: auto;
+            margin-bottom: 5px;
+            max-height: 250px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .compact-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px !important;
+            line-height: 1.1;
+        }
+
+        .compact-table th,
+        .compact-table td {
+            padding: 2px 3px !important;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .compact-table th {
+            background-color: #f8f8f8;
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Tiny Input Fields for all compact tables */
+        .compact-table input {
+            width: 50px !important;
+            padding: 1px 2px !important;
+            font-size: 10px !important;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            height: 18px;
+        }
+
+        /* Time Column Sticky (Optional) */
+        .compact-table th:first-child,
+        .compact-table td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #f8f8f8;
+            z-index: 1;
+        }
+
+        .sun {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #f1c40f, #e67e22);
+            border-radius: 50%;
+            filter: blur(10px);
+            animation: sunGlow 8s infinite alternate;
+        }
+
+        .panel {
+            position: absolute;
+            width: 80px;
+            height: 40px;
+            background-color: rgba(52, 152, 219, 0.7);
+            clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
+        }
+
+        @keyframes sunGlow {
+            0% {
+                opacity: 0.3;
+            }
+
+            100% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .tab-container {
+            margin-bottom: 20px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: #7f8c8d;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--secondary-color);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--secondary-color);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .gauge-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .gauge-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .pdf-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .pdf-loading-spinner {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #2c7be5;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .gauge-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .gauge-chart {
+            height: 200px;
+        }
+
+        .data-highlight {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .data-highlight h4 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .data-highlight p {
+            margin-bottom: 5px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background-color: rgba(241, 196, 15, 0.1);
+            color: #f39c12;
+        }
+
+        .status-in-progress {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Edit mode specific styles */
+        .edit-mode .card {
+            background-color: #fffdf6;
+        }
+
+        .edit-mode .metric-card {
+            background-color: #fffdf6;
+        }
+
+        .edit-mode input,
+        .edit-mode select,
+        .edit-mode textarea {
+            display: inline-block;
+            background-color: white;
+            border: 1px solid #ddd;
+        }
+
+        .edit-mode .display-value {
+            display: none;
+        }
+
+        .display-value {
+            display: inline-block;
+        }
+
+        /* Equal width tables */
+        .equal-width-tables {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .equal-width-tables table {
+            width: 100%;
+        }
+
+        /* Maintenance layout */
+        .maintenance-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .maintenance-subsection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .maintenance-chart {
+            margin-top: 20px;
+        }
+
+        @media print,
+        pdf {
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: white !important;
+                color: #333 !important;
+                font-size: 12pt !important;
+                line-height: 1.5 !important;
+            }
+
+            .container {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .card,
+            .metric-card,
+            .chart-card {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                border: 1px solid #ddd !important;
+                background-color: white !important;
+                box-shadow: none !important;
+            }
+
+            .chart-container,
+            .mini-chart-container {
+                height: 400px !important;
+                width: 100% !important;
+            }
+
+            table {
+                page-break-inside: avoid;
+                width: 100% !important;
+                font-size: 10pt !important;
+            }
+
+            th,
+            td {
+                padding: 8px 12px !important;
+                border-bottom: 1px solid #eee !important;
+            }
+
+            th {
+                background-color: #f5f5f5 !important;
+            }
+
+            /* Ensure all text is black for printing */
+            * {
+                color: #333 !important;
+            }
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .metric-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+
+            .gauge-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .equal-width-tables {
+                grid-template-columns: 1fr;
+            }
+
+            .maintenance-subsection {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gauge-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .btn {
+                width: 48%;
+            }
+        }
+
+        /* New styles for enhanced functionality */
+        .editable-field {
+            position: relative;
+        }
+
+        .editable-field::after {
+            content: '\f044';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .edit-mode .editable-field::after {
+            opacity: 1;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background-color: #f5f5f5;
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .chart-tooltip {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .chart-tooltip strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .chart-annotation {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-left: 4px solid var(--secondary-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-width: 200px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-updated {
+            animation: highlightUpdate 1.5s;
+        }
+
+        @keyframes highlightUpdate {
+            0% {
+                background-color: rgba(46, 204, 113, 0.3);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        .remark-cell {
+            min-width: 200px;
+        }
+
+        .status-select-wrapper {
+            position: relative;
+        }
+
+        .status-select-wrapper::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #7f8c8d;
+        }
+
+        .status-select {
+            appearance: none;
+            padding-right: 25px;
+        }
+
+        /* Loading spinner for PDF generation */
+        .pdf-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            font-size: 24px;
+            flex-direction: column;
+        }
+
+        .pdf-loading-spinner {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media print,
+        pdf {
+            body {
+                background-color: white !important;
+                color: #333 !important;
+                font-size: 12pt !important;
+                line-height: 1.4 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .card,
+            .metric-card,
+            .chart-card,
+            .gauge-card {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                margin-bottom: 20px !important;
+                border: 1px solid #e0e0e0 !important;
+                background-color: white !important;
+                box-shadow: none !important;
+            }
+
+            .card-header {
+                background-color: #2c3e50 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .chart-container,
+            .mini-chart-container {
+                height: 350px !important;
+                width: 100% !important;
+                page-break-inside: avoid !important;
+            }
+
+            table {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                width: 100% !important;
+            }
+
+            th,
+            td {
+                padding: 8px 12px !important;
+                border-bottom: 1px solid #eee !important;
+            }
+
+            th {
+                background-color: #f5f5f5 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .btn,
+            .editable-field::after,
+            .tooltip {
+                display: none !important;
+            }
+
+            /* Ensure text is black for printing */
+            * {
+                color: #333 !important;
+            }
+
+            /* Special handling for status indicators */
+            .status-display.completed {
+                background-color: rgba(39, 174, 96, 0.1) !important;
+                color: #27ae60 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .status-display.pending {
+                background-color: rgba(241, 196, 15, 0.1) !important;
+                color: #f39c12 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .status-display.in-progress {
+                background-color: rgba(52, 152, 219, 0.1) !important;
+                color: #3498db !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="solar-animation">
+                <div class="sun"></div>
+                <!-- Solar panels -->
+                <div class="panel" style="top: 30%; left: 30%; transform: rotate(15deg);"></div>
+                <div class="panel" style="top: 40%; left: 40%; transform: rotate(30deg);"></div>
+                <div class="panel" style="top: 30%; left: 50%; transform: rotate(45deg);"></div>
+                <div class="panel" style="top: 20%; left: 60%; transform: rotate(60deg);"></div>
+                <div class="panel" style="top: 10%; left: 70%; transform: rotate(75deg);"></div>
+            </div>
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>SJN Solar Plant Daily Report</h1>
+                    <p id="report-date">Loading date...</p>
+                </div>
+                <div class="header-right">
+                    <p class="report-date-container">
+                    <h2>Report of Date:</h2>
+                    <span class="editable-field">
+                        <h2> <span class="display-value" id="report-of-date">01-Jan-2023</span>
+                            <input type="date" id="report-date-input" value="2023-01-01">
+                        </h2>
+                    </span>
+                    </p>
+                    <button class="btn btn-primary" id="exportPdf">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button class="btn btn-secondary" id="toggleEdit">
+                        <i class="fas fa-edit"></i> Edit Mode
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Time Bar -->
+        <div class="time-bar">
+            <div class="time-display">
+                <i class="fas fa-clock"></i> Local Time (Jeddah): <span id="current-time">Loading...</span>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <div class="status-text">Plant Operational</div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="grid metric-grid">
+            <div class="metric-card">
+                <div class="metric-title">Plant Capacity (DC)</div>
+                <div class="metric-value editable-field">
+                    <span class="display-value">387.68 MWdc</span>
+                    <input type="text" value="387.68" data-unit="MWdc">
+                </div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i> 1.27 DC/AC Ratio
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Plant Capacity (AC)</div>
+                <div class="metric-value editable-field">
+                    <span class="display-value">306.18 MWac</span>
+                    <input type="text" value="306.18" data-unit="MWac">
+                </div>
+                <div class="metric-change positive">
+                    <i class="fas fa-check-circle"></i> 100% Availability
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Total Energy Export</div>
+                <div class="metric-value editable-field" id="export-energy">
+                    <span class="display-value">3,055.32 MWh</span>
+                    <input type="number" value="3055.32" step="0.01" data-unit="MWh">
+                </div>
+                <div class="metric-change positive" id="export-deviation">
+                    <i class="fas fa-arrow-up"></i> +6.39% vs Expected
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Performance Ratio</div>
+                <div class="metric-value editable-field" id="performance-ratio">
+                    <span class="display-value">84.50%</span>
+                    <input type="number" value="84.50" step="0.01" data-unit="%">
+                </div>
+                <div class="metric-change positive" id="performance-deviation">
+                    <i class="fas fa-arrow-up"></i> +1.90% vs Target
+                </div>
+            </div>
+        </div>
+
+        <!-- Plant Summary -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-solar-panel"></i> Plant Operation & Technical Overview</h3>
+            </div>
+            <div class="card-body">
+                <div class="equal-width-tables">
+                    <div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Start Time</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">05:45</span>
+                                        <input type="time" id="start-time" value="05:45" class="time-input">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>End Time</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">19:06</span>
+                                        <input type="time" id="end-time" value="19:06" class="time-input">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Total Operational Hours</td>
+                                    <td id="total-hours">13:21</td>
+                                </tr>
+                                <tr>
+                                    <td>Location</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">Industrial Area 3, Jeddah, KSA</span>
+                                        <input type="text" value="Industrial Area 3, Jeddah, KSA">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Coordinates</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">21°10'1.39" N, 39°25'38.48" E</span>
+                                        <input type="text" value="21°10'1.39&quot; N, 39°25'38.48&quot; E">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Project Company</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">Masdar-EDF-Nesma JV</span>
+                                        <input type="text" value="Masdar-EDF-Nesma JV">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>O&M Operator</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">L&T</span>
+                                        <input type="text" value="L&T">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Module Technology</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">Mono-Crystalline Bi-Facial LONGI Solar</span>
+                                        <input type="text" value="Mono-Crystalline Bi-Facial LONGI Solar">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Inverter Type</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">String Inverter/180 kVA @ 50°C</span>
+                                        <input type="text" value="String Inverter/180 kVA @ 50°C">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Plant Altitude</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">50m</span>
+                                        <input type="text" value="50" data-unit="m">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Performance Data -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-tachometer-alt"></i> Plant Performance Summary</h3>
+            </div>
+            <div class="card-body">
+                <div class="data-highlight">
+                    <h4>Key Performance Indicators</h4>
+                    <p><strong>Energy Export:</strong> <span id="highlight-export">3,055.32 MWh</span></p>
+                    <p><strong>Performance Ratio:</strong> <span id="highlight-pr">84.50%</span></p>
+                    <p><strong>GHI:</strong> <span id="highlight-ghi">7.66 kWh/m²</span></p>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Expected</th>
+                            <th>Actual</th>
+                            <th>Units</th>
+                            <th>Deviation %</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Export Energy</td>
+                            <td class="editable-field">
+                                <span class="display-value">2,871.80</span>
+                                <input type="number" class="expected-input" value="2871.8" step="0.01">
+                            </td>
+                            <td class="editable-field">
+                                <span class="display-value">3,055.32</span>
+                                <input type="number" class="actual-input" value="3055.32" step="0.01">
+                            </td>
+                            <td>MWh</td>
+                            <td class="deviation" id="export-dev">6.39%</td>
+                            <td class="editable-field remark-cell">
+                                <span class="display-value">-</span>
+                                <input type="text" class="remarks-input" placeholder="Enter remarks">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Import Energy</td>
+                            <td class="editable-field">
+                                <span class="display-value">11.53</span>
+                                <input type="number" class="expected-input" value="11.53" step="0.01">
+                            </td>
+                            <td class="editable-field">
+                                <span class="display-value">9.56</span>
+                                <input type="number" class="actual-input" value="9.56" step="0.01">
+                            </td>
+                            <td>MWh</td>
+                            <td class="deviation" id="import-dev">-17.10%</td>
+                            <td class="editable-field remark-cell">
+                                <span class="display-value">-</span>
+                                <input type="text" class="remarks-input" placeholder="Enter remarks">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>GHI</td>
+                            <td class="editable-field">
+                                <span class="display-value">7.36</span>
+                                <input type="number" class="expected-input" value="7.36" step="0.01">
+                            </td>
+                            <td class="editable-field">
+                                <span class="display-value">7.66</span>
+                                <input type="number" class="actual-input" value="7.66" step="0.01">
+                            </td>
+                            <td>kWh/m²</td>
+                            <td class="deviation" id="ghi-dev">4.13%</td>
+                            <td class="editable-field remark-cell">
+                                <span class="display-value">-</span>
+                                <input type="text" class="remarks-input" placeholder="Enter remarks">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>GTI/POA</td>
+                            <td class="editable-field">
+                                <span class="display-value">8.96</span>
+                                <input type="number" class="expected-input" value="8.96" step="0.01">
+                            </td>
+                            <td class="editable-field">
+                                <span class="display-value">9.15</span>
+                                <input type="number" class="actual-input" value="9.15" step="0.01">
+                            </td>
+                            <td>kWh/m²</td>
+                            <td class="deviation" id="gti-dev">2.15%</td>
+                            <td class="editable-field remark-cell">
+                                <span class="display-value">-</span>
+                                <input type="text" class="remarks-input" placeholder="Enter remarks">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Plant Availability</td>
+                            <td class="editable-field">
+                                <span class="display-value">100.00</span>
+                                <input type="number" class="expected-input" value="100" step="0.01">
+                            </td>
+                            <td class="editable-field">
+                                <span class="display-value">100.00</span>
+                                <input type="number" class="actual-input" value="100.0" step="0.01">
+                            </td>
+                            <td>%</td>
+                            <td class="deviation" id="avail-dev">0.00%</td>
+                            <td class="editable-field remark-cell">
+                                <span class="display-value">-</span>
+                                <input type="text" class="remarks-input" placeholder="Enter remarks">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Performance Ratio</td>
+                            <td class="editable-field">
+                                <span class="display-value">82.60</span>
+                                <input type="number" class="expected-input" value="82.60" step="0.01">
+                            </td>
+                            <td class="editable-field">
+                                <span class="display-value">84.50</span>
+                                <input type="number" class="actual-input" value="84.50" step="0.01">
+                            </td>
+                            <td>%</td>
+                            <td class="deviation" id="perf-dev">1.90%</td>
+                            <td class="editable-field remark-cell">
+                                <span class="display-value">-</span>
+                                <input type="text" class="remarks-input" placeholder="Enter remarks">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Module Temperature</td>
+                            <td class="editable-field">
+                                <span class="display-value">54.80</span>
+                                <input type="number" class="expected-input" value="54.80" step="0.01">
+                            </td>
+                            <td class="editable-field">
+                                <span class="display-value">48.75</span>
+                                <input type="number" class="actual-input" value="48.75" step="0.01">
+                            </td>
+                            <td>°C</td>
+                            <td class="deviation" id="modtemp-dev">-11.05%</td>
+                            <td class="editable-field remark-cell">
+                                <span class="display-value">-</span>
+                                <input type="text" class="remarks-input" placeholder="Enter remarks">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Ambient Temperature</td>
+                            <td class="editable-field">
+                                <span class="display-value">33.49</span>
+                                <input type="number" class="expected-input" value="33.49" step="0.01">
+                            </td>
+                            <td class="editable-field">
+                                <span class="display-value">37.03</span>
+                                <input type="number" class="actual-input" value="37.03" step="0.01">
+                            </td>
+                            <td>°C</td>
+                            <td class="deviation" id="ambtemp-dev">10.58%</td>
+                            <td class="editable-field remark-cell">
+                                <span class="display-value">-</span>
+                                <input type="text" class="remarks-input" placeholder="Enter remarks">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Weather & Environmental Data -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-cloud-sun"></i> Weather Station & Environmental Summary</h3>
+            </div>
+            <div class="card-body">
+                <div class="equal-width-tables">
+                    <div>
+                        <h4>Weather Stations Data</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Max Peak Power</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">301.09</span>
+                                        <input type="number" value="301.09" step="0.01"> MWh
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Max Irradiance</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1,011.33</span>
+                                        <input type="number" value="1011.33" step="0.01"> W/m²
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Max Wind Speed</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">19.68</span>
+                                        <input type="number" value="19.68" step="0.01"> m/s
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Max Module Temperature</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">55.01</span>
+                                        <input type="number" value="55.01" step="0.01"> °C
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Max Ambient Temperature</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">41.40</span>
+                                        <input type="number" value="41.40" step="0.01"> °C
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h4>Soiling Losses</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Location</th>
+                                    <th>Expected</th>
+                                    <th>Actual</th>
+                                    <th>Deviation</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="editable-field">
+                                        <span class="display-value">WMS-1_B-03</span>
+                                        <input type="text" value="WMS-1_B-03">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0.80</span>
+                                        <input type="number" class="soiling-expected" value="0.8" step="0.01">%
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1.38</span>
+                                        <input type="number" class="soiling-actual" value="1.38" step="0.01">%
+                                    </td>
+                                    <td class="soiling-deviation">0.58%</td>
+                                    <td class="editable-field remark-cell">
+                                        <span class="display-value">-</span>
+                                        <input type="text" class="remarks-input" placeholder="Enter remarks">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="editable-field">
+                                        <span class="display-value">WMS-2_B-16</span>
+                                        <input type="text" value="WMS-2_B-16">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0.80</span>
+                                        <input type="number" class="soiling-expected" value="0.8" step="0.01">%
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0.00</span>
+                                        <input type="number" class="soiling-actual" value="0" step="0.01">%
+                                    </td>
+                                    <td class="soiling-deviation">-</td>
+                                    <td class="editable-field remark-cell">
+                                        <span class="display-value">-</span>
+                                        <input type="text" class="remarks-input" placeholder="Enter remarks">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="editable-field">
+                                        <span class="display-value">WMS-3_B-22</span>
+                                        <input type="text" value="WMS-3_B-22">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0.80</span>
+                                        <input type="number" class="soiling-expected" value="0.8" step="0.01">%
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0.79</span>
+                                        <input type="number" class="soiling-actual" value="0.79" step="0.01">%
+                                    </td>
+                                    <td class="soiling-deviation">-0.01%</td>
+                                    <td class="editable-field remark-cell">
+                                        <span class="display-value">-</span>
+                                        <input type="text" class="remarks-input" placeholder="Enter remarks">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="editable-field">
+                                        <span class="display-value">WMS-4_B-25</span>
+                                        <input type="text" value="WMS-4_B-25">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0.80</span>
+                                        <input type="number" class="soiling-expected" value="0.8" step="0.01">%
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1.42</span>
+                                        <input type="number" class="soiling-actual" value="1.42" step="0.01">%
+                                    </td>
+                                    <td class="soiling-deviation">0.62%</td>
+                                    <td class="editable-field remark-cell">
+                                        <span class="display-value">-</span>
+                                        <input type="text" class="remarks-input" placeholder="Enter remarks">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="editable-field">
+                                        <span class="display-value">WMS-5_B-38</span>
+                                        <input type="text" value="WMS-5_B-38">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0.80</span>
+                                        <input type="number" class="soiling-expected" value="0.8" step="0.01">%
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1.42</span>
+                                        <input type="number" class="soiling-actual" value="1.42" step="0.01">%
+                                    </td>
+                                    <td class="soiling-deviation">0.62%</td>
+                                    <td class="editable-field remark-cell">
+                                        <span class="display-value">-</span>
+                                        <input type="text" class="remarks-input" placeholder="Enter remarks">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="editable-field">
+                                        <span class="display-value">WMS-6_B-40</span>
+                                        <input type="text" value="WMS-6_B-40">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0.80</span>
+                                        <input type="number" class="soiling-expected" value="0.8" step="0.01">%
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1.42</span>
+                                        <input type="number" class="soiling-actual" value="1.42" step="0.01">%
+                                    </td>
+                                    <td class="soiling-deviation">0.62%</td>
+                                    <td class="editable-field remark-cell">
+                                        <span class="display-value">-</span>
+                                        <input type="text" class="remarks-input" placeholder="Enter remarks">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-cloud-sun"></i> Daily Irradiance & GHI Summary</h3>
+            </div>
+            <div class="card-body">
+                <!-- Weather Data Input -->
+                <div class="chart-card">
+                    <h4>GHI Data (W/m²)</h4>
+                    <div class="ghi-table-container">
+                        <table class="ghi-table" id="ghi-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>04:00</th>
+                                    <th>05:00</th>
+                                    <th>06:00</th>
+                                    <th>07:00</th>
+                                    <th>08:00</th>
+                                    <th>09:00</th>
+                                    <th>10:00</th>
+                                    <th>11:00</th>
+                                    <th>12:00</th>
+                                    <th>13:00</th>
+                                    <th>14:00</th>
+                                    <th>15:00</th>
+                                    <th>16:00</th>
+                                    <th>17:00</th>
+                                    <th>18:00</th>
+                                    <th>19:00</th>
+                                    <th>20:00</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>GHI</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0</span>
+                                        <input type="number" value="0" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0</span>
+                                        <input type="number" value="0" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">200</span>
+                                        <input type="number" value="200" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">600</span>
+                                        <input type="number" value="600" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">800</span>
+                                        <input type="number" value="800" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">800</span>
+                                        <input type="number" value="800" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">600</span>
+                                        <input type="number" value="600" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">100</span>
+                                        <input type="number" value="100" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0</span>
+                                        <input type="number" value="0" step="1">
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="compact-table-container">
+                        <h4>POA Data (W/m²)</h4>
+                        <table class="compact-table" id="poa-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>04:00</th>
+                                    <th>05:00</th>
+                                    <th>06:00</th>
+                                    <th>07:00</th>
+                                    <th>08:00</th>
+                                    <th>09:00</th>
+                                    <th>10:00</th>
+                                    <th>11:00</th>
+                                    <th>12:00</th>
+                                    <th>13:00</th>
+                                    <th>14:00</th>
+                                    <th>15:00</th>
+                                    <th>16:00</th>
+                                    <th>17:00</th>
+                                    <th>18:00</th>
+                                    <th>19:00</th>
+                                    <th>20:00</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>POA</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0</span>
+                                        <input type="number" value="0" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0</span>
+                                        <input type="number" value="0" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">200</span>
+                                        <input type="number" value="200" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">600</span>
+                                        <input type="number" value="600" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">800</span>
+                                        <input type="number" value="800" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1000</span>
+                                        <input type="number" value="1000" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">800</span>
+                                        <input type="number" value="800" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">600</span>
+                                        <input type="number" value="600" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">100</span>
+                                        <input type="number" value="100" step="1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0</span>
+                                        <input type="number" value="0" step="1">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="compact-table-container">
+                        <h4>Daily Energy Generation (MWh) Data</h4>
+                        <table class="compact-table" id="hourly-energy-table">
+                            <thead>
+                                <tr>
+                                    <th>Hour</th>
+                                    <th>04:00</th>
+                                    <th>05:00</th>
+                                    <th>06:00</th>
+                                    <th>07:00</th>
+                                    <th>08:00</th>
+                                    <th>09:00</th>
+                                    <th>10:00</th>
+                                    <th>11:00</th>
+                                    <th>12:00</th>
+                                    <th>13:00</th>
+                                    <th>14:00</th>
+                                    <th>15:00</th>
+                                    <th>16:00</th>
+                                    <th>17:00</th>
+                                    <th>18:00</th>
+                                    <th>19:00</th>
+                                    <th>20:00</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Energy</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0</span>
+                                        <input type="number" value="0" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">5</span>
+                                        <input type="number" value="5" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">50</span>
+                                        <input type="number" value="50" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">120</span>
+                                        <input type="number" value="120" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">200</span>
+                                        <input type="number" value="200" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">250</span>
+                                        <input type="number" value="250" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">280</span>
+                                        <input type="number" value="280" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">300</span>
+                                        <input type="number" value="300" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">290</span>
+                                        <input type="number" value="290" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">280</span>
+                                        <input type="number" value="280" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">260</span>
+                                        <input type="number" value="260" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">220</span>
+                                        <input type="number" value="220" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">160</span>
+                                        <input type="number" value="160" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">80</span>
+                                        <input type="number" value="80" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">20</span>
+                                        <input type="number" value="20" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0</span>
+                                        <input type="number" value="0" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">0</span>
+                                        <input type="number" value="0" step="0.1">
+                                    </td>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="compact-table-container">
+                        <h4>Performance Ratio Data</h4>
+                        <table class="compact-table" id="pr-trend-table">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Sat</th>
+                                    <th>Sun</th>
+                                    <th>Mon</th>
+                                    <th>Tue</th>
+                                    <th>Wed</th>
+                                    <th>Thu</th>
+                                    <th>Fri</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>PR %</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">82.1</span>
+                                        <input type="number" value="82.1" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">83.5</span>
+                                        <input type="number" value="83.5" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">84.0</span>
+                                        <input type="number" value="84.0" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">83.8</span>
+                                        <input type="number" value="83.8" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">84.5</span>
+                                        <input type="number" value="84.5" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">84.2</span>
+                                        <input type="number" value="84.2" step="0.1">
+                                    </td>
+                                    <td class="editable-field">
+                                        <span class="display-value">84.0</span>
+                                        <input type="number" value="84.0" step="0.1">
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Visualization -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-line"></i> Performance Visualization</h3>
+            </div>
+            <div class="card-body">
+                <!-- Main Performance Chart -->
+                <div class="chart-card">
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gauge Charts -->
+            <div class="card-body">
+                <div class="gauge-container">
+                    <div class="gauge-card">
+                        <div class="gauge-title">Plant Availability</div>
+                        <div class="gauge-chart">
+                            <canvas id="availabilityGauge"></canvas>
+                        </div>
+                    </div>
+                    <div class="gauge-card">
+                        <div class="gauge-title">Performance Ratio</div>
+                        <div class="gauge-chart">
+                            <canvas id="prGauge"></canvas>
+                        </div>
+                    </div>
+                    <div class="gauge-card">
+                        <div class="gauge-title">Soiling Loss</div>
+                        <div class="gauge-chart">
+                            <canvas id="soilingGauge"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Energy Flow and Weather Charts -->
+            <div class="card-body">
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <h4>Energy Flow</h4>
+                        <div class="mini-chart-container">
+                            <canvas id="energyFlowChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Performance Ratio Trend</h4>
+                        <div class="mini-chart-container" style="margin-top: 20px;">
+                            <canvas id="prTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-line"></i> Daily Generation Overview</h3>
+            </div>
+            <div class="card-body">
+                <!-- Daily Energy and PR Trend Charts -->
+                <div class="chart-card">
+                    <div class="chart-card">
+                        <h4>Daily Energy Generation</h4>
+                        <div class="mini-chart-container" style="margin-top: 20px;">
+                            <canvas id="dailyEnergyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card">
+                        <h4>GHI vs POA Analysis</h4>
+                        <div class="chart-container">
+                            <canvas id="weatherChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Equipment & Maintenance -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-cogs"></i> Power Transformer Performance & ACRS Operation Summary</h3>
+            </div>
+            <div class="card-body">
+                <div class="equal-width-tables">
+                    <div>
+                        <!-- Equipment performance table remains unchanged -->
+                        <h4>Major Equipment Performance</h4>
+                        <table class="data-table" id="equipment-performance-table">
+                            <thead>
+                                <tr>
+                                    <th>Equipment</th>
+                                    <th>Generation (MWh)</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>PTR – 1</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1,547.58</span>
+                                        <input type="number" value="1547.58" step="0.01">
+                                    </td>
+                                    <td class="editable-field remark-cell">
+                                        <span class="display-value">-</span>
+                                        <input type="text" class="remarks-input" placeholder="Enter remarks">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>PTR – 2</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">1,507.73</span>
+                                        <input type="number" value="1507.73" step="0.01">
+                                    </td>
+                                    <td class="editable-field remark-cell">
+                                        <span class="display-value">-</span>
+                                        <input type="text" class="remarks-input" placeholder="Enter remarks">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="chart-card">
+                            <h4>Equipment Performance Comparison</h4>
+                            <div class="mini-chart-container">
+                                <canvas id="equipmentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>ACRS Robots Operation</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Total No. of Robots</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">308</span>
+                                        <input type="number" id="total-robots" value="308">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>No. of Robots Started</td>
+                                    <td class="editable-field">
+                                        <span class="display-value">299</span>
+                                        <input type="number" id="started-robots" value="299">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>No. of Robots Not Started</td>
+                                    <td id="not-started-robots">9</td>
+                                </tr>
+                                <tr>
+                                    <td>Robots Working Percentage</td>
+                                    <td id="robots-working-percent">97.1%</td>
+                                </tr>
+                                <tr>
+                                    <td>Remarks</td>
+                                    <td class="editable-field remark-cell">
+                                        <span class="display-value">-</span>
+                                        <input type="text" class="remarks-input" placeholder="Enter remarks">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="chart-card">
+                            <h4>Robot Operational Status</h4>
+                            <div class="mini-chart-container">
+                                <canvas id="robotStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Maintenance Activities -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-tools"></i> Plant Maintenance Activities</h3>
+            </div>
+            <div class="card-body">
+                <!-- Preventive Maintenance Section -->
+                <div style="margin-bottom: 30px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h4>Preventive Maintenance</h4>
+                        <button class="btn btn-success add-row-btn" id="add-preventive-row">
+                            <i class="fas fa-plus"></i> Add Activity
+                        </button>
+                    </div>
+                    <table class="data-table" id="preventive-maintenance-table">
+                        <thead>
+                            <tr>
+                                <th>Activity</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Frequency</th>
+                                <th>Remarks</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="editable-field">
+                                    <span class="display-value">Substation Inspection</span>
+                                    <input type="text" value="Substation Inspection">
+                                </td>
+                                <td class="editable-field">
+                                    <span class="display-value">Main Substation</span>
+                                    <input type="text" value="Main Substation">
+                                </td>
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value status-display completed">Completed</span>
+                                        <select class="status-select" style="display: none;" disabled>
+                                            <option value="completed" selected>Completed</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="in-progress">In Progress</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value">Monthly</span>
+                                        <select class="frequency-select" style="display: none;" disabled>
+                                            <option value="daily">Daily</option>
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly" selected>Monthly</option>
+                                            <option value="quarterly">Quarterly</option>
+                                            <option value="bi-annually">Bi-Annually</option>
+                                            <option value="annually">Annually</option>
+                                            <option value="two-yearly">Two-Yearly</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="editable-field remark-cell">
+                                    <span class="display-value">Routine inspection</span>
+                                    <input type="text" value="Routine inspection">
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger remove-row-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="editable-field">
+                                    <span class="display-value">Weather Station Cleaning</span>
+                                    <input type="text" value="Weather Station Cleaning">
+                                </td>
+                                <td class="editable-field">
+                                    <span class="display-value">WMS-1</span>
+                                    <input type="text" value="WMS-1">
+                                </td>
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value status-display completed">Completed</span>
+                                        <select class="status-select" style="display: none;" disabled>
+                                            <option value="completed" selected>Completed</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="in-progress">In Progress</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value">Monthly</span>
+                                        <select class="frequency-select" style="display: none;" disabled>
+                                            <option value="daily">Daily</option>
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly" selected>Monthly</option>
+                                            <option value="quarterly">Quarterly</option>
+                                            <option value="bi-annually">Bi-Annually</option>
+                                            <option value="annually">Annually</option>
+                                            <option value="two-yearly">Two-Yearly</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="editable-field remark-cell">
+                                    <span class="display-value">Cleaned sensors</span>
+                                    <input type="text" value="Cleaned sensors">
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger remove-row-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="editable-field">
+                                    <span class="display-value">Manual Backside Modules Cleaning</span>
+                                    <input type="text" value="Manual Backside Modules Cleaning">
+                                </td>
+                                <td class="editable-field">
+                                    <span class="display-value">B03_T15</span>
+                                    <input type="text" value="B03_T15">
+                                </td>
+
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value status-display completed">Completed</span>
+                                        <select class="status-select" style="display: none;" disabled>
+                                            <option value="completed" selected>Completed</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="in-progress">In Progress</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value">Monthly</span>
+                                        <select class="frequency-select" style="display: none;" disabled>
+                                            <option value="daily">Daily</option>
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly" selected>Monthly</option>
+                                            <option value="quarterly">Quarterly</option>
+                                            <option value="bi-annually">Bi-Annually</option>
+                                            <option value="annually">Annually</option>
+                                            <option value="two-yearly">Two-Yearly</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="editable-field remark-cell">
+                                    <span class="display-value">Completed section C28-C32</span>
+                                    <input type="text" value="Completed section C28-C32">
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger remove-row-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="editable-field">
+                                    <span class="display-value">ACRS Cleaning</span>
+                                    <input type="text" value="ACRS Cleaning">
+                                </td>
+                                <td class="editable-field">
+                                    <span class="display-value">All robots</span>
+                                    <input type="text" value="All robots">
+                                </td>
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value status-display completed">Completed</span>
+                                        <select class="status-select" style="display: none;" disabled>
+                                            <option value="completed" selected>Completed</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="in-progress">In Progress</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value">Monthly</span>
+                                        <select class="frequency-select" style="display: none;" disabled>
+                                            <option value="daily">Daily</option>
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly" selected>Monthly</option>
+                                            <option value="quarterly">Quarterly</option>
+                                            <option value="bi-annually">Bi-Annually</option>
+                                            <option value="annually">Annually</option>
+                                            <option value="two-yearly">Two-Yearly</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="editable-field remark-cell">
+                                    <span class="display-value">Full system cleaning</span>
+                                    <input type="text" value="Full system cleaning">
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger remove-row-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Corrective Maintenance Section -->
+                <div style="margin-bottom: 30px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h4>Corrective Maintenance</h4>
+                        <button class="btn btn-success add-row-btn" id="add-corrective-row">
+                            <i class="fas fa-plus"></i> Add Issue
+                        </button>
+                    </div>
+                    <table class="data-table" id="corrective-maintenance-table">
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th>Issue Description</th>
+                                <th>Action Taken</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="editable-field">
+                                    <span class="display-value">B03_T15_C28</span>
+                                    <input type="text" value="B03_T15_C28">
+                                </td>
+                                <td class="editable-field">
+                                    <span class="display-value">Faulty Dbox</span>
+                                    <input type="text" value="Faulty Dbox">
+                                </td>
+                                <td class="editable-field">
+                                    <span class="display-value">Dbox replaced</span>
+                                    <input type="text" value="Dbox replaced">
+                                </td>
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value status-display pending">Pending</span>
+                                        <select class="status-select" style="display: none;" disabled>
+                                            <option value="pending" selected>Pending</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="in-progress">In Progress</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="editable-field remark-cell">
+                                    <span class="display-value">Replaced with spare part #DBX-0287</span>
+                                    <input type="text" value="Replaced with spare part #DBX-0287">
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger remove-row-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="editable-field">
+                                    <span class="display-value">B05_T22_C15</span>
+                                    <input type="text" value="B05_T22_C15">
+                                </td>
+                                <td class="editable-field">
+                                    <span class="display-value">Inverter fault</span>
+                                    <input type="text" value="Inverter fault">
+                                </td>
+                                <td class="editable-field">
+                                    <span class="display-value">Reset performed</span>
+                                    <input type="text" value="Reset performed">
+                                </td>
+                                <td>
+                                    <div class="status-select-wrapper">
+                                        <span class="display-value status-display completed">Completed</span>
+                                        <select class="status-select" style="display: none;" disabled>
+                                            <option value="completed" selected>Completed</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="in-progress">In Progress</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td class="editable-field remark-cell">
+                                    <span class="display-value">Needs follow-up</span>
+                                    <input type="text" value="Needs follow-up">
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger remove-row-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Charts Section -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="chart-card">
+                        <h4>Maintenance Completion Status</h4>
+                        <div class="mini-chart-container">
+                            <canvas id="maintenanceStatusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Corrective Issues by Status</h4>
+                        <div class="mini-chart-container">
+                            <canvas id="correctiveStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Analysis & Recommendations -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-robot"></i> Analysis & Recommendations</h3>
+            </div>
+            <div class="card-body">
+                <div id="ai-analysis">
+                    <p><i class="fas fa-spinner fa-spin"></i> Analyzing plant performance data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update the appState to include all chart data
+        const appState = {
+            editMode: false,
+            charts: {},
+            weatherData: {
+                ghi: [0, 0, 0, 0, 0, 200, 600, 800, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 800, 600, 300, 200, 50, 0, 0, 0],
+                poa: [0, 0, 0, 0, 0, 200, 600, 800, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 800, 600, 300, 200, 50, 0, 0, 0]
+            },
+            performanceData: {
+                dailyEnergy: [0, 0, 0, 0, 0, 5, 50, 120, 200, 250, 280, 300, 290, 280, 260, 220, 160, 80, 20, 0, 0, 0, 0, 0],
+                prTrend: [82.1, 83.5, 84.0, 83.8, 84.5, 84.2, 84.0]
+            }
+        };
+        // Format date as DD-MMM-YYYY
+        function formatReportDate(date) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        // Initialize and handle date changes
+        const dateInput = document.getElementById('report-date-input');
+        const dateDisplay = document.getElementById('report-of-date');
+
+        dateInput.addEventListener('change', function () {
+            const selectedDate = new Date(this.value);
+            dateDisplay.textContent = formatReportDate(selectedDate);
+        });
+
+        // Set initial date
+        const today = new Date();
+        dateInput.valueAsDate = today;
+        dateDisplay.textContent = formatReportDate(today);
+        // Set Jeddah timezone and date
+        function updateJeddahDateTime() {
+            const options = {
+                timeZone: 'Asia/Riyadh',
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+
+            const now = new Date();
+            document.getElementById('report-date').textContent = now.toLocaleDateString('en-US', options);
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', {
+                timeZone: 'Asia/Riyadh',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // Update time every second
+        updateJeddahDateTime();
+        setInterval(updateJeddahDateTime, 1000);
+
+        // Calculate operational hours
+        function calculateOperationalHours() {
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
+
+            if (startTime && endTime) {
+                const [startHours, startMinutes] = startTime.split(':').map(Number);
+                const [endHours, endMinutes] = endTime.split(':').map(Number);
+
+                let totalMinutes = (endHours * 60 + endMinutes) - (startHours * 60 + startMinutes);
+                if (totalMinutes < 0) totalMinutes += 24 * 60; // Handle overnight
+
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+
+                document.getElementById('total-hours').textContent =
+                    `${hours}:${minutes.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Format value with unit
+        function formatValueWithUnit(value, unit) {
+            if (unit === 'MWh' || unit === 'MWdc' || unit === 'MWac') {
+                return parseFloat(value).toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ' + unit;
+            }
+            return value + ' ' + unit;
+        }
+
+        // Calculate all deviations
+        function calculateDeviations() {
+            // Performance deviations
+            document.querySelectorAll('.expected-input, .actual-input').forEach(input => {
+                const row = input.closest('tr');
+                if (row) {
+                    const expected = parseFloat(row.querySelector('.expected-input').value) || 0;
+                    const actual = parseFloat(row.querySelector('.actual-input').value) || 0;
+                    let deviation = 0;
+
+                    if (expected !== 0) {
+                        deviation = ((actual - expected) / expected) * 100;
+                    }
+
+                    const deviationCell = row.querySelector('.deviation');
+                    if (deviationCell) {
+                        deviationCell.textContent = deviation.toFixed(2) + '%';
+
+                        // Color coding
+                        if (deviation > 0) {
+                            deviationCell.className = 'deviation positive';
+                        } else if (deviation < 0) {
+                            deviationCell.className = 'deviation negative';
+                        } else {
+                            deviationCell.className = 'deviation';
+                        }
+                    }
+                }
+            });
+
+            // Update metric cards
+            const exportActual = parseFloat(document.querySelector('input.actual-input').value) || 0;
+            const exportExpected = parseFloat(document.querySelector('input.expected-input').value) || 0;
+            const exportDeviation = exportExpected !== 0 ? ((exportActual - exportExpected) / exportExpected * 100) : 0;
+
+            document.getElementById('export-energy').querySelector('.display-value').textContent =
+                exportActual.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' MWh';
+            document.getElementById('export-deviation').innerHTML = `<i class="fas fa-arrow-${exportDeviation >= 0 ? 'up' : 'down'}"></i> ${Math.abs(exportDeviation).toFixed(2)}% vs Expected`;
+            document.getElementById('export-deviation').className = `metric-change ${exportDeviation >= 0 ? 'positive' : 'negative'}`;
+
+            // Update highlights
+            document.getElementById('highlight-export').textContent = exportActual.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' MWh';
+            document.getElementById('highlight-pr').textContent = parseFloat(document.querySelectorAll('input.actual-input')[5].value || 0).toFixed(2) + '%';
+            document.getElementById('highlight-ghi').textContent = parseFloat(document.querySelectorAll('input.actual-input')[2].value || 0).toFixed(2) + ' kWh/m²';
+
+            const perfActual = parseFloat(document.querySelectorAll('input.actual-input')[5].value) || 0;
+            const perfExpected = parseFloat(document.querySelectorAll('input.expected-input')[5].value) || 0;
+            const perfDeviation = perfExpected !== 0 ? ((perfActual - perfExpected) / perfExpected * 100) : 0;
+
+            document.getElementById('performance-ratio').querySelector('.display-value').textContent = perfActual.toFixed(2) + '%';
+            document.getElementById('performance-deviation').innerHTML = `<i class="fas fa-arrow-${perfDeviation >= 0 ? 'up' : 'down'}"></i> ${Math.abs(perfDeviation).toFixed(2)}% vs Target`;
+            document.getElementById('performance-deviation').className = `metric-change ${perfDeviation >= 0 ? 'positive' : 'negative'}`;
+
+            // Robot calculations
+            const totalRobots = parseInt(document.getElementById('total-robots').value) || 0;
+            const startedRobots = parseInt(document.getElementById('started-robots').value) || 0;
+            const notStartedRobots = Math.max(0, totalRobots - startedRobots);
+            const workingPercentage = totalRobots > 0 ? (startedRobots / totalRobots * 100) : 0;
+
+            document.getElementById('not-started-robots').textContent = notStartedRobots;
+            document.getElementById('robots-working-percent').textContent = workingPercentage.toFixed(1) + '%';
+
+            // Update robot status chart if it exists
+            if (appState.charts.robotStatusChart) {
+                appState.charts.robotStatusChart.data.datasets[0].data = [startedRobots, notStartedRobots];
+                appState.charts.robotStatusChart.update();
+            }
+
+            // Soiling losses
+            document.querySelectorAll('.soiling-expected, .soiling-actual').forEach(input => {
+                const row = input.closest('tr');
+                if (row) {
+                    const expected = parseFloat(row.querySelector('.soiling-expected').value) || 0;
+                    const actual = parseFloat(row.querySelector('.soiling-actual').value) || 0;
+                    const deviation = actual - expected;
+
+                    const deviationCell = row.querySelector('.soiling-deviation');
+                    if (deviationCell) {
+                        if (isNaN(deviation)) {
+                            deviationCell.textContent = '-';
+                        } else {
+                            deviationCell.textContent = deviation.toFixed(2) + '%';
+
+                            // Color coding
+                            if (deviation > 0) {
+                                deviationCell.className = 'soiling-deviation negative';
+                            } else if (deviation < 0) {
+                                deviationCell.className = 'soiling-deviation positive';
+                            } else {
+                                deviationCell.className = 'soiling-deviation';
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update charts with new data
+            updateCharts();
+
+            // Generate AI recommendations
+            generateAIRecommendations();
+        }
+
+        // Generate AI recommendations based on current data
+        function generateAIRecommendations() {
+            const analysisDiv = document.getElementById('ai-analysis');
+            analysisDiv.innerHTML = '';
+
+            // Get current values
+            const exportActual = parseFloat(document.querySelector('input.actual-input').value) || 0;
+            const exportExpected = parseFloat(document.querySelector('input.expected-input').value) || 0;
+            const exportDeviation = exportExpected !== 0 ? ((exportActual - exportExpected) / exportExpected * 100) : 0;
+
+            const perfActual = parseFloat(document.querySelectorAll('input.actual-input')[5].value) || 0;
+            const perfExpected = parseFloat(document.querySelectorAll('input.expected-input')[5].value) || 0;
+            const perfDeviation = perfExpected !== 0 ? ((perfActual - perfExpected) / perfExpected * 100) : 0;
+
+            const modTempExpected = parseFloat(document.querySelectorAll('input.expected-input')[6].value) || 0;
+            const modTempActual = parseFloat(document.querySelectorAll('input.actual-input')[6].value) || 0;
+
+            const ambTempExpected = parseFloat(document.querySelectorAll('input.expected-input')[7].value) || 0;
+            const ambTempActual = parseFloat(document.querySelectorAll('input.actual-input')[7].value) || 0;
+
+            const totalRobots = parseInt(document.getElementById('total-robots').value) || 0;
+            const startedRobots = parseInt(document.getElementById('started-robots').value) || 0;
+            const robotWorkingPercent = totalRobots > 0 ? (startedRobots / totalRobots * 100) : 0;
+
+            // Create recommendations
+            const recommendations = [];
+
+            // Performance recommendations
+            if (exportDeviation > 5) {
+                recommendations.push({
+                    icon: 'fa-bolt',
+                    color: 'success',
+                    text: `Energy export exceeded expectations by ${exportDeviation.toFixed(2)}%. This excellent performance may be due to favorable weather conditions or improved system efficiency. Consider analyzing tracking patterns to replicate this success.`
+                });
+            } else if (exportDeviation < -5) {
+                recommendations.push({
+                    icon: 'fa-exclamation-triangle',
+                    color: 'danger',
+                    text: `Energy export is ${Math.abs(exportDeviation).toFixed(2)}% below expectations. Investigate potential issues with inverters, tracking systems, or module performance. Check for any maintenance activities that may have affected production.`
+                });
+            }
+
+            if (perfDeviation > 2) {
+                recommendations.push({
+                    icon: 'fa-thumbs-up',
+                    color: 'success',
+                    text: `Performance ratio is ${perfDeviation.toFixed(2)}% above target, indicating efficient plant operation. Review recent maintenance activities to identify practices contributing to this improvement.`
+                });
+            } else if (perfDeviation < -2) {
+                recommendations.push({
+                    icon: 'fa-search',
+                    color: 'warning',
+                    text: `Performance ratio is ${Math.abs(perfDeviation).toFixed(2)}% below target. Conduct a detailed system inspection focusing on DC/AC conversion efficiency and potential losses.`
+                });
+            }
+
+            // Temperature analysis
+            if (modTempActual < modTempExpected && ambTempActual > ambTempExpected) {
+                recommendations.push({
+                    icon: 'fa-temperature-low',
+                    color: 'info',
+                    text: `Module temperatures are lower than expected (${modTempActual}°C vs expected ${modTempExpected}°C) despite higher ambient temperatures (${ambTempActual}°C vs expected ${ambTempExpected}°C). This suggests effective cooling or possible issues with temperature sensors. Verify sensor accuracy and tracker angles.`
+                });
+            }
+
+            // Robot maintenance
+            if (robotWorkingPercent < 95) {
+                recommendations.push({
+                    icon: 'fa-robot',
+                    color: 'warning',
+                    text: `Robot working percentage is ${robotWorkingPercent.toFixed(1)}%, below the optimal 95% target. Focus maintenance efforts on the ${totalRobots - startedRobots} non-operational robots, particularly checking power systems and communication links.`
+                });
+            }
+
+            // Soiling losses
+            const soilingDeviations = Array.from(document.querySelectorAll('.soiling-deviation'))
+                .filter(el => el.textContent !== '-')
+                .map(el => parseFloat(el.textContent));
+
+            if (soilingDeviations.length > 0) {
+                const avgSoilingDev = soilingDeviations.reduce((a, b) => a + b, 0) / soilingDeviations.length;
+                if (avgSoilingDev > 0.2) {
+                    recommendations.push({
+                        icon: 'fa-wind',
+                        color: 'warning',
+                        text: `Average soiling loss deviation is ${avgSoilingDev.toFixed(2)}%, higher than expected. Consider increasing cleaning frequency or investigating environmental factors contributing to faster soiling.`
+                    });
+                }
+            }
+
+            // Default recommendation if no specific issues
+            if (recommendations.length === 0) {
+                recommendations.push({
+                    icon: 'fa-check-circle',
+                    color: 'success',
+                    text: 'Plant is operating within expected parameters. Continue current maintenance schedule and monitor for any deviations.'
+                });
+            }
+
+            // Display recommendations
+            const list = document.createElement('ul');
+            list.style.paddingLeft = '20px';
+
+            recommendations.forEach(rec => {
+                const item = document.createElement('li');
+                item.style.marginBottom = '15px';
+                item.style.listStyleType = 'none';
+                item.style.position = 'relative';
+                item.style.paddingLeft = '25px';
+
+                const icon = document.createElement('i');
+                icon.className = `fas ${rec.icon} text-${rec.color}`;
+                icon.style.position = 'absolute';
+                icon.style.left = '0';
+                icon.style.top = '3px';
+
+                const text = document.createElement('span');
+                text.textContent = rec.text;
+
+                item.appendChild(icon);
+                item.appendChild(text);
+                list.appendChild(item);
+            });
+
+            analysisDiv.appendChild(list);
+        }
+        // Initialize all charts
+        function initCharts() {
+            const isPDF = window.jsPDF !== undefined;
+            const pixelRatio = isPDF ? 2 : 1; // Double DPI for PDF
+
+            Chart.defaults.font.size = isPDF ? 12 : 10;
+            Chart.defaults.color = '#333';
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            appState.charts.performanceChart = new Chart(performanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Export Energy', 'Import Energy', 'GHI', 'GTI/POA', 'Performance Ratio', 'Module Temp', 'Ambient Temp'],
+                    datasets: [
+                        {
+                            label: 'Expected',
+                            data: [
+                                parseFloat(document.querySelector('input.expected-input').value) || 0,
+                                parseFloat(document.querySelectorAll('input.expected-input')[1].value) || 0,
+                                parseFloat(document.querySelectorAll('input.expected-input')[2].value) || 0,
+                                parseFloat(document.querySelectorAll('input.expected-input')[3].value) || 0,
+                                parseFloat(document.querySelectorAll('input.expected-input')[5].value) || 0,
+                                parseFloat(document.querySelectorAll('input.expected-input')[6].value) || 0,
+                                parseFloat(document.querySelectorAll('input.expected-input')[7].value) || 0
+                            ],
+                            backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Actual',
+                            data: [
+                                parseFloat(document.querySelector('input.actual-input').value) || 0,
+                                parseFloat(document.querySelectorAll('input.actual-input')[1].value) || 0,
+                                parseFloat(document.querySelectorAll('input.actual-input')[2].value) || 0,
+                                parseFloat(document.querySelectorAll('input.actual-input')[3].value) || 0,
+                                parseFloat(document.querySelectorAll('input.actual-input')[5].value) || 0,
+                                parseFloat(document.querySelectorAll('input.actual-input')[6].value) || 0,
+                                parseFloat(document.querySelectorAll('input.actual-input')[7].value) || 0
+                            ],
+                            backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    },
+                    animation: {
+                        duration: 2000
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        if (context.dataIndex <= 3) { // Energy values
+                                            label += context.parsed.y.toFixed(2) + ' MWh';
+                                        } else if (context.dataIndex === 4) { // Performance ratio
+                                            label += context.parsed.y.toFixed(2) + '%';
+                                        } else { // Temperature values
+                                            label += context.parsed.y.toFixed(2) + '°C';
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Energy Flow Chart
+            const energyFlowCtx = document.getElementById('energyFlowChart').getContext('2d');
+            appState.charts.energyFlowChart = new Chart(energyFlowCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Export Energy', 'Import Energy', 'Energy Consumption'],
+                    datasets: [{
+                        data: [
+                            parseFloat(document.querySelector('input.actual-input').value) || 0,
+                            parseFloat(document.querySelectorAll('input.actual-input')[1].value) || 0,
+                            calculateSystemLosses()
+                        ],
+                        backgroundColor: [
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(231, 76, 60, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(46, 204, 113, 1)',
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(231, 76, 60, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value.toFixed(2)} MWh (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Weather Chart (now GHI vs POA)
+            const weatherCtx = document.getElementById('weatherChart').getContext('2d');
+            appState.charts.weatherChart = new Chart(weatherCtx, {
+                type: 'line',
+                data: {
+                    labels: ['04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'],
+                    datasets: [
+                        {
+                            label: 'GHI (W/m²)',
+                            data: appState.weatherData.ghi,
+                            borderColor: 'rgba(241, 196, 15, 1)',
+                            backgroundColor: 'rgba(241, 196, 15, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'POA (W/m²)',
+                            data: appState.weatherData.poa,
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'GHI (W/m²)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'POA (W/m²)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+
+
+            // Daily Energy Chart
+            const dailyEnergyCtx = document.getElementById('dailyEnergyChart').getContext('2d');
+            appState.charts.dailyEnergyChart = new Chart(dailyEnergyCtx, {
+                type: 'line',
+                data: {
+                    labels: ['04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'],
+                    datasets: [{
+                        label: 'Energy Generation (MWh)',
+                        data: appState.performanceData.dailyEnergy,
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // PR Trend Chart
+            const prTrendCtx = document.getElementById('prTrendChart').getContext('2d');
+            appState.charts.prTrendChart = new Chart(prTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    datasets: [{
+                        label: 'Performance Ratio (%)',
+                        data: appState.performanceData.prTrend,
+                        borderColor: 'rgba(46, 204, 113, 1)',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 50,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Availability Gauge
+            const availabilityCtx = document.getElementById('availabilityGauge').getContext('2d');
+            appState.charts.availabilityGauge = new Chart(availabilityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Available', 'Unavailable'],
+                    datasets: [{
+                        data: [100, 0],
+                        backgroundColor: ['rgba(46, 204, 113, 0.7)', 'rgba(231, 76, 60, 0.7)'],
+                        borderWidth: 0,
+                        circumference: 270,
+                        rotation: 225
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        },
+                        datalabels: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'gaugeText',
+                    afterDraw(chart) {
+                        const { ctx, chartArea: { width, height } } = chart;
+                        ctx.restore();
+                        const text = 'Plant Capacity';
+                        const text2 = 'AC Availability';
+                        ctx.font = 'bold 20px sans-serif';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = '#27ae60';
+                        const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                        const textY = height / 2 - 10;
+                        ctx.fillText(text, textX, textY);
+
+                        ctx.font = '12px sans-serif';
+                        ctx.fillStyle = '#7f8c8d';
+                        const text2X = Math.round((width - ctx.measureText(text2).width) / 2);
+                        const text2Y = height / 2 + 15;
+                        ctx.fillText(text2, text2X, text2Y);
+                        ctx.save();
+                    }
+                }]
+            });
+
+            // PR Gauge
+            const prCtx = document.getElementById('prGauge').getContext('2d');
+
+            appState.charts.prGauge = new Chart(prCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['PR', 'Remaining'],
+                    datasets: [{
+                        data: [84.5, 15.5],
+                        backgroundColor: ['rgba(46, 204, 113, 0.7)', 'rgba(189, 195, 199, 0.3)'],
+                        borderWidth: 0,
+                        circumference: 270,
+                        rotation: 225
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        },
+                        datalabels: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'gaugeText',
+                    afterDraw(chart) {
+                        const { ctx, chartArea: { width, height } } = chart;
+                        ctx.restore();
+                        const text = 'Plant PR';
+                        const text2 = 'Actual';
+                        ctx.font = 'bold 20px sans-serif';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = '#27ae60';
+                        const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                        const textY = height / 2 - 10;
+                        ctx.fillText(text, textX, textY);
+
+                        ctx.font = '12px sans-serif';
+                        ctx.fillStyle = '#7f8c8d';
+                        const text2X = Math.round((width - ctx.measureText(text2).width) / 2);
+                        const text2Y = height / 2 + 15;
+                        ctx.fillText(text2, text2X, text2Y);
+                        ctx.save();
+                    }
+                }]
+            });
+
+            // Soiling Gauge
+            const soilingCtx = document.getElementById('soilingGauge').getContext('2d');
+            appState.charts.soilingGauge = new Chart(soilingCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Soiling', 'Remaining'],
+                    datasets: [{
+                        data: [calculateAverageSoiling(), 100 - calculateAverageSoiling()],
+                        backgroundColor: ['rgba(231, 76, 60, 0.7)', 'rgba(189, 195, 199, 0.3)'],
+                        borderWidth: 0,
+                        circumference: 270,
+                        rotation: 225
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        },
+                        datalabels: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'gaugeText',
+                    afterDraw(chart) {
+                        const { ctx, chartArea: { width, height } } = chart;
+                        ctx.restore();
+                        const text = calculateAverageSoiling().toFixed(2) + '%';
+                        const text2 = 'Soiling Loss';
+                        ctx.font = 'bold 20px sans-serif';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = '#e74c3c';
+                        const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                        const textY = height / 2 - 10;
+                        ctx.fillText(text, textX, textY);
+
+                        ctx.font = '12px sans-serif';
+                        ctx.fillStyle = '#7f8c8d';
+                        const text2X = Math.round((width - ctx.measureText(text2).width) / 2);
+                        const text2Y = height / 2 + 15;
+                        ctx.fillText(text2, text2X, text2Y);
+                        ctx.save();
+                    }
+                }]
+            });
+            // Equipment Chart
+            const equipmentCtx = document.getElementById('equipmentChart').getContext('2d');
+            appState.charts.equipmentChart = new Chart(equipmentCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['PTR-1', 'PTR-2'],
+                    datasets: [{
+                        label: 'Energy Generation (MWh)',
+                        data: getEquipmentPerformanceData(),
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(155, 89, 182, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(155, 89, 182, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Energy (MWh)'
+                            }
+                        }
+                    }
+                }
+            });
+            function getEquipmentPerformanceData() {
+                const equipmentTable = document.querySelector('#equipment-performance-table tbody');
+                const rows = equipmentTable.querySelectorAll('tr');
+                const data = [];
+
+                rows.forEach(row => {
+                    const value = parseFloat(row.querySelector('input').value) || 0;
+                    data.push(value);
+                });
+
+                return data;
+            }
+            // Add event listeners to equipment performance inputs
+            document.querySelectorAll('#equipment-performance-table input').forEach(input => {
+                input.addEventListener('input', () => {
+                    if (appState.charts.equipmentChart) {
+                        appState.charts.equipmentChart.data.datasets[0].data = getEquipmentPerformanceData();
+                        appState.charts.equipmentChart.update();
+                    }
+                });
+            });
+
+
+
+            // Robot Status Chart
+            const robotStatusCtx = document.getElementById('robotStatusChart').getContext('2d');
+            const totalRobots = parseInt(document.getElementById('total-robots').value) || 0;
+            const startedRobots = parseInt(document.getElementById('started-robots').value) || 0;
+            const notStartedRobots = Math.max(0, totalRobots - startedRobots);
+
+            appState.charts.robotStatusChart = new Chart(robotStatusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Operational', 'Not Operational'],
+                    datasets: [{
+                        data: [startedRobots, notStartedRobots],
+                        backgroundColor: [
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(231, 76, 60, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(46, 204, 113, 1)',
+                            'rgba(231, 76, 60, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Maintenance Status Chart
+            const maintenanceStatusCtx = document.getElementById('maintenanceStatusChart').getContext('2d');
+            appState.charts.maintenanceStatusChart = new Chart(maintenanceStatusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Completed', 'Pending', 'In Progress'],
+                    datasets: [{
+                        data: getMaintenanceStatusCounts(),
+                        backgroundColor: [
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(241, 196, 15, 0.7)',
+                            'rgba(52, 152, 219, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(46, 204, 113, 1)',
+                            'rgba(241, 196, 15, 1)',
+                            'rgba(52, 152, 219, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+
+            // Corrective Status Chart
+            const correctiveStatusCtx = document.getElementById('correctiveStatusChart').getContext('2d');
+            appState.charts.correctiveStatusChart = new Chart(correctiveStatusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Completed', 'Pending', 'In Progress'],
+                    datasets: [{
+                        data: getCorrectiveStatusCounts(),
+                        backgroundColor: [
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(241, 196, 15, 0.7)',
+                            'rgba(52, 152, 219, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(46, 204, 113, 1)',
+                            'rgba(241, 196, 15, 1)',
+                            'rgba(52, 152, 219, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+        // Calculate average soiling loss
+        function calculateAverageSoiling() {
+            const soilingValues = [];
+            document.querySelectorAll('.soiling-actual').forEach(input => {
+                const value = parseFloat(input.value);
+                if (!isNaN(value)) {
+                    soilingValues.push(value);
+                }
+            });
+
+            if (soilingValues.length === 0) return 0;
+            return soilingValues.reduce((a, b) => a + b, 0) / soilingValues.length;
+        }
+
+
+        // Calculate system losses
+        function calculateSystemLosses() {
+            const exportActual = parseFloat(document.querySelector('input.actual-input').value) || 0;
+            const expectedProduction = parseFloat(document.querySelector('input.expected-input').value) || 0;
+            return Math.max(0, expectedProduction - exportActual);
+        }
+
+        // Helper function to get maintenance status counts
+        function getMaintenanceStatusCounts() {
+            const preventiveRows = document.querySelectorAll('#preventive-maintenance-table tbody tr');
+            let completed = 0, pending = 0, inProgress = 0;
+
+            preventiveRows.forEach(row => {
+                const status = row.querySelector('.status-select').value;
+                if (status === 'completed') completed++;
+                else if (status === 'pending') pending++;
+                else if (status === 'in-progress') inProgress++;
+            });
+
+            return [completed, pending, inProgress];
+        }
+
+        // Helper function to get corrective status counts
+        function getCorrectiveStatusCounts() {
+            const correctiveRows = document.querySelectorAll('#corrective-maintenance-table tbody tr');
+            let completed = 0, pending = 0, inProgress = 0;
+
+            correctiveRows.forEach(row => {
+                const status = row.querySelector('.status-select').value;
+                if (status === 'completed') completed++;
+                else if (status === 'pending') pending++;
+                else if (status === 'in-progress') inProgress++;
+            });
+
+            return [completed, pending, inProgress];
+        }
+        // Update all charts when data changes
+        function updateCharts() {
+            // Performance Chart
+            if (appState.charts.performanceChart) {
+                appState.charts.performanceChart.data.datasets[0].data = [
+                    parseFloat(document.querySelector('input.expected-input').value) || 0,
+                    parseFloat(document.querySelectorAll('input.expected-input')[1].value) || 0,
+                    parseFloat(document.querySelectorAll('input.expected-input')[2].value) || 0,
+                    parseFloat(document.querySelectorAll('input.expected-input')[3].value) || 0,
+                    parseFloat(document.querySelectorAll('input.expected-input')[5].value) || 0,
+                    parseFloat(document.querySelectorAll('input.expected-input')[6].value) || 0,
+                    parseFloat(document.querySelectorAll('input.expected-input')[7].value) || 0
+                ];
+                appState.charts.performanceChart.data.datasets[1].data = [
+                    parseFloat(document.querySelector('input.actual-input').value) || 0,
+                    parseFloat(document.querySelectorAll('input.actual-input')[1].value) || 0,
+                    parseFloat(document.querySelectorAll('input.actual-input')[2].value) || 0,
+                    parseFloat(document.querySelectorAll('input.actual-input')[3].value) || 0,
+                    parseFloat(document.querySelectorAll('input.actual-input')[5].value) || 0,
+                    parseFloat(document.querySelectorAll('input.actual-input')[6].value) || 0,
+                    parseFloat(document.querySelectorAll('input.actual-input')[7].value) || 0
+                ];
+                appState.charts.performanceChart.update();
+            }
+
+            // Energy Flow Chart
+            if (appState.charts.energyFlowChart) {
+                appState.charts.energyFlowChart.data.datasets[0].data = [
+                    parseFloat(document.querySelector('input.actual-input').value) || 0,
+                    parseFloat(document.querySelectorAll('input.actual-input')[1].value) || 0,
+                    calculateSystemLosses()
+                ];
+                appState.charts.energyFlowChart.update();
+            }
+
+            // Weather Chart
+            const ghiInputs = document.querySelectorAll('#ghi-table input');
+            appState.weatherData.ghi = Array.from(ghiInputs).map(input => parseFloat(input.value)) || 0;
+            const poaInputs = document.querySelectorAll('#poa-table input');
+            appState.weatherData.poa = Array.from(poaInputs).map(input => parseFloat(input.value)) || 0;
+
+            if (appState.charts.weatherChart) {
+                appState.charts.weatherChart.data.datasets[0].data = appState.weatherData.ghi;
+                appState.charts.weatherChart.data.datasets[1].data = appState.weatherData.poa;
+                appState.charts.weatherChart.options.scales.y1.title.text = 'POA (W/m²)';
+                appState.charts.weatherChart.update();
+            }
+
+            // Daily Energy Chart
+            const energyInputs = document.querySelectorAll('#hourly-energy-table input');
+            appState.performanceData.dailyEnergy = Array.from(energyInputs).map(input => parseFloat(input.value)) || 0;
+
+            // PR Trend Chart
+            const prInputs = document.querySelectorAll('#pr-trend-table input');
+            appState.performanceData.prTrend = Array.from(prInputs).map(input => parseFloat(input.value)) || 0;
+
+            if (appState.charts.dailyEnergyChart) {
+                appState.charts.dailyEnergyChart.data.datasets[0].data = appState.performanceData.dailyEnergy;
+                appState.charts.dailyEnergyChart.update();
+            }
+
+            if (appState.charts.prTrendChart) {
+                appState.charts.prTrendChart.data.datasets[0].data = appState.performanceData.prTrend;
+                appState.charts.prTrendChart.update();
+            }
+
+
+            // Availability Gauge
+            if (appState.charts.availabilityGauge) {
+                // Update availability based on Plant Capacity (AC) value
+                const plantCapacityAC = parseFloat(document.querySelectorAll('.metric-card')[1].querySelector('input').value) || 0;
+                const baseCapacity = 306.18; // MWac
+                const availabilityPercent = Math.min(100, (plantCapacityAC / baseCapacity) * 100);
+
+                appState.charts.availabilityGauge.data.datasets[0].data = [availabilityPercent, 100 - availabilityPercent];
+                appState.charts.availabilityGauge.update();
+
+                // Update the availability metric
+                document.querySelectorAll('input.actual-input')[4].value = availabilityPercent.toFixed(2);
+                if (!appState.editMode) {
+                    document.querySelectorAll('input.actual-input')[4].dispatchEvent(new Event('change'));
+                }
+            }
+
+            // PR Gauge
+            if (appState.charts.prGauge) {
+                const prValue = parseFloat(document.querySelectorAll('input.actual-input')[5].value) || 0;
+                appState.charts.prGauge.data.datasets[0].data = [prValue, 100 - prValue];
+                appState.charts.prGauge.update();
+            }
+
+            // Soiling Gauge
+            if (appState.charts.soilingGauge) {
+                const avgSoiling = calculateAverageSoiling();
+                appState.charts.soilingGauge.data.datasets[0].data = [avgSoiling, 100 - avgSoiling];
+                appState.charts.soilingGauge.update();
+            }
+
+            // Equipment Chart
+            if (appState.charts.equipmentChart) {
+                appState.charts.equipmentChart.data.datasets[0].data = getEquipmentPerformanceData();
+                appState.charts.equipmentChart.update();
+            }
+            // Add this to your initialization code
+            document.querySelectorAll('#equipment-performance-table input').forEach(input => {
+                input.addEventListener('input', () => {
+                    if (appState.charts.equipmentChart) {
+                        appState.charts.equipmentChart.data.datasets[0].data = getEquipmentPerformanceData();
+                        appState.charts.equipmentChart.update();
+                    }
+                });
+            });
+
+            // Robot Status Chart
+            if (appState.charts.robotStatusChart) {
+                const totalRobots = parseInt(document.getElementById('total-robots').value) || 0;
+                const startedRobots = parseInt(document.getElementById('started-robots').value) || 0;
+                appState.charts.robotStatusChart.data.datasets[0].data = [startedRobots, totalRobots - startedRobots];
+                appState.charts.robotStatusChart.update();
+            }
+
+            // Update maintenance status charts
+            updateMaintenanceCharts();
+        }
+
+        // Update maintenance status charts
+        function updateMaintenanceCharts() {
+            // Maintenance Status Chart
+            if (appState.charts.maintenanceStatusChart) {
+                appState.charts.maintenanceStatusChart.data.datasets[0].data = getMaintenanceStatusCounts();
+                appState.charts.maintenanceStatusChart.update();
+            }
+
+            // Corrective Status Chart
+            if (appState.charts.correctiveStatusChart) {
+                appState.charts.correctiveStatusChart.data.datasets[0].data = getCorrectiveStatusCounts();
+                appState.charts.correctiveStatusChart.update();
+            }
+        }
+        // Replace debounced calculations with immediate updates for critical charts
+        function setupRealTimeUpdates() {
+            // Weather data inputs
+            document.querySelectorAll('#ghi-table input, #ambient-temp-table input').forEach(input => {
+                input.addEventListener('input', () => {
+                    updateWeatherChartData();
+                    calculateDeviations();
+                });
+            });
+
+            // Performance data inputs
+            document.querySelectorAll('#hourly-energy-table input, #pr-trend-table input').forEach(input => {
+                input.addEventListener('input', () => {
+                    updatePerformanceChartData();
+                    calculateDeviations();
+                });
+            });
+
+            // Other inputs can use debounced calculations
+            document.querySelectorAll('input:not(#ghi-table input, #ambient-temp-table input, #hourly-energy-table input, #pr-trend-table input)').forEach(input => {
+                input.addEventListener('input', debouncedCalculations);
+            });
+        }
+
+        document.getElementById('add-preventive-row').addEventListener('click', function () {
+            const table = document.querySelector('#preventive-maintenance-table tbody');
+            const newRow = document.createElement('tr');
+
+            newRow.innerHTML = `
+        <td class="editable-field">
+            <span class="display-value">New Activity</span>
+            <input type="text" placeholder="Enter activity">
+        </td>
+        <td class="editable-field">
+            <span class="display-value">Location</span>
+            <input type="text" placeholder="Enter location">
+        </td>
+        <td>
+            <div class="status-select-wrapper">
+                <span class="display-value status-display pending">Pending</span>
+                <select class="status-select" style="display: none;" disabled>
+                    <option value="pending" selected>Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="in-progress">In Progress</option>
+                </select>
+            </div>
+        </td>
+        <td>
+            <div class="status-select-wrapper">
+                <span class="display-value">Monthly</span>
+                <select class="frequency-select" style="display: none;" disabled>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly" selected>Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="bi-annually">Bi-Annually</option>
+                    <option value="annually">Annually</option>
+                    <option value="two-yearly">Two-Yearly</option>
+                </select>
+            </div>
+        </td>
+        <td class="editable-field remark-cell">
+            <span class="display-value">-</span>
+            <input type="text" placeholder="Enter remarks">
+        </td>
+        <td>
+            <button class="btn btn-danger remove-row-btn">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+
+            table.appendChild(newRow);
+
+            // Add event listener to the new remove button
+            newRow.querySelector('.remove-row-btn').addEventListener('click', function () {
+                table.removeChild(newRow);
+                updateMaintenanceCharts();
+            });
+
+            // Add event listener to the status select
+            const statusSelect = newRow.querySelector('.status-select');
+            statusSelect.addEventListener('change', function () {
+                updateStatusDisplays();
+                updateMaintenanceCharts();
+            });
+
+            // Add event listener to the frequency select
+            const frequencySelect = newRow.querySelector('.frequency-select');
+            frequencySelect.addEventListener('change', function () {
+                updateFrequencyDisplays();
+            });
+
+            // Initialize the displays
+            updateStatusDisplays();
+            updateFrequencyDisplays();
+            updateMaintenanceCharts();
+        });
+
+        function updateFrequencyDisplays() {
+            document.querySelectorAll('.frequency-select').forEach(select => {
+                const wrapper = select.closest('.status-select-wrapper');
+                if (wrapper) {
+                    const display = wrapper.querySelector('.display-value:not(.status-display)');
+                    if (display) {
+                        // Capitalize first letter for display
+                        const value = select.value;
+                        const displayText = value.charAt(0).toUpperCase() + value.slice(1);
+                        display.textContent = displayText;
+                    }
+                }
+            });
+        }
+        // Add row to corrective maintenance table
+        document.getElementById('add-corrective-row').addEventListener('click', function () {
+            const table = document.querySelector('#corrective-maintenance-table tbody');
+            const newRow = document.createElement('tr');
+
+            newRow.innerHTML = `
+        <td class="editable-field">
+            <span class="display-value">New Location</span>
+            <input type="text" placeholder="Enter location">
+        </td>
+        <td class="editable-field">
+            <span class="display-value">Issue Description</span>
+            <input type="text" placeholder="Enter issue">
+        </td>
+        <td class="editable-field">
+            <span class="display-value">Action Taken</span>
+            <input type="text" placeholder="Enter action">
+        </td>
+        <td>
+            <div class="status-select-wrapper">
+                <span class="display-value status-display pending">Pending</span>
+                <select class="status-select" style="display: none;" disabled>
+                    <option value="pending" selected>Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="in-progress">In Progress</option>
+                </select>
+            </div>
+        </td>
+        <td class="editable-field remark-cell">
+            <span class="display-value">-</span>
+            <input type="text" placeholder="Enter remarks">
+        </td>
+        <td>
+            <button class="btn btn-danger remove-row-btn">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+
+            table.appendChild(newRow);
+
+            // Add event listener to the new remove button
+            newRow.querySelector('.remove-row-btn').addEventListener('click', function () {
+                table.removeChild(newRow);
+                updateMaintenanceCharts();
+            });
+
+            // Add event listener to the status select
+            const statusSelect = newRow.querySelector('.status-select');
+            statusSelect.addEventListener('change', function () {
+                updateStatusDisplays();
+                updateMaintenanceCharts();
+            });
+
+            // Initialize the status display
+            updateStatusDisplays();
+            updateMaintenanceCharts();
+        });
+        // Add event listeners to existing remove buttons
+        document.querySelectorAll('.remove-row-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const row = this.closest('tr');
+                row.parentNode.removeChild(row);
+                updateMaintenanceCharts();
+            });
+        });
+
+        // Add event listeners to status selects
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.addEventListener('change', function () {
+                updateMaintenanceCharts();
+            });
+        });
+
+        // Tab functionality
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const tabId = this.getAttribute('data-tab');
+
+                // Remove active class from all buttons and content
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Add active class to clicked button and corresponding content
+                this.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+
+        // Event listeners for calculations
+        document.getElementById('start-time').addEventListener('change', calculateOperationalHours);
+        document.getElementById('end-time').addEventListener('change', calculateOperationalHours);
+
+        // Debounced calculation function
+        const debounce = (func, delay) => {
+            let timeout;
+            return function () {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        };
+
+        const debouncedCalculations = debounce(() => {
+            calculateOperationalHours();
+            calculateDeviations();
+        }, 300);
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', debouncedCalculations);
+            input.addEventListener('input', debouncedCalculations);
+        });
+
+        // In your existing edit mode toggle event listener
+        document.getElementById('toggleEdit').addEventListener('click', function () {
+            appState.editMode = !appState.editMode;
+            document.body.classList.toggle('edit-mode', appState.editMode);
+
+            this.innerHTML = appState.editMode
+                ? '<i class="fas fa-save"></i> Save Changes'
+                : '<i class="fas fa-edit"></i> Edit Mode';
+
+            // Toggle input visibility, including status selects
+            document.querySelectorAll('.editable-field, .status-select-wrapper').forEach(field => {
+                const displayValue = field.querySelector('.display-value');
+                const input = field.querySelector('input:not(.status-select), textarea, select');
+
+                if (appState.editMode) {
+                    if (displayValue) displayValue.style.display = 'none';
+                    if (input) input.style.display = 'inline-block';
+
+                    // Special handling for status selects
+                    const statusSelect = field.querySelector('.status-select');
+                    if (statusSelect) {
+                        statusSelect.style.display = 'inline-block';
+                        statusSelect.disabled = false;
+                    }
+
+                    // Update input value from display value if needed
+                    if (input && input.tagName === 'INPUT' && input.value === '' && displayValue && displayValue.textContent) {
+                        input.value = displayValue.textContent.replace(/[^\d.-]/g, '');
+                    }
+                } else {
+                    if (displayValue) displayValue.style.display = 'inline-block';
+                    if (input) input.style.display = 'none';
+
+                    // Special handling for status selects
+                    const statusSelect = field.querySelector('.status-select');
+                    if (statusSelect) {
+                        statusSelect.style.display = 'none';
+                        statusSelect.disabled = true;
+                    }
+
+                    // Update display value from input
+                    if (input && input.value !== '' && displayValue) {
+                        if (input.hasAttribute('data-unit')) {
+                            displayValue.textContent = formatValueWithUnit(input.value, input.getAttribute('data-unit'));
+                        } else {
+                            displayValue.textContent = input.value;
+                        }
+                    }
+                }
+            });
+
+            if (!appState.editMode) {
+                // Recalculate all values when exiting edit mode
+                calculateOperationalHours();
+                calculateDeviations();
+            }
+        });
+
+        // Function to ensure all charts are fully rendered before PDF generation
+        async function prepareChartsForPDF() {
+            // Force all charts to render at their full size
+            const charts = document.querySelectorAll('canvas');
+            const promises = [];
+
+            charts.forEach(chart => {
+                const parent = chart.parentElement;
+                const originalHeight = parent.style.height;
+                const originalWidth = parent.style.width;
+
+                // Set fixed size for PDF rendering
+                parent.style.height = '300px';
+                parent.style.width = '100%';
+
+                // Create promise to wait for chart to render
+                promises.push(new Promise(resolve => {
+                    setTimeout(() => {
+                        if (appState.charts[chart.id]) {
+                            appState.charts[chart.id].resize();
+                            appState.charts[chart.id].render();
+                        }
+                        resolve();
+                    }, 200);
+                }));
+            });
+
+            await Promise.all(promises);
+        }
+        function updateStatusDisplays() {
+            document.querySelectorAll('.status-select').forEach(select => {
+                const wrapper = select.closest('.status-select-wrapper');
+                if (wrapper) {
+                    const display = wrapper.querySelector('.status-display');
+                    if (display) {
+                        // Remove all status classes
+                        display.classList.remove('completed', 'pending', 'in-progress');
+
+                        // Add the appropriate class based on selected value
+                        const value = select.value;
+                        display.classList.add(value === 'completed' ? 'completed' :
+                            value === 'pending' ? 'pending' : 'in-progress');
+
+                        // Update text
+                        display.textContent = value === 'completed' ? 'Completed' :
+                            value === 'pending' ? 'Pending' : 'In Progress';
+                    }
+                }
+            });
+        }
+
+        // Call this function initially and whenever status selects change
+        updateStatusDisplays();
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.addEventListener('change', updateStatusDisplays);
+        });
+        // Function to restore chart sizes after PDF generation
+        function restoreChartSizes() {
+            document.querySelectorAll('.chart-container').forEach(container => {
+                container.style.height = '400px';
+            });
+            document.querySelectorAll('.mini-chart-container').forEach(container => {
+                container.style.height = '250px';
+            });
+
+            // Update all charts
+            Object.values(appState.charts).forEach(chart => {
+                chart.resize();
+                chart.render();
+            });
+        }
+        // Add header function
+        function addHeader(pdf, pageWidth) {
+            const margin = 40;
+
+            // Add logo (replace with your actual logo URL)
+            const logoUrl = 'https://example.com/path/to/your/logo.png'; // Replace with your logo URL
+            try {
+                // Add logo to header (left side)
+                pdf.addImage(logoUrl, 'PNG', margin, 15, 50, 30);
+
+                // Add company name and report title
+                pdf.setFontSize(16);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('SJN Solar Plant', margin + 60, 30);
+
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Daily Performance Report', margin + 60, 45);
+
+                // Add date
+                const today = new Date();
+                const dateString = today.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'long'
+                });
+                pdf.setFontSize(10);
+                pdf.text(`Generated: ${dateString}`, pageWidth - margin - 100, 30);
+
+                // Add header separator line
+                pdf.setDrawColor(200, 200, 200);
+                pdf.line(margin, 55, pageWidth - margin, 55);
+            } catch (e) {
+                console.warn('Could not load logo:', e);
+                // Fallback header without logo
+                pdf.setFontSize(16);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('SJN Solar Plant - Daily Performance Report', margin, 30);
+            }
+        }
+        document.getElementById('exportPdf').addEventListener('click', async function () {
+            const { jsPDF } = window.jspdf;
+
+            // Create loading overlay
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'pdf-loading-overlay';
+            loadingOverlay.innerHTML = `
+        <div class="pdf-loading-spinner"><i class="fas fa-spinner fa-spin"></i></div>
+        <div>Generating high-quality PDF...</div>
+    `;
+            document.body.appendChild(loadingOverlay);
+
+            try {
+                // Create PDF with better settings
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'pt',
+                    format: 'a4',
+                    compress: true,
+                    filters: ['ASCIIHexEncode']
+                });
+
+                // Set PDF metadata
+                pdf.setProperties({
+                    title: 'SJN Solar Plant Daily Report',
+                    subject: 'Daily Performance Report',
+                    author: 'Solar Plant Monitoring System',
+                    keywords: 'solar, energy, report, daily',
+                    creator: 'SJN Solar Plant'
+                });
+
+                // ====== ADD HEADER & FOOTER SETUP HERE ======
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const margin = 40;
+                const contentWidth = pageWidth - 2 * margin;
+                // Add header to first page immediately after PDF creation
+             
+                // Prepare the document for PDF export
+                const originalStyles = {};
+                const elementsToOptimize = document.querySelectorAll('body, .container, .card, .chart-container, table');
+
+                // Apply PDF-optimized styles
+                elementsToOptimize.forEach(el => {
+                    originalStyles[el] = {
+                        boxShadow: el.style.boxShadow,
+                        backgroundColor: el.style.backgroundColor,
+                        border: el.style.border,
+                        fontSize: el.style.fontSize
+                    };
+
+                    el.style.boxShadow = 'none';
+                    el.style.backgroundColor = '#ffffff';
+                    el.style.border = '1px solid #e0e0e0';
+                    el.style.fontSize = '12pt';
+                });
+
+                // Optimize charts for PDF
+                document.querySelectorAll('.chart-container, .mini-chart-container').forEach(container => {
+                    container.style.height = '400px';
+                    container.style.width = '100%';
+                });
+
+                // Hide interactive elements
+                document.querySelectorAll('.btn, .editable-field::after, .tooltip').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                const reportElement = document.querySelector('.container');
+                let currentY = margin;
+
+                for (const section of reportElement.children) {
+                    if (section.offsetHeight === 0) continue;
+
+                    const canvas = await html2canvas(section, {
+                        scale: 2, // Higher scale for better quality
+                        dpi: 300, // High DPI
+                        logging: false,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        letterRendering: true,
+                        allowTaint: false,
+                        removeContainer: true,
+                        ignoreElements: (element) => {
+                            return element.classList.contains('btn') ||
+                                element.classList.contains('solar-animation');
+                        }
+                    });
+
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    const imgProps = pdf.getImageProperties(imgData);
+                    const pdfWidth = contentWidth;
+                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                    // Add new page if needed
+                    if (currentY + pdfHeight > pageHeight - margin) {
+                        pdf.addPage();
+                        currentY = margin;
+                    }
+
+                    pdf.addImage(imgData, 'JPEG', margin, currentY, pdfWidth, pdfHeight);
+                    currentY += pdfHeight + 20;
+                }
+
+
+
+                // Add footer function
+                function addFooter(pdf, pageWidth, pageHeight, currentPage, totalPages) {
+                    const margin = 40;
+
+                    // Footer separator line
+                    pdf.setDrawColor(200, 200, 200);
+                    pdf.line(margin, pageHeight - 40, pageWidth - margin, pageHeight - 40);
+
+                    // Footer content
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(100);
+
+                    // Left footer - Company info
+                    pdf.text('Plant Perfomance Report', margin, pageHeight - 25);
+
+                    // Center footer - Page info
+                    pdf.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 25, { align: 'center' });
+
+                    // Right footer - Timestamp
+                    const now = new Date();
+                    pdf.text('South Jeddah Noor 300MWAC Solar Project', pageWidth - margin, pageHeight - 25, { align: 'right' });
+                }
+                // ====== ADD FOOTER TO ALL PAGES AT THE END ======
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    addFooter(pdf, pageWidth, pageHeight, i, totalPages);
+                }
+
+                // Save PDF
+                const now = new Date();
+                const timestamp = now.toISOString().slice(0, 10).replace(/-/g, '');
+                pdf.save(`SJN_Report_${timestamp}.pdf`);
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('Error generating PDF. Please try again.');
+            } finally {
+                // Restore original styles
+                Object.keys(originalStyles).forEach(el => {
+                    if (el.style) {
+                        el.style.boxShadow = originalStyles[el].boxShadow;
+                        el.style.backgroundColor = originalStyles[el].backgroundColor;
+                        el.style.border = originalStyles[el].border;
+                        el.style.fontSize = originalStyles[el].fontSize;
+                    }
+                });
+
+                // Restore chart sizes
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    container.style.height = '400px';
+                });
+                document.querySelectorAll('.mini-chart-container').forEach(container => {
+                    container.style.height = '250px';
+                });
+
+                // Show interactive elements
+                document.querySelectorAll('.btn, .editable-field::after, .tooltip').forEach(el => {
+                    el.style.display = '';
+                });
+
+                // Remove loading overlay
+                document.body.removeChild(loadingOverlay);
+            }
+        });
+
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateOperationalHours();
+            calculateDeviations();
+            initCharts();
+
+            // Add event listeners for robot inputs
+            document.getElementById('total-robots').addEventListener('input', calculateDeviations);
+            document.getElementById('started-robots').addEventListener('input', calculateDeviations);
+
+            // Animation for solar panels
+            const panels = document.querySelectorAll('.panel');
+            panels.forEach((panel, index) => {
+                panel.style.animation = `float ${3 + index * 0.2}s ease-in-out infinite`;
+            });
+        });
+    </script>
+</body>
+
+</html>
